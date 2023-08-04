@@ -27,6 +27,7 @@
     - "/var/lib/pgsql/pgautofailover.service"
     - "/var/lib/pgsql/.bash_profile"
     - "/var/lib/pgsql"
+    - "/home/postgres"
 
 #
 - name: Uninstall Python3 Packages

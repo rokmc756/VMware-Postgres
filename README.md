@@ -32,3 +32,41 @@ https://patroni.readthedocs.io/en/latest/replication_modes.html
 ~~~
 https://patroni.readthedocs.io/en/latest/replica_bootstrap.html
 ~~~
+
+## Enable SSL on pgautofailover
+~~~
+[postgres@rk8-master certs]$ /opt/vmware/postgres/15/bin/pg_autoctl enable ssl --pgdata /var/lib/pgsql/monitor/ --ssl-ca-file ./ca.key --ssl-crl-file ./ca.srl --server-key ./server.key --server-cert ./server.crt
+21:11:57 54855 INFO  Using default --ssl-mode "verify-full"
+21:11:57 54855 WARN  HBA rules in "/var/lib/pgsql/monitor/pg_hba.conf" have NOT been edited: "host"  records match either SSL or non-SSL connection attempts.
+21:11:57 54855 INFO  Successfully enabled new SSL configuration:
+21:11:57 54855 INFO    SSL is now active
+21:11:57 54855 INFO    pg_autoctl service has been signaled to reload its configuration
+
+moonjaYMD6T:vmware-postgres moonja$ psql -h rk8-master -U postgres
+psql (14.7 (Homebrew), server 15.3 (VMware Postgres 15.3.0))
+WARNING: psql major version 14, server major version 15.
+         Some psql features might not work.
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=# exit
+
+
+# Disable SSL
+[postgres@rk8-master certs]$ /opt/vmware/postgres/15/bin/pg_autoctl disable ssl --pgdata /var/lib/pgsql/monitor
+21:19:44 60906 WARN  No encryption is used for network traffic! This allows an attacker on the network to read all replication data.
+21:19:44 60906 WARN  Using --ssl-self-signed instead of --no-ssl is recommend to achieve more security with the same ease of deployment.
+21:19:44 60906 WARN  See https://www.postgresql.org/docs/current/libpq-ssl.html for details on how to improve
+21:19:44 60906 INFO  Using default --ssl-mode "prefer"
+21:19:44 60906 WARN  HBA rules in "/var/lib/pgsql/monitor/pg_hba.conf" have NOT been edited: "host"  records match either SSL or non-SSL connection attempts.
+21:19:44 60906 INFO  Successfully enabled new SSL configuration:
+21:19:44 60906 INFO    SSL is now disabled
+21:19:44 60906 INFO    pg_autoctl service has been signaled to reload its configuration
+
+moonjaYMD6T:vmware-postgres moonja$ psql -h rk8-master -U postgres
+psql (14.7 (Homebrew), server 15.3 (VMware Postgres 15.3.0))
+WARNING: psql major version 14, server major version 15.
+         Some psql features might not work.
+Type "help" for help.
+
+~~~

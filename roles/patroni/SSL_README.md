@@ -52,4 +52,5 @@ Regards,
 joe.
 
 
+https://docs.microfocus.com/doc/Operations_Orchestration/2022.11/HardeningPatroniCluster
 

@@ -56,6 +56,9 @@ bootstrap:
     - host replication replicator {{ hostvars[groups['workers'][1]]['ansible_eth0']['ipv4']['address'] }}/32 md5
     - host replication replicator {{ hostvars[groups['workers'][2]]['ansible_eth0']['ipv4']['address'] }}/32 md5
     - host all all 0.0.0.0/0 md5
+{% if enable_ssl == true %}
+    - hostssl all all 0.0.0.0/0 md5
+{% endif %}
   users:
     admin:
       password: admin
@@ -81,6 +84,12 @@ postgresql:
     unix_socket_directories: /tmp
     port: 5432
     synchronous_commit: local
+{% if enable_ssl == true %}
+    ssl: 'on'
+    ssl_ca_file: '{{ pgsql_ssl_dir }}/ca.crt'
+    ssl_cert_file: '{{ pgsql_ssl_dir }}/server.crt'
+    ssl_key_file: '{{ pgsql_ssl_dir }}/server.key'
+{% endif %}
     # synchronous_commit: "on"
     # synchronous_standby_name: "*"
     # synchronous_standby_name: none

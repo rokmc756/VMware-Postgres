@@ -1,4 +1,17 @@
 # Create instance for worker nodes
+
+- name: Insert executable binary path into .bashrc for VMware Postgres {{ major_version }}
+  become: true
+  become_user: postgres
+  lineinfile:
+    path: "{{ item }}"
+    line: "export PATH={{ bin_dir }}:$PATH"
+  with_items:
+    - "/var/lib/pgsql/.bash_profile"
+    - "/home/postgres/.bashrc"
+  #  path: /var/lib/pgsql/.bashrc
+
+#
 - name: Create workers instance. It will automatically be set by the monitor as the primary node with read-write capability (PGDATA = /var/lib/pgpsql/ha)
   become: true
   become_user: postgres

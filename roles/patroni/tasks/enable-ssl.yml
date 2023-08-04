@@ -1,0 +1,60 @@
+#
+- name: Create ssl dir on postgres base
+  become: true
+  become_user: postgres
+  shell: mkdir -p {{ pgsql_ssl_dir }}
+  register: create_ssl_dir
+
+#
+- name: Generate a CA certificate private key
+  become: true
+  become_user: postgres
+  shell: openssl genrsa -out {{ pgsql_ssl_dir }}/ca.key 4096
+  register: gen_ca_cert_priv_key
+
+#
+- name: Generate the CA certificate
+  become: true
+  become_user: postgres
+  shell: |
+    openssl req -x509 -new -nodes -sha512 -days 3650 \
+    -subj "/C={{ pgsql_ssl_country }}/ST={{ pgsql_ssl_state }}/L={{ pgsql_ssl_location }}/O={{ pgsql_ssl_organization }}/OU={{ pgsql_ssl_organization_unit }}/CN={{ pgsql_ssl_common_name }}/emailAddress={{ pgsql_ssl_email }}" \
+    -key {{ pgsql_ssl_dir }}/ca.key \
+    -out {{ pgsql_ssl_dir }}/ca.crt
+  register: gen_ca_cert
+
+#
+- name: Generate a private key
+  become: true
+  become_user: postgres
+  shell: openssl genrsa -out {{ pgsql_ssl_dir }}/server.key 4096
+  register: gen_priv_key
+
+#
+- name: Generate a certificate signing request (CSR)
+  become: true
+  become_user: postgres
+  shell: |
+    openssl req -sha512 -new \
+    -subj "/C={{ pgsql_ssl_country }}/ST={{ pgsql_ssl_state }}/L={{ pgsql_ssl_location }}/O={{ pgsql_ssl_organization }}/OU={{ pgsql_ssl_organization_unit }}/CN={{ pgsql_ssl_common_name }}/emailAddress={{ pgsql_ssl_email }}" \
+    -key {{ pgsql_ssl_dir }}/server.key \
+    -out {{ pgsql_ssl_dir }}/server.csr
+  register: gen_cert_sign_req
+
+#
+- name: Copy an x509 v3 extension file
+  become: true
+  become_user: root
+  template: src=v3.ext.j2 dest={{ pgsql_ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
+  register: copy_x509_v3_ext
+
+#
+- name: Replace the CRS and CRT file names for Monitor node
+  become: true
+  become_user: postgres
+  shell: |
+    openssl x509 -req -sha512 -days 3650 -extfile {{ pgsql_ssl_dir }}/v3.ext \
+    -CA {{ pgsql_ssl_dir }}/ca.crt -CAkey {{ pgsql_ssl_dir }}/ca.key -CAcreateserial \
+    -in {{ pgsql_ssl_dir }}/server.csr \
+    -out {{ pgsql_ssl_dir }}/server.crt
+  register: replace_csr_crt

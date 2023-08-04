@@ -122,21 +122,3 @@ with_patroni_pkg: False
 # kube_ver3: 4.0
 # kube_ver4: 5.0
 
-# Examples
-# hdfs_site_properties:
-#  - {
-#      "name":"dfs.namenode.name.dir",
-#      "value":"file:{{ hadoop_dfs_name }}"
-#  }
-#  - {
-#      "name":"dfs.namenode.data.dir",
-#      "value":"file:{{ hadoop_dfs_data }}"
-#  }
-#  - {
-#      "name":"dfs.replication",
-#      "value":"{{ groups['workers']|length }}"
-#  }
-#  - {
-#      "name":"dfs.webhdfs.enabled",
-#      "value":"true"
-#  }

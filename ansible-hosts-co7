@@ -5,16 +5,15 @@ remote_machine_password="changeme"
 
 # For patroni cluster
 [master]
-co7-master ansible_ssh_host=192.168.0.81
+co7-master ansible_ssh_host=192.168.56.171
 
 [slave]
-co7-slave ansible_ssh_host=192.168.0.82
+co7-slave ansible_ssh_host=192.168.56.172
 
 [workers]
-co7-node01 ansible_ssh_host=192.168.0.83
-co7-node02 ansible_ssh_host=192.168.0.84
-co7-node03 ansible_ssh_host=192.168.0.85
-
+co7-node01 ansible_ssh_host=192.168.56.173
+co7-node02 ansible_ssh_host=192.168.56.174
+co7-node03 ansible_ssh_host=192.168.56.175
 
 # For autofailover
 #[monitor]

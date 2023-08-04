@@ -29,6 +29,11 @@
   include: check-status-workers.yml
   tags: install
 
+- name: Enable SSL on Monitor
+  include: enable-ssl-monitor.yml
+  tags: install
+  when: inventory_hostname in groups['monitor'] and enable_ssl_monitor == true
+
 - name: Uninstallation of vmware postgres for Red Hat / CentOS
   include: uninstall.yml
   tags: uninstall

@@ -69,17 +69,17 @@
 #    - pgautofailover_service_stopped.status
 #   tags: debug
 
-#- name: Insert executable binary path into .bashrc for VMware Postgres {{ major_version }}
-#  become: true
-#  become_user: postgres
-#  lineinfile:
-#    path: /var/lib/pgsql/.bashrc
-#    line: "export PATH={{ bin_dir }}:$PATH"
+- name: Insert executable binary path into .bashrc for VMware Postgres {{ major_version }}
+  become: true
+  become_user: postgres
+  lineinfile:
+    path: "{{ item }}"
+    line: "export PATH={{ bin_dir }}:$PATH"
+  with_items:
+    - "/var/lib/pgsql/.bash_profile"
+    - "/home/postgres/.bashrc"
 
-#- name: Set variable of PATH for VMware Postgres {{ major_version }}
-#  become: true
-#  become_user: postgres
-#  shell: source /var/lib/pgsql/.bashrc
+  #  path: /var/lib/pgsql/.bashrc
 
 #
 - name: Create monitor node

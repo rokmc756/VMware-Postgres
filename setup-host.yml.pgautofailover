@@ -6,4 +6,4 @@
     install_dep_packages: false
     remove_dep_packages: false
   roles:
-    - vmware-pgautofailover
+    - pgautofailover

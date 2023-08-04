@@ -49,7 +49,7 @@
     - "/var/lib/pgsql/etcd.yml"
     - "/var/lib/pgsql/etcd_logfile"
     - "/var/lib/pgsql/.bash_profile"
-
+    - "/etc/etcd/etcd.conf"
 #
 - name: Delete data directories
   become: true

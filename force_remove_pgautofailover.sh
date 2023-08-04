@@ -1,7 +1,7 @@
 #!/bin/bash
 
-HOSTS="81 82 83 84 85"
-# HOSTS="171 172 173 174 175"
+# HOSTS="81 82 83 84 85"
+HOSTS="171 172 173 174 175"
 
 for i in `echo $HOSTS`
 do

@@ -1,0 +1,72 @@
+---
+# Install grafana for RHEL or CentOS
+#
+#
+- name: Copy influxdb yum repo file
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
+  register: config_file_copied
+  with_items:
+    - { src: "influxdata.repo.j2",   dest: "/etc/yum.repos.d/influxdata.repo" }
+
+#
+- name: Install Dependent and Grafana RPM packages
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+    # skip_broken: yes
+  async: 120
+  poll: 5
+  with_items:
+    - epel-release
+    - python3
+    - python3-pip
+    - postgresql-contrib
+    - postgresql-devel
+    - influxdb2
+    - influxdb2-cli
+    - grafana
+    - grafana-pcp
+  when: install_pkgs
+
+#
+- name: Install pip modules for grafana
+  become: true
+  become_user: root
+  shell: |
+    pip3 install setuptools_rust
+    python3 -m pip install --upgrade pip
+    pip3 install --upgrade setuptools_rust
+    python3 -m pip install --upgrade Pillow
+    pip3 install wheel
+  async: 120
+  poll: 5
+  register: pip_module_installed
+
+#
+- name: Copy the grafana ini file
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
+  register: systemd_file_copied
+  with_items:
+    - { src: "grafana.ini.j2",                   dest: "/etc/grafana/grafana.ini" }
+
+  # when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
+  # when: bin_files_existed.stat.exists != True
+
+  # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
+
+#
+- name: Reload and start services for grafana
+  become: true
+  systemd:
+    daemon_reexec: true
+    daemon_reload: true
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  register: systemd_restarted
+  with_items:
+    - influxdb
+    - grafana-server

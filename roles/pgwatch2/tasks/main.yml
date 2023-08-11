@@ -1,0 +1,25 @@
+---
+# Install VMWare Postgres for Red Hat / CentOS
+
+# for now fail if it's not a Red Hat based system
+- name: Check OS ( GPDB )
+  fail: msg="Not a Red Hat based system!"
+  when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
+
+#
+- name: Install pgwatch2
+  include: install.yml
+  tags: install
+  when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
+
+#
+- name: Uninstall grafana for Red Hat / CentOS
+  include: uninstall.yml
+  tags: uninstall
+  when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
+
+#
+- name: Upgrade grafana for Red Hat / CentOS
+  include: upgrade.yml
+  tags: upgrade
+  when: inventory_hostname in groups['monitors']

@@ -32,7 +32,7 @@
   poll: 5
   register: pip_prereq_modules_uninstalled
   ignore_errors: yes
-  when: uninstall_python_module
+  when: uninstall_pip_module
 
 #
 - name: Delete configuration files for patroni and systemd
@@ -84,7 +84,7 @@
     - "pyopenssl"
     - "pyrsistent"
   when:
-    - uninstall_python_module
+    - uninstall_pip_module
     - major_version >= 14
 
 #
@@ -99,7 +99,7 @@
   with_items:
     - "psycopg2-binary"
   when:
-    - uninstall_python_module
+    - uninstall_pip_module
     - major_version >= 13
 
 #
@@ -124,7 +124,7 @@
     - "wheel"
     - "pip"
   when:
-    - uninstall_python_module
+    - uninstall_pip_module
 
 #
 - name: Delete the dependencies file of etcd
@@ -135,7 +135,7 @@
     state: absent
   register: patroni_prereq_uninstalled_of_etcd_deleted
   ignore_errors: yes
-  when: uninstall_python_module
+  when: uninstall_pip_module
 
 #
 - name: Uninstall RPM packages of the etcd and Patroni prerequisites
@@ -160,7 +160,7 @@
     - "python27-python-setuptools"
     - "yamllint"
     - "daemonize"
-  when: remove_dep_packages
+  when: uninstall_dep_pkgs
   #  - python34-setuptools
 
 #

@@ -1,0 +1,101 @@
+---
+# Install pgwatch2 daemon and web ui for RHEL or CentOS
+#
+#
+- name: Copy the pgwatch2 rpm file
+  become: true
+  become_user: root
+  copy: src=pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm dest=/root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm mode=0644 owner=root group=root
+
+#
+- name: Install pgwatch2 rpm package
+  become: true
+  become_user: root
+  shell: yum localinstall -y /root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm
+  async: 180
+  poll: 5
+
+#
+- name: Create the database specified in vars
+  become: true
+  become_user: postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python2
+  postgresql_db: name={{ item }} template='template0' state=present login_host=localhost login_user=postgres login_unix_socket=/tmp
+  with_items:
+    - "pgwatch2"
+    - "pgwatch2_metrics"
+    - "pgwatch2_grafana"
+
+#
+- name: Create a user to the pgwatch2 schema. Typically called pgwatch2 but can be anything really, if the schema creation file is adjusted accordingly.
+  become: true
+  become_user: postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python2
+  postgresql_user: name={{ item.name }} db={{ item.db }} password={{ item.pass }} priv={{ item.priv }} state=present login_host=localhost login_user=postgres login_unix_socket=/tmp
+  with_items:
+    - { db: 'pgwatch2', name: 'pgwatch2', pass: 'changeme', priv: 'ALL' }
+    - { db: 'pgwatch2_grafana', name: 'pgwatch2_grafana', pass: 'changeme', priv: 'ALL' }
+
+#
+- name: Ensure user does not have unnecessary permissions
+  become: true
+  become_user: postgres
+  vars:
+    ansible_python_interpreter: /usr/bin/python2
+  postgresql_user: name={{ item.name }} role_attr_flags={{ item.role }} state=present login_host=localhost login_user=postgres login_unix_socket=/tmp
+  with_items:
+    - { name: 'pgwatch2', role: 'SUPERUSER' }
+    - { name: 'pgwatch2_grafana', role: 'SUPERUSER' }
+
+#
+- name: Roll out the pgwatch2 config schema and Bootstrap the metrics storage DB
+  become: true
+  become_user: postgres
+  shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
+  args:
+    executable: /bin/bash
+  register: config_metrics_storage_created
+  with_items:
+    - { dir: "/etc/pgwatch2/sql/config_store", file: "config_store.sql", user: "pgwatch2", db: "pgwatch2" }
+    - { dir: "/etc/pgwatch2/sql/config_store", file: "metric_definitions.sql", user: "pgwatch2", db: "pgwatch2" }
+    - { dir: "/etc/pgwatch2/sql/metric_store", file: "roll_out_metric_time.psql", user: "pgwatch2", db: "pgwatch2_metrics" }
+
+#
+- name: Install pip modules for pgwatch2
+  become: true
+  become_user: root
+  shell: |
+    pip3 install setuptools_rust
+    python3 -m pip install --upgrade pip
+    pip3 install --upgrade setuptools_rust
+    python3 -m pip install --upgrade Pillow
+    pip3 install wheel
+    pip3 install -U -r /etc/pgwatch2/webpy/requirements_pg_metrics.txt
+  async: 120
+  poll: 5
+  register: pip_module_installed
+
+#
+- name: Create the pgwatch2-web and pgwatch2-daemon systemd unit file
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
+  register: etcd_config_created
+  with_items:
+    - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
+    - { src: 'pgwatch2-daemon.systemd.j2', dest: '/etc/systemd/system/pgwatch2-daemon.service', owner: 'root', group: 'root' }
+
+#
+- name: Reload and start services for pgwatch2-web and daemon
+  become: true
+  systemd:
+    daemon_reexec: true
+    daemon_reload: true
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  register: systemd_started
+  with_items:
+    - pgwatch2-web
+    - pgwatch2-daemon

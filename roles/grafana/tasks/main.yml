@@ -1,0 +1,41 @@
+---
+# Install VMWare Postgres for Red Hat / CentOS
+
+# for now fail if it's not a Red Hat based system
+- name: Check OS ( GPDB )
+  fail: msg="Not a Red Hat based system!"
+  when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
+
+#
+- name: Install GO language
+  include: install-go.yml
+  tags: install
+  when: install_go == true
+
+#
+- name: Install prometheus / postgresql_exporter
+  include: install-prometheus.yml
+  tags: install
+  when: install_prometheus == true and inventory_hostname in groups['workers']
+
+#
+- name: Install grafana and influx database packages
+  include: install-grafana.yml
+  tags: install
+  when: install_grafana == true and inventory_hostname in groups['monitors']
+
+#
+- name: Enable SSL on sinlge postgres
+  include: enable-ssl.yml
+  tags: install
+  when: enable_ssl == true and inventory_hostname in groups['monitors']
+
+#
+- name: Uninstall grafana for Red Hat / CentOS
+  include: uninstall.yml
+  tags: uninstall
+
+#
+- name: Upgrade grafana for Red Hat / CentOS
+  include: upgrade.yml
+  tags: upgrade

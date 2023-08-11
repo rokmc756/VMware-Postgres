@@ -1,0 +1,521 @@
+---
+# Install pg_auto_failover for RHEL or CentOS
+#
+
+- name: Alternative python version to python2
+  become: true
+  become_user: root
+  command: alternatives --set python /usr/bin/python2
+  ignore_errors: yes
+  register: python_version_alternative
+
+- debug:
+    var: python_version_alternative
+
+#- meta: end_play
+
+
+- name: Install rpm packages of dependenies to need installing packages regarding kubernates
+  become: true
+  become_user: root
+  yum:
+    name: "{{ item }}"
+    state: present
+  ignore_errors: yes
+  register: selinux_policy_installed
+  with_items:
+    - firewalld
+    - python3
+    - python3-devel
+    - python3-libselinux
+    - openssl-libs
+#    - python-psycopg2
+#    - python27-python-psycopg2
+#    - python3-policycoreutils
+#    - python2-libselinux
+#    - libselinux-python2
+#    - policycoreutils-python-utils
+#    - libselinux-python3
+
+- name: Start and enable firewalld.
+  become: true
+  service:
+    name: firewalld
+    state: started
+    enabled: True
+
+- name: Open Firewall
+  become: true
+  firewalld:
+    port: '{{item}}/tcp'
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: yes
+  with_items:
+    - "5432"
+
+#
+- name: Whitelist of Ip addresses
+  become: true
+  firewalld:
+    zone: public
+    rich_rule: "rule family=ipv4 source address={{ hostvars[item]['ansible_eth0']['ipv4']['address'] }} accept"
+    permanent: true
+    state: enabled
+  with_items:
+    - "{{ groups['all'] }}"
+
+#
+- name: Bounce firewalld
+  become: true
+  service: name=firewalld state=restarted
+
+#
+- name: Copy the vmwawre-postgres rpm file to all hosts in cluster
+  copy: src={{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm dest=/home/jomoon/{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm mode=0644 owner=jomoon group=jomoon
+
+- name: Install dependency rpm package for pgautofailover
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  async: 360
+  poll: 5
+  with_items:
+    - "python2-psutil"
+
+- name: Install VMware Postgres on all hosts as root
+  become: true
+  yum:
+    name: /home/jomoon/{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm
+    state: present
+  async: 360
+  poll: 5
+
+# This will create the Postgres user. You can add the Postgres user to sudoers:
+# echo "postgres  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/postgres
+- name: Verify that pg_auto_failover/postgres was installed properly
+  become: true
+  become_user: postgres
+  shell: ( {{ bin_dir }}/pg_autoctl version )
+  register: pg_autoctl_install_verified
+  when: inventory_hostname in groups['monitor']
+
+- debug: msg={{ pg_autoctl_install_verified.stdout }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+- name: Verify that pg_auto_failover/postgres was installed properly
+  become: true
+  become_user: postgres
+  shell: ( {{ bin_dir }}/pg_ctl -V )
+  register: pg_ctl_install_verified
+  when: inventory_hostname in groups['monitor']
+
+- debug: msg={{ pg_ctl_install_verified.stdout }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+- name: Getting process IDs of the pg_autoctl process
+  pids:
+    name: pg_autoctl
+  register: pids_of_pg_autoctl
+
+- name: Printing the process IDs obtained
+  debug:
+    msg: "PIDS of pg_autoctl:{{pids_of_pg_autoctl.pids|join(',')}}"
+  tags:
+    - print_debug
+
+# - name: Getting process IDs of processes matching pattern
+#  community.general.pids:
+#    pattern: myapp(2(\.7)?|3(\.6)?)?\s+myapp\.py
+#  register: myapp_pids
+
+- name: Stop pgautofailover service of systemd
+  become: true
+
+  systemd:
+    state: stopped
+    name: pgautofailover
+  register: pgautofailover_service_stopped
+  when:
+    - pids_of_pg_autoctl.pids|join(',') | length > 0
+
+- debug: msg={{ pgautofailover_service_stopped  }}
+  tags:
+    - print_debug
+
+#- name: Drop the monitor node
+#  become: yes
+#  become_user: postgres
+#  shell: ( export PGDATA=/var/lib/pgsql/data && pg_autoctl drop monitor --destroy --pgdata monitor )
+#  ignore_errors: true
+#  register: monitor_node_dropped
+#  async: 180
+#  poll: 5
+#  when:
+#    - inventory_hostname in groups['monitor']
+#    - pgautofailover_service_stopped.status
+#
+#- dgebug: msg={{ monitor_node_dropped }}
+#  when:
+#    - inventory_hostname in groups['monitor']
+#    - pgautofailover_service_stopped.status
+#   tags: debug
+
+#- name: Creates data directories for vmware-postgres13-13.5.1
+#  become: true
+#  become_user: root
+#  file:
+#    path: "{{ item }}"
+#    state: directory
+#    owner: postgres
+#    group: postgres
+#    mode: 0755
+#    recourse: yes
+#  with_items:
+#    - /var/lib/pgsql
+#    - /var/lib/pgsql/backups
+#    - /var/lib/pgsql/data
+
+
+# To create a simple self-signed certificate for the server, valid for 365 days, use the following OpenSSL command, replacing dbhost.yourdomain.com with the server's host name:
+# $ openssl req -new -x509 -days 365 -nodes -text -out server.crt \
+#  -keyout server.key -subj "/CN=$(hostname).jtest.pivotal.io"
+
+# Then do:
+# $ chmod og-rwx server.key
+
+# because the server will reject the file if its permissions are more liberal than this. For more details on how to create your server private key and certificate, refer to the OpenSSL documentation.
+# While a self-signed certificate can be used for testing, a certificate signed by a certificate authority (CA) (usually an enterprise-wide root CA) should be used in production.
+# To create a server certificate whose identity can be validated by clients, first create a certificate signing request (CSR) and a public/private key file:
+
+# $ openssl req -new -nodes -text -out root.csr \
+#  -keyout root.key -subj "/CN=root.jtest.pivotal.io"
+# $ chmod og-rwx root.key
+
+# Then, sign the request with the key to create a root certificate authority (using the default OpenSSL configuration file location on Linux):
+# st (CSR) and a public/private key file:
+# $ openssl req -new -nodes -text -out root.csr -keyout root.key -subj "/CN=root.jtest.pivotal.io"
+
+# chmod og-rwx root.key
+# Then, sign the request with the key to create a root certificate authority (using the default OpenSSL configuration
+# file location on Linux):
+# $ openssl x509 -req -in root.csr -text -days 3650 \
+#  -extfile /etc/pki/tls/openssl.cnf -extensions v3_ca \
+#  -signkey root.key -out root.crt
+
+
+# Finally, create a server certificate signed by the new root certificate authority:
+# $ openssl req -new -nodes -text -out server.csr \
+#  -keyout server.key -subj "/CN=$(hostname).jtest.pivotal.io"
+# $ chmod og-rwx server.key
+
+# $ openssl x509 -req -in server.csr -text -days 365 \
+#  -CA root.crt -CAkey root.key -CAcreateserial \
+#  -out server.crt
+
+
+- name: Create the monitor node
+  become: true
+  become_user: postgres
+  shell: ( export PATH={{ bin_dir }}:$PATH ; cd /var/lib/pgsql ; {{ bin_dir }}/pg_autoctl create monitor --auth trust --ssl-self-signed --pgdata {{ monitor_database }} )
+  register: monitor_node_created
+  async: 360
+  poll: 5
+  when: inventory_hostname in groups['monitor']
+
+
+- name: Create the monitor node with ssl
+  become: true
+  become_user: postgres
+  shell: ( export PATH={{ bin_dir }}:$PATH ; cd /var/lib/pgsql;
+           {{ bin_dir }}/pg_autoctl create monitor \
+           --ssl-ca-file root.crt   \
+           --ssl-crl-file root.crl  \
+           --server-cert server.crt  \
+           --server-key server.key  \
+           --ssl-mode verify-full \
+           --auth trust --ssl-self-signed --pgdata {{ monitor_database }}
+         )
+  register: monitor_node_created_with_ssl
+  async: 360
+  poll: 5
+  when: ( inventory_hostname in groups['monitor'] ) and ( enable_ssl == "yes" )
+
+
+- debug: msg={{ monitor_node_created }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+- name: Create systemd service file of monitor instance
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ; {{ bin_dir }}/pg_autoctl -q show systemd --pgdata ~postgres/{{ monitor_database }} > /var/lib/pgsql/pgautofailover.service )
+  register: systemd_service_added
+  async: 360
+  poll: 5
+  when: inventory_hostname in groups['monitor']
+
+- name: Copy systemd service file of monitor instance
+  become: true
+  become_user: root
+  copy:
+    src: /var/lib/pgsql/pgautofailover.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: true
+  when: inventory_hostname in groups['monitor']
+
+- name: Reload and start systemd service of monitor instance
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: pgautofailover
+  register: monitor_systemd_status
+  when: inventory_hostname in groups['monitor']
+
+- debug: msg={{ monitor_systemd_status }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+- name: Replace database directory
+  become: true
+  become_user: postgres
+  replace:
+    path: /var/lib/pgsql/.bash_profile
+    regexp: '^(.*)PGDATA=(.*)$'
+    replace: 'PGDATA=//var/lib/pgsql/{{ monitor_database }}'
+    backup: yes
+  when: inventory_hostname in groups['monitor']
+
+- name: Verify the current state of monitor instance
+  become: true
+  become_user: postgres
+  shell: ( ps -ef | grep postgres )
+  register: monitor_instance_state_verified
+  when: inventory_hostname in groups['monitor']
+
+- debug: msg={{ monitor_instance_state_verified }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+- name: Verify the current state of monitor
+  become: true
+  become_user: postgres
+  shell: ( {{ bin_dir }}/psql -c "\l" )
+  register: monitor_state_verified
+  when: inventory_hostname in groups['monitor']
+
+- debug: msg={{ monitor_state_verified }}
+  when: inventory_hostname in groups['monitor']
+  tags:
+    - print_debug
+
+
+# Primary instance
+- name: Create primiary instance. It will automatically be set by the monitor as the primary node with read-write capability (PGDATA = /var/lib/pgsql/ha)
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ; {{ bin_dir }}/pg_autoctl create postgres --pgdata "{{ primary_database }}" --auth trust --ssl-self-signed --username ha-admin --dbname "{{ app_database }}" --hostname "{{ primary_hostname }}" --pgctl {{ bin_dir }}/pg_ctl --monitor 'postgres://autoctl_node@{{ monitor_hostname }}/pg_auto_failover?sslmode=require' )
+  register: primary_instance_created
+  async: 360
+  poll: 5
+  when: ( inventory_hostname in groups['primary'] ) and ( enable_ssl != "yes" )
+
+- debug: msg={{ primary_instance_created }}
+  when: ( inventory_hostname in groups['primary'] ) and ( enable_ssl != "yes" )
+  tags:
+    - print_debug
+
+# Primary instance with ssl
+- name: Create primiary instance with ssl. It will automatically be set by the monitor as the primary node with read-write capability (PGDATA = /var/lib/pgsql/ha)
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ;
+           {{ bin_dir }}/pg_autoctl create postgres \
+           --ssl-ca-file root.crt   \
+           --server-cert server.crt  \
+           --server-key server.key  \
+           --ssl-mode verify-full \
+           --pgdata "{{ primary_database }}" --auth trust --username ha-admin \
+           --dbname "{{ app_database }}" --hostname "{{ primary_hostname }}" --pgctl {{ bin_dir }}/pg_ctl \
+           --monitor 'postgres://autoctl_node@{{ monitor_hostname }}/pg_auto_failover?sslmode=require'
+         )
+  register: primary_instance_created_with_ssl
+  async: 360
+  poll: 5
+  when: ( inventory_hostname in groups['primary'] ) and ( enable_ssl == "yes" )
+
+- debug: msg={{ primary_instance_created_with_ssl }}
+  when: ( inventory_hostname in groups['primary'] ) and ( enable_ssl == "yes" )
+  tags:
+    - print_debug
+
+
+- name: Create systemd service file of pirmary instance
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ; {{ bin_dir }}/pg_autoctl -q show systemd --pgdata ~postgres/{{ primary_database }} > pgautofailover.service )
+  register: primary_systemd_service_added
+  async: 360
+  poll: 5
+  when: inventory_hostname in groups['primary']
+
+- debug: msg={{ primary_systemd_service_added }}
+  when: inventory_hostname in groups['primary']
+  tags:
+    - print_debug
+
+- name: Copy primary systemd service file of primary instance
+  become: true
+  become_user: root
+  copy:
+    src: /var/lib/pgsql/pgautofailover.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: true
+  when: inventory_hostname in groups['primary']
+
+- name: Reload and start primary systemd service of primary instance
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: pgautofailover
+    enabled: yes
+    state: started
+  when: inventory_hostname in groups['primary']
+
+- name: Replace database directory
+  become: true
+  become_user: postgres
+  replace:
+    path: /var/lib/pgsql/.bash_profile
+    regexp: '^(.*)PGDATA=(.*)$'
+    replace: 'PGDATA=//var/lib/pgsql/{{ primary_database }}'
+    backup: yes
+  when: inventory_hostname in groups['primary']
+  #when: ( inventory_hostname == hostvars[groups['primary'][0]]['ansible_hostname'] )
+
+- name: Verify the state of primary instance
+  become: true
+  become_user: postgres
+  shell: ( source ~/.bash_profile ; {{ bin_dir }}/pg_autoctl show state )
+  register: primary_state_verified
+  when: inventory_hostname in groups['primary']
+
+- debug: msg={{ primary_state_verified }}
+  when: ( inventory_hostname == hostvars[groups['primary'][0]]['ansible_hostname'] )
+  tags:
+    - print_debug
+  when: inventory_hostname in groups['primary']
+  # when: ( inventory_hostname == hostvars[groups['primary'][0]]['ansible_hostname'] )
+
+# Create secondary instances in groups['secondary']
+- name: Create secondary instance. It will automatically be set by the monitor as the secondary  node with read-write capability (PGDATA = /var/lib/pgsql/ha)
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ;  {{ bin_dir }}/pg_autoctl create postgres --pgdata "{{ secondary_database }}" --auth trust --ssl-self-signed --username ha-admin --dbname "{{ app_database }}" --hostname "{{ inventory_hostname }}" --pgctl {{ bin_dir }}/pg_ctl --monitor 'postgres://autoctl_node@{{ monitor_hostname }}/pg_auto_failover?sslmode=require' )
+  register: secondary_instance_created
+  async: 360
+  poll: 5
+  when: ( inventory_hostname in groups['secondary'] ) and ( enable_ssl != "yes" )
+
+- debug: msg={{ secondary_instance_created }}
+  when: ( inventory_hostname in groups['secondary'] ) and ( enable_ssl != "yes" )
+  tags:
+    - print_debug
+
+# Create secondary instances in groups['secondary'] with ssl
+- name: Create secondary instance. It will automatically be set by the monitor as the secondary  node with read-write capability (PGDATA = /var/lib/pgsql/ha)
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ;
+           {{ bin_dir }}/pg_autoctl create postgres \
+           --ssl-ca-file root.crt   \
+           --server-cert server.crt  \
+           --server-key server.key  \
+           --ssl-mode verify-full \
+           --pgdata "{{ secondary_database }}" --auth trust --username ha-admin \
+           --dbname "{{ app_database }}" --hostname "{{ primary_hostname }}" --pgctl {{ bin_dir }}/pg_ctl \
+           --monitor 'postgres://autoctl_node@{{ monitor_hostname }}/pg_auto_failover?sslmode=require'
+         )
+  register: secondary_instance_created_with_ssl
+  async: 360
+  poll: 5
+  when: ( inventory_hostname in groups['secondary'] ) and ( enable_ssl == "yes" )
+
+- debug: msg={{ secondary_instance_created_with_ssl }}
+  when: ( inventory_hostname in groups['secondary'] ) and ( enable_ssl == "yes" )
+  tags:
+    - print_debug
+
+- name: Create systemd service file of secondary instance
+  become: true
+  become_user: postgres
+  shell: ( cd /var/lib/pgsql ; {{ bin_dir }}/pg_autoctl -q show systemd --pgdata ~postgres/{{ secondary_database }} > pgautofailover.service )
+  register: secondary_systemd_service_added
+  async: 360
+  poll: 5
+  when: inventory_hostname in groups['secondary']
+
+- debug: msg={{ secondary_systemd_service_added }}
+  when: inventory_hostname in groups['secondary']
+  tags:
+    - print_debug
+
+- name: Copy secondary systemd service file of secondary instance
+  become: true
+  become_user: root
+  copy:
+    src: /var/lib/pgsql/pgautofailover.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: true
+  when: inventory_hostname in groups['secondary']
+
+- name: Reload and start secondary systemd service of secondary instance
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: pgautofailover
+    enabled: yes
+    state: started
+  when: inventory_hostname in groups['secondary']
+
+- name: Replace database directory
+  become: true
+  become_user: postgres
+  replace:
+    path: /var/lib/pgsql/.bash_profile
+    regexp: '^(.*)PGDATA=(.*)$'
+    replace: 'PGDATA=//var/lib/pgsql/{{ secondary_database }}'
+    backup: yes
+  when: inventory_hostname in groups['secondary']
+
+- name: Verify the state of secondary instance
+  become: true
+  become_user: postgres
+  shell: ( source ~/.bash_profile ; {{ bin_dir }}/pg_autoctl show state )
+  register: secondary_state_verified
+  when: inventory_hostname in groups['secondary']
+
+- debug: msg={{ secondary_state_verified }}
+  when: inventory_hostname in groups['secondary']
+  tags:
+    - print_debug

@@ -12,9 +12,10 @@
     print_debug: true
     install_pkgs: true
     install_dep_pkgs: true
-    uninstall_pkgs: false
+    uninstall_pkgs: true
+    uninstall_dep_pkgs: true
     install_pip_module: true
-    uninstall_python_module: false
+    uninstall_pip_module: true
     configure_patroni: true
     with_patroni_pkg: true
   roles:

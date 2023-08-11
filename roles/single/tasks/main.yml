@@ -4,16 +4,43 @@
 # for now fail if it's not a Red Hat based system
 - name: Check OS ( GPDB )
   fail: msg="Not a Red Hat based system!"
-  when: ansible_os_family != 'RedHat'
+  when:
+    - inventory_hostname in groups['all']
+    - ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
-- name: Installation of vmware postgres for Red Hat / CentOS
-  include: install.yml
+#
+- name: Installation common package for single postgres
+  include: install-common.yml
   tags: install
+  when: inventory_hostname in groups['all']
 
-- name: Uninstallation of vmware postgres for Red Hat / CentOS
+#
+- name: Installation single postgres
+  include: install-postgres.yml
+  tags: install
+  when: inventory_hostname in groups['all']
+
+#
+- name: Enable SSL on sinlge postgres
+  include: enable-ssl.yml
+  tags: install
+  when: enable_ssl == true and inventory_hostname in groups['all']
+
+#
+- name: Check the status of sinlge postgres
+  include: check-status.yml
+  tags: install
+  when: inventory_hostname in groups['all']
+
+#
+- name: Uninstallation of sinlge postgres for Red Hat / CentOS
   include: uninstall.yml
   tags: uninstall
+  when: inventory_hostname in groups['all']
 
-- name: Upgrade of vmware postgres for Red Hat / CentOS
+#
+- name: Upgrade of single postgres for Red Hat / CentOS
   include: upgrade.yml
   tags: upgrade
+  when: inventory_hostname in groups['all']
+

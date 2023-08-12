@@ -31,9 +31,22 @@
   when: enable_ssl == true and inventory_hostname in groups['monitors']
 
 #
-- name: Uninstall grafana for Red Hat / CentOS
-  include: uninstall.yml
+- name: Uninstall prometheus / postgresql_exporter
+  include: uninstall-prometheus.yml
   tags: uninstall
+  when: uninstall_prometheus == true and inventory_hostname in groups['workers']
+
+#
+- name: Unistall grafana and influx database packages
+  include: uninstall-grafana.yml
+  tags: uninstall
+  when: uninstall_grafana == true and inventory_hostname in groups['monitors']
+
+#
+- name: Uninstall GO language
+  include: uninstall-go.yml
+  tags: uninstall
+  when: uninstall_go == true
 
 #
 - name: Upgrade grafana for Red Hat / CentOS

@@ -1,0 +1,59 @@
+---
+# Install grafana for RHEL or CentOS
+#
+- name: Stop and disable prometheus and postgres_exporter service
+  become: true
+  systemd:
+    daemon_reexec: true
+    daemon_reload: true
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  ignore_errors: true
+  register: systemd_restarted
+  with_items:
+    - prometheus
+    - postgres_exporter
+
+#
+- name: Delete the grafana / prometheus / postgres_exporter config and binary files
+  become: true
+  file: path={{ item.dest }} state=absent
+  ignore_errors: true
+  register: systemd_unit_files_deleted
+  with_items:
+    - { src: "prometheus.yml.j2",              dest: "/usr/local/etc/prometheus.yml" }
+    - { src: "postgres_exporter.systemd.j2",   dest: "/etc/systemd/system/postgres_exporter.service" }
+    - { src: "prometheus.systemd.j2",          dest: "/etc/systemd/system/prometheus.service" }
+    - { src: "prometheus binary",              dest: "/usr/local/bin/prometheus" }
+    - { src: "postgres_exporter binary",       dest: "/usr/local/bin/postgres_exporter" }
+    - { src: "prometheus tar file",            dest: "/root/prometheus-{{ prometheus_major_version }}.{{ prometheus_minor_version }}.{{ prometheus_patch_version }}.linux-amd64.tar.gz" }
+    - { src: "postgres_exporter tar file",     dest: "/root/postgres_exporter-{{ postgres_exporter_major_version }}.{{ postgres_exporter_minor_version }}.{{ postgres_exporter_patch_version }}.linux-amd64" }
+    - { src: "prometheus directory",           dest: "/root/prometheus-{{ prometheus_major_version }}.{{ prometheus_minor_version }}.{{ prometheus_patch_version }}.linux-amd64.tar.gz" }
+    - { src: "postgres_exporter directory",    dest: "/root/postgres_exporter-{{ postgres_exporter_major_version }}.{{ postgres_exporter_minor_version }}.{{ postgres_exporter_patch_version }}.linux-amd64" }
+
+#
+- name: Uninstall pip modules for grafana
+  become: true
+  become_user: root
+  shell: |
+    pip3 uninstall -y wheel
+    pip3 uninstall -y Pillow
+    pip3 uninstall -y setuptools_rust
+  async: 120
+  poll: 5
+  ignore_errors: true
+  register: pip_module_installed
+
+#
+- name: Uninstall Dependent and Grafana RPM packages
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: absent
+  async: 120
+  poll: 5
+  ignore_errors: true
+  with_items:
+    - postgresql-devel
+    - postgresql-contrib

@@ -1,8 +1,6 @@
 ---
 # Install grafana for RHEL or CentOS
 #
-#
-#
 - name: Install Dependent and Grafana RPM packages
   become: true
   yum:
@@ -15,6 +13,8 @@
     - epel-release
     - python3
     - python3-pip
+    - python2
+    - python2-pip
     - postgresql-contrib
     - postgresql-devel
   when: install_pkgs

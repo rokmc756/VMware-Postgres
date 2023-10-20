@@ -70,3 +70,34 @@
   with_items:
     - influxdb
     - grafana-server
+
+#
+- name: Setup pgwatch2 metrics database as default datasource
+  become: true
+  become_user: postgres
+  shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
+  args:
+    executable: /bin/bash
+  register: metrics_database_setup
+  with_items:
+    - { dir: "/etc/pgwatch2/bootstrap", file: "grafana_datasource.sql", user: "pgwatch2_grafana", db: "pgwatch2_grafana" }
+
+#
+- name: Add pgwatch2 predefined dashboards to Grafana
+  become: true
+  become_user: root
+  shell: |
+    /etc/pgwatch2/grafana-dashboards/import_all.sh
+  async: 120
+  poll: 5
+  register: grafana_dashboard_added
+
+#
+- name: Install Grafana plugin
+  become: true
+  become_user: root
+  shell: |
+    grafana-cli plugins install savantly-heatmap-panel
+  async: 120
+  poll: 5
+  register: grafana_plugin_installed

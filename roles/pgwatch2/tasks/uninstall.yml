@@ -15,6 +15,8 @@
   with_items:
     - pgwatch2-daemon
     - pgwatch2-web
+  when: inventory_hostname in groups['monitors']
+
 
 #
 - name: Delete the pgwatch2-web and pgwatch2-daemon systemd unit file
@@ -25,6 +27,8 @@
   with_items:
     - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
     - { src: 'pgwatch2-daemon.systemd.j2', dest: '/etc/systemd/system/pgwatch2-daemon.service', owner: 'root', group: 'root' }
+    - { src: 'instances.yaml.j2', dest: '/etc/pgwatch2/config/instances.yaml', owner: 'root', group: 'root' }
+  when: inventory_hostname in groups['monitors']
 
 #
 - name: Uninstall pip modules for pgwatch2

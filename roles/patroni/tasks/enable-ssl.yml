@@ -4,6 +4,7 @@
   become_user: postgres
   shell: mkdir -p {{ pgsql_ssl_dir }}
   register: create_ssl_dir
+  when: inventory_hostname in groups['workers'][0]
 
 #
 - name: Generate a CA certificate private key
@@ -11,6 +12,8 @@
   become_user: postgres
   shell: openssl genrsa -out {{ pgsql_ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
+  when: inventory_hostname in groups['workers'][0]
+  # when: inventory_hostname in "tvars[groups['workers'][0]].ansible_hostname }}"
 
 #
 - name: Generate the CA certificate
@@ -22,6 +25,7 @@
     -key {{ pgsql_ssl_dir }}/ca.key \
     -out {{ pgsql_ssl_dir }}/ca.crt
   register: gen_ca_cert
+  when: inventory_hostname in groups['workers'][0]
 
 #
 - name: Generate a private key
@@ -29,6 +33,7 @@
   become_user: postgres
   shell: openssl genrsa -out {{ pgsql_ssl_dir }}/server.key 4096
   register: gen_priv_key
+  when: inventory_hostname in groups['workers'][0]
 
 #
 - name: Generate a certificate signing request (CSR)
@@ -40,6 +45,7 @@
     -key {{ pgsql_ssl_dir }}/server.key \
     -out {{ pgsql_ssl_dir }}/server.csr
   register: gen_cert_sign_req
+  when: inventory_hostname in groups['workers'][0]
 
 #
 - name: Copy an x509 v3 extension file
@@ -47,6 +53,7 @@
   become_user: root
   template: src=v3.ext.j2 dest={{ pgsql_ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
+  when: inventory_hostname in groups['workers'][0]
 
 #
 - name: Replace the CRS and CRT file names for Monitor node
@@ -58,3 +65,54 @@
     -in {{ pgsql_ssl_dir }}/server.csr \
     -out {{ pgsql_ssl_dir }}/server.crt
   register: replace_csr_crt
+  when: inventory_hostname in groups['workers'][0]
+
+#
+- name: Synchronize ssl directory using rsync protocol on delegate host (push)
+  synchronize:
+    src: "{{ pgsql_ssl_dir }}"
+    dest: "{{ pgsql_base_dir }}"
+    mode: push
+    recursive: yes
+  delegate_to: "{{groups['workers'][0]}}"
+  register: ssl_dir_synced
+  when: inventory_hostname not in groups['workers'][0]
+
+#
+- name: Change permissions for cert files
+  become: true
+  file:
+    path: "{{ pgsql_ssl_dir }}/{{ item }}"
+    state: file
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  register: certs_permission_changed
+  with_items:
+    - "ca.crt"
+    - "ca.key"
+    - "ca.srl"
+    - "server.crt"
+    - "server.csr"
+    - "server.key"
+    - "v3.ext"
+
+#
+#- name: Create the patroni.yml configuration file
+#  become: true
+#  become_user: postgres
+#  template: src=patroni.yml.j2 dest=/var/lib/pgsql/patroni.yml owner=postgres group=postgres mode=644 force=yes
+#  register: patroni_config_created
+
+# Enable and Start services for patroni
+#- name: Reload and start systemd service of patroni
+#  become: true
+#  systemd:
+#    name: "{{ item }}"
+#    state: restarted
+#  register: patroni_systemd_service_restarted
+#  until: patroni_systemd_service_restarted is succeeded
+#  retries: 3
+#  with_items:
+#    - etcd
+#    - patroni

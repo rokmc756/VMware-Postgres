@@ -30,7 +30,6 @@ pgsql_ssl_organization_unit: "Tanzu"
 pgsql_ssl_common_name: "jtest.pivotal.io"
 pgsql_ssl_email: "jomoon@pivotal.io"
 
-
 # RHEL or Rocky Linux 8
 # vmware-postgres10-10.21-1.el8.x86_64.rpm            # - OK
 # vmware-postgres10-10.22-1.el8.x86_64.rpm            # - OK
@@ -114,5 +113,3 @@ pgsql_ssl_email: "jomoon@pivotal.io"
 # vmware-postgres14-14.5-1.el7.x86_64.rpm            # - 
 # vmware-postgres14-14.6-1.el7.x86_64.rpm            # OK
 # vmware-postgres15-15.1-1.el7.x86_64.rpm            # OK
-
-

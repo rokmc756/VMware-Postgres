@@ -70,3 +70,9 @@ WARNING: psql major version 14, server major version 15.
 Type "help" for help.
 
 ~~~
+
+# SSL configure in patroni
+https://docs.microfocus.com/doc/Operations_Orchestration/2023.05/HardeningPatroniCluster
+https://access.crunchydata.com/documentation/patroni/2.0.1/environment/
+https://patroni.readthedocs.io/en/master/ENVIRONMENT.html
+

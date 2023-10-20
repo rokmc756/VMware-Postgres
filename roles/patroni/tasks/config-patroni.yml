@@ -126,20 +126,36 @@
     state: started
   register: patroni_systemd_service_reloaded
 
-# Remove cluster
-# shell: |
-#   export LC_ALL=en_US.utf-8 && {{ patronictl_path }} -c /var/lib/pgsql/patroni.yml remove {{ cluster_name }} <<EOF
-#   {{ cluster_name }}
-#   Yes I am aware
-#   EOF
+#
+#- name: Remove cluster
+#  become: true
+#  become_user: postgres
+#  shell: |
+#    export LC_ALL=en_US.utf-8 && {{ patronictl_path }} -c /var/lib/pgsql/patroni.yml remove {{ cluster_name }} <<EOF
+#    {{ cluster_name }}
+#    Yes I am aware
+#    EOF
+#  register: cluster_removed
 
-# Reinitialize cluster
-# shell: |
-#   export LC_ALL=en_US.utf-8 && {{ patronictl_path }} -c /var/lib/pgsql/patroni.yml reinit {{ cluster_name }} <<EOF
-#   {{ inventory_hostname }}
-#   y
-#   y
-#   EOF
+#
+#- debug: msg={{ cluster_removed }}
+#  when: print_debug
+
+#
+#- name: Reinitialize cluster
+#  become: true
+#  become_user: postgres
+#  shell: |
+#    export LC_ALL=en_US.utf-8 && {{ patronictl_path }} -c /var/lib/pgsql/patroni.yml reinit {{ cluster_name }} <<EOF
+#    {{ inventory_hostname }}
+#    y
+#    y
+#    EOF
+#  register: cluster_reinited
+
+#
+#- debug: msg={{ cluster_reinited }}
+#  when: print_debug
 
 #
 - name: Pause for 1 minutes to wait for compleiting initializaion of patroni cluster

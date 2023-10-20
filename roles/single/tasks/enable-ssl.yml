@@ -81,7 +81,7 @@
 - name: Stop Postgres instance manually to apply systemd unit
   become: true
   become_user: postgres
-  shell: /opt/vmware/postgres/15/bin/pg_ctl stop -D /var/lib/pgsql/data -s -m fast
+  shell: /opt/vmware/postgres/{{ major_version }}/bin/pg_ctl stop -D /var/lib/pgsql/data -s -m fast
   register: postgres_instance_stoppped
 
 #

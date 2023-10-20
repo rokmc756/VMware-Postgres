@@ -63,6 +63,22 @@
     - { dir: "/etc/pgwatch2/sql/metric_store", file: "roll_out_metric_time.psql", user: "pgwatch2", db: "pgwatch2_metrics" }
 
 #
+#- name: Roll out the pgwatch2 config schema and Bootstrap the metrics storage DB
+#  become: true
+#  become_user: postgres
+#  shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
+#  args:
+#    executable: /bin/bash
+#  register: config_metrics_storage_created
+#  with_items:
+#    - { dir: "/etc/pgwatch2/metrics/00_helpers/get_stat_activity/$pgver/", file: "metric.sql", user: "pgwatch2", db: "pgwatch2" }
+#    - { dir: "/etc/pgwatch2/metrics/00_helpers/get_stat_replication/$pgver/", file: "metric.sql", db: "pgwatch2" }
+#    - { dir: "/etc/pgwatch2/metrics/00_helpers/get_wal_size/$pgver/", file: "metric.sql", db: "pgwatch2" }
+#    - { dir: "/etc/pgwatch2/metrics/00_helpers/get_stat_statements/$pgver/", file: "metric.sql", db: "pgwatch2" }
+#    - { dir: "/etc/pgwatch2/metrics/00_helpers/get_sequences/$pgver/", file: "metric.sql", db: "pgwatch2" }
+#    # export PGUSER=superuser
+
+#
 - name: Install pip modules for pgwatch2
   become: true
   become_user: root
@@ -78,13 +94,35 @@
   register: pip_module_installed
 
 #
-- name: Create the pgwatch2-web and pgwatch2-daemon systemd unit file
+- name: Create the pgwatch2-web systemd unit file
   become: true
   template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
   register: etcd_config_created
   with_items:
     - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
+  when: inventory_hostname in groups['monitors']
+  #    - { src: 'pgwatch2-daemon.systemd.j2', dest: '/etc/systemd/system/pgwatch2-daemon.service', owner: 'root', group: 'root' }
+
+#
+- name: Create the pgwatch2-daemon systemd unit file
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
+  register: etcd_config_created
+  with_items:
     - { src: 'pgwatch2-daemon.systemd.j2', dest: '/etc/systemd/system/pgwatch2-daemon.service', owner: 'root', group: 'root' }
+  when: inventory_hostname in groups['workers']
+#  - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
+
+#
+- name: Create the pgwatch2 instances yaml file
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
+  register: pgwatch2_instacnes_file_created
+  with_items:
+    - { src: 'instances.yaml.j2', dest: '/etc/pgwatch2/config/instances.yaml', owner: 'root', group: 'root' }
+  when: inventory_hostname in groups['workers']
+#  - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
+
 
 #
 - name: Reload and start services for pgwatch2-web and daemon
@@ -98,4 +136,21 @@
   register: systemd_started
   with_items:
     - pgwatch2-web
+  when: inventory_hostname in groups['monitors']
+#    - pgwatch2-daemon
+
+
+#
+- name: Reload and start services for daemon
+  become: true
+  systemd:
+    daemon_reexec: true
+    daemon_reload: true
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  register: systemd_started
+  with_items:
     - pgwatch2-daemon
+  when: inventory_hostname in groups['workers']
+#    - pgwatch2-web

@@ -1,0 +1,39 @@
+---
+#- hosts: all
+#  gather_facts: true
+#  become: yes
+#  roles:
+#    - init-hosts
+
+#
+- hosts: workers
+  gather_facts: true
+  become: yes
+  vars:
+    print_debug: true
+    config_firewall: false
+    install_dep_pkgs: false
+    install_pip_module: false
+    install_pkgs: false
+    config_env: false
+    enable_ssl: false
+    config_patroni: false
+    add_users: true
+  roles:
+    - patroni
+
+#- hosts: co7-master
+#  become: yes
+#  become_user: root
+#  gather_facts: true
+#  roles:
+#    - { role: haproxy }
+#    - { role: keepalived, keepalived_shared_ip: "192.168.56.89", keepalived_role: "master" }
+#
+#- hosts: co7-slave
+#  become: yes
+#  become_user: root
+#  gather_facts: true
+#  roles:
+#    - { role: haproxy }
+#    - { role: keepalived, keepalived_shared_ip: "192.168.0.89", keepalived_role: "slave" }

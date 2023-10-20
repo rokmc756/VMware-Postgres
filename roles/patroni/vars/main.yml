@@ -1,4 +1,59 @@
 ---
+major_version: 15
+minor_version: 4
+patch_version: 1
+rhel_version: el7
+patroni_version: "3.0.4-1"
+etcd_version: "3.2.21-2"
+# package_name: pivotal-postgres
+package_name: "vmware-postgres{{ major_version }}"
+
+db_name: testdb
+db_user: jomoon
+db_password: 'changeme'
+# username: postgres
+
+bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"
+# bin_dir: "/usr/bin"
+# bin_dir: "/usr/local/bin"
+patroni_path: "{{ bin_dir }}/patroni"
+patronictl_path: "{{ bin_dir }}/patronictl"
+cluster_name: patclu01
+# false is for pgbackrest, not found yet how does pgbackrest
+# interactive with synchronous mode in patroni cluster
+# 3sync_mode: on    # one of node will be a Sync Standby role
+sync_mode: False
+with_patroni_pkg: True
+
+#
+# enable_ssl: true
+pgsql_base_dir: "/var/lib/pgsql"
+pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
+pgsql_ssl_days: 3660
+pgsql_ssl_country: "KR"
+pgsql_ssl_state: "Seoul"
+pgsql_ssl_location: "Guro"
+pgsql_ssl_organization: "VMware"
+pgsql_ssl_organization_unit: "Tanzu"
+pgsql_ssl_common_name: "jtest.pivotal.io"
+pgsql_ssl_email: "jomoon@pivotal.io"
+
+# Patroni prerequistes =< vmware-postgres13
+# urllib3_ver1: 1.19.1
+# urllib3_ver2: 1.21
+# six_ver: 1.7
+# kazoo_ver: 1.3.1
+# python-etc_ver1: 0.4.3
+# python-etc_ver2: 0.5
+# python-consul_ver: 0.7.0
+# click_ver: 4.1
+# prettytable_ver: 0.7
+# psutil_ver: 2.0.0
+# kube_ver1: 2.0.0
+# kube_ver2: 7.0.0
+# kube_ver3: 4.0
+# kube_ver4: 5.0
+
 # RHEL or Rocky Linux 8
 # vmware-postgres10-10.21-1.el8.x86_64.rpm            # OK : patroni is included
 # vmware-postgres10-10.22-1.el8.x86_64.rpm            # OK : patroni is included
@@ -85,55 +140,4 @@
 
 # vmware-postgres15-15.1-1.el8.x86_64.rpm             # OK : patroni 2.1.4-1
 
-major_version: 15
-minor_version: 3
-patch_version: 1
-rhel_version: el8
-# patroni_version: "2.1.4-1"
-patroni_version: "3.0.2-1"
-etcd_version: "3.2.21-2"
-# package_name: pivotal-postgres
-# package_name: vmware-postgres
-package_name: "vmware-postgres{{ major_version }}"
-database_name: vmware_postgres_testdb
-username: postgres
-bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"
-# bin_dir: "/usr/bin"
-# bin_dir: "/usr/local/bin"
-patroni_path: "{{ bin_dir }}/patroni"
-patronictl_path: "{{ bin_dir }}/patronictl"
-cluster_name: patclu01
-# false is for pgbackrest, not found yet how does pgbackrest
-# interactive with synchronous mode in patroni cluster
-# 3sync_mode: on    # one of node will be a Sync Standby role
-sync_mode: False
-with_patroni_pkg: True
 
-#
-enable_ssl: true
-pgsql_base_dir: "/var/lib/pgsql"
-pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
-pgsql_ssl_days: 3660
-pgsql_ssl_country: "KR"
-pgsql_ssl_state: "Seoul"
-pgsql_ssl_location: "Guro"
-pgsql_ssl_organization: "VMware"
-pgsql_ssl_organization_unit: "Tanzu"
-pgsql_ssl_common_name: "jtest.pivotal.io"
-pgsql_ssl_email: "jomoon@pivotal.io"
-
-# Patroni prerequistes =< vmware-postgres13
-# urllib3_ver1: 1.19.1
-# urllib3_ver2: 1.21
-# six_ver: 1.7
-# kazoo_ver: 1.3.1
-# python-etc_ver1: 0.4.3
-# python-etc_ver2: 0.5
-# python-consul_ver: 0.7.0
-# click_ver: 4.1
-# prettytable_ver: 0.7
-# psutil_ver: 2.0.0
-# kube_ver1: 2.0.0
-# kube_ver2: 7.0.0
-# kube_ver3: 4.0
-# kube_ver4: 5.0

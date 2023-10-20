@@ -1,0 +1,79 @@
+---
+#
+- name: Install the python module of dependencies for ETCD on all nodes in workers group
+  become: true
+  become_user: postgres
+  template: src=requirements.txt.{{ rhel_version }}.j2 dest=/var/lib/pgsql/requirements.txt owner=postgres group=postgres mode=644 force=yes
+  register: patroni_prereq_installed
+
+#
+- name: Install python modlue for patroni
+  become: true
+  become_user: root
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 180
+  poll: 5
+  register: pip3_python_modules_installed
+  with_items:
+    - "setuptools-rust"
+    - "typing"
+    - "wheel"
+    - "-r /var/lib/pgsql/requirements.txt"
+  when: install_pip_module
+
+#
+- name: Upgrade pip3 version
+  become: true
+  become_user: root
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install --upgrade pip )
+  async: 60
+  poll: 5
+  register: pip_upgraded
+  when: install_pip_module
+
+#
+- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
+  become: true
+  become_user: root
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_python_modules_for_vmware_postgres_13_and_earlier_versions_installed
+  with_items:
+    - "psycopg2-binary"
+  when:
+    - major_version|int <= 13
+    - install_pip_module
+
+#
+- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
+  become: true
+  become_user: root
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_python_modules_for_vmware_postgres_14_and_higher_versions_installed
+  with_items:
+    - "pyopenssl"
+    - "pyrsistent==0.16.0"
+  when:
+    - major_version|int >= 14
+    - install_pip_module
+
+#
+- name: Install prerequesties of python modules for Patroni
+  become: true
+  become_user: root
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_python_etcd_installed
+  with_items:
+    - "tzlocal"
+    - "requests"
+    - "ydiff"
+    - "psutil"
+    - "prettytable"
+    - "click"
+    - "python-etcd"
+  when: install_pip_module

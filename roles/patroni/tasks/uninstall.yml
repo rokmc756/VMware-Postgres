@@ -8,10 +8,13 @@
     enabled: no
     state: stopped
   register: patroni_etcd_service_stopped
+  until: patroni_etcd_service_stopped is succeeded
+  retries: 10
   with_items:
     - patroni
     - etcd
   ignore_errors: yes
+  when: uninstall_pkgs
 
 #
 - name: Kill etcd process
@@ -22,6 +25,7 @@
   poll: 5
   register: etcd_processes_killed
   ignore_errors: yes
+  when: uninstall_pkgs
 
 #
 - name: Uninstall pip modules of Patroni prerequisites on all three nodes
@@ -50,6 +54,8 @@
     - "/var/lib/pgsql/etcd_logfile"
     - "/var/lib/pgsql/.bash_profile"
     - "/etc/etcd/etcd.conf"
+  when: remove_patroni_config
+
 #
 - name: Delete data directories
   become: true
@@ -64,12 +70,14 @@
     - "wal_archive"
     - "pgpass0"
     - "requirements.txt"
+  when: uninstall_pkgs
 
 #
 - name: Delete old patroni data directory for patroni cluster
   become: true
   shell: rm -rf /var/lib/pgsql/.local /var/lib/pgsql/.cache /var/lib/pgsql/patroni_data_*
   register: backup_hidden_data_directories_deleted
+  when: uninstall_pkgs
 
 #
 - name: Uninstall pip3 modules for higher versions than vmware-postgres {{ major_version }}
@@ -175,9 +183,10 @@
   with_items:
     - "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}"
     - "vmware-postgres"
+  when: uninstall_pkgs
 
 #
-- name: Uninstall Patroni RPM Package VMware Postgres RPM packages
+- name: Uninstall Patroni RPM Package
   become: true
   yum:
     name: "{{ item }}"
@@ -187,7 +196,7 @@
   register: patroni_rpm_packages_uninstalled
   with_items:
     - "{{ package_name }}-patroni-{{ patroni_version }}"
-  when: with_patroni_pkg
+  when: with_patroni_pkg == true and uninstall_pkgs == true
 
 #
 - name: Delete the vmwawre-postgres rpm file
@@ -196,6 +205,7 @@
     path: /home/jomoon/{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm
     state: absent
   register: vmware_postgres_rpm_packages_deleted
+  when: uninstall_pkgs == true
 
 #
 - name: Delete the vmwawre-postgres{{ major_version }}-paroni rpm file
@@ -204,7 +214,7 @@
     path: "/home/jomoon/{{ package_name }}-patroni-{{ patroni_version }}.{{ rhel_version }}.x86_64.rpm"
     state: absent
   register: patroni_rpm_packages_deleted
-  when: with_patroni_pkg
+  when: with_patroni_pkg == true and uninstall_pkgs == true
 
 #
 - name: List iptables rules
@@ -212,6 +222,8 @@
   become_user: root
   shell: ( iptables -nL )
   register: iptables_rules_listed
+  when: remove_firewall_config
+
 
 #
 - name: Flush iptables rules
@@ -219,6 +231,7 @@
   become_user: root
   shell: ( iptables -F )
   register: iptables_rules_flushed
+  when: remove_firewall_config
 
 #
 - name: Stop and disable firewalld
@@ -228,7 +241,9 @@
     state: stopped
     enabled: false
   register: firewalld_service_stopped
+  when: remove_firewall_config
 
 - debug: msg={{ iptables_rules_listed.stdout }}
   tags:
     - print_debug
+  when: remove_firewall_config

@@ -6,28 +6,60 @@
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat'
 
+#
+- name: x
+  import_tasks: config-firewall.yml
+  tags: install
+  when: config_firewall == true
+
+#
+- name: x
+  import_tasks: install-dep-pkgs.yml
+  tags: install
+  when: install_dep_pkgs == true
+
+#
+- name: x
+  import_tasks: install-pip-module.yml
+  tags: install
+  when: install_pip_module == true
+
+#
 - name: Install rpm and python packages for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  include: install-pkgs.yml
+  import_tasks: install-pkgs.yml
   tags: install
   when: install_pkgs == true
 
+#
+- name: x
+  import_tasks: config-env.yml
+  tags: install
+  when: config_env == true
+
+#
 - name: Enable SSL for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  include: enable-ssl.yml
+  import_tasks: enable-ssl.yml
   tags: install
   when: enable_ssl == true
 
+#
 - name: Configure patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  include: configure.yml
+  import_tasks: config-patroni.yml
   tags: install
-  when: configure_patroni == true
+  when: config_patroni == true
+
+#
+- name: Add users for vmware-postgres patroni cluster in Red Hat / CentOS / Rocky Linux
+  import_tasks: add-users.yml
+  tags: install
+  when: add_users == true
 
 #
 - name: Uninstallation of vmware postgres for Red Hat / CentOS
-  include: uninstall.yml
+  import_tasks: uninstall.yml
   tags: uninstall
 
 #
 - name: Upgrade of vmware postgres for Red Hat / CentOS
-  include: upgrade.yml
+  import_tasks: upgrade.yml
   tags: upgrade
-

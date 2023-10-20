@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    print_debug: true
+    install_dep_packages: true
+    remove_dep_packages: true
+  roles:
+    - pgautofailover
+    - init-hosts

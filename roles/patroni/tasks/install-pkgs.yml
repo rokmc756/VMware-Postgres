@@ -1,64 +1,6 @@
 ---
 # Install Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
 #
-- name: Add line into /etc/locale.conf for LC_TYPE to prevent error
-  become: true
-  lineinfile:
-    path: /etc/locale.conf
-    line: "LC_CTYPE=en_US.UTF-8"
-  register: lctype_line_added
-
-#
-- name: Install the 'Development tools' and perl package group and others for VMware Postgres Dependencies
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: present
-  async: 180
-  poll: 5
-  with_items:
-    - "perl"
-    - "perl-libs"
-    - "@Development tools"
-    - "epel-release"
-    - "firewalld"
-    - "readline-devel"
-    - "libicu-devel"
-    - "rsyslog"
-  register: vmware_postgres_depenecies_packages_installed
-  when: install_dep_pkgs
-#    - python-psycopg2
-#    - python27-python-psycopg2
-#    - python3-policycoreutils
-#    - python2-libselinux
-#    - libselinux-python2
-#    - policycoreutils-python-utils
-#    - libselinux-python3
-
-#
-- name: Stop and disable firewalld
-  become: true
-  systemd:
-    name: firewalld
-    state: stopped
-    enabled: false
-  register: firewalld_service_disabled
-
-#
-- name: Flush iptables rules
-  become: true
-  become_user: root
-  shell: ( iptables -F )
-  register: iptables_rules_flushed
-
-#
-- name: List iptables rules
-  become: true
-  become_user: root
-  shell: ( iptables -nL )
-  register: iptables_rules_listed
-
-#
 - name: Copy the VMware Postgres {{ major_version }} rpm package file to all nodes in workers
   copy:
     src: "{{ item }}"
@@ -96,29 +38,6 @@
     - "{{ package_name }}-patroni-{{ patroni_version }}.{{ rhel_version }}.x86_64.rpm"
   when: with_patroni_pkg
 
-#
-- name: Install Patroni prerequisites rpm packages on all nodes in workers group for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: present
-    skip_broken: yes
-  async: 180
-  poll: 5
-  with_items:
-    - python3
-    - python3-libs
-    - python3-devel
-    - python3-setuptools
-    - python3-rpm-generators
-    - python3-PyYAML
-    - python3-pathspec
-    - gcc
-    - yamllint
-    - daemonize
-  register: patroni_prereq_rpm_packages_installed
-  when: install_dep_pkgs
-
 # - python-psycopg2
 # - etcd
 # - python34
@@ -127,6 +46,54 @@
 # - python36-PyYAML
 # - python36-pathspec
 
+#- name: Alternative python3.6 version to python3
+#  become: true
+#  become_user: root
+#  command: alternatives --set python3 /usr/bin/python3.6
+#  ignore_errors: yes
+#  register: python3_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#- debug:
+#    var: python3_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#
+#- name: Alternative python3 version to python
+#  become: true
+#  become_user: root
+#  command: alternatives --set python /usr/bin/python3
+#  ignore_errors: yes
+#  register: python_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#- debug:
+#    var: python_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#- name: Alternative pip3.6 version to pip3
+#  become: true
+#  become_user: root
+#  command: alternatives --set pip3 /usr/bin/pip3.6
+#  ignore_errors: yes
+#  register: pip3_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+#
+#- debug:
+#    var: pip3_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+#
+#- name: Alternative pip3 version to python
+#  become: true
+#  become_user: root
+#  command: alternatives --set pip /usr/bin/pip3
+#  ignore_errors: yes
+#  register: pip_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+#
+#- debug:
+#    var: pip_version_alternative
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
 #
 - name: Install VMware Postgres RPM Package on all hosts as root
@@ -156,56 +123,6 @@
   when: with_patroni_pkg
 
 #
-- name: Make sure we have a 'wheel' group
-  become: true
-  group:
-    name: wheel
-    state: present
-  register: wheel_group_added
-
-#
-- name: Allow 'wheel' group to have passwordless sudo
-  become: true
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: 'visudo -cf %s'
-  register: wheel_group_allowed
-
-#
-- name: Check if .bash_profile exits under /var/lib/pgsql directory
-  become: true
-  become_user: postgres
-  stat: path=/var/lib/pgsql/.bash_profile
-  register: bash_profile_existed
-
-#
-- name: Sanity check for .bash_profile in /var/lib/pgsql
-  become: true
-  become_user: postgres
-  shell: "{{ item }}"
-  with_items:
-    - "touch /var/lib/pgsql/.bash_profile"
-    - "chmod 600 /var/lib/pgsql/.bash_profile"
-  register: bash_profile_checked
-  when:
-    - bash_profile_existed.stat.exists == False
-
-#
-- name: Insert executable binary path into .bashrc for VMware Postgres {{ major_version }}
-  become: true
-  become_user: postgres
-  lineinfile:
-    path: /var/lib/pgsql/.bash_profile
-    line: "export PATH={{ bin_dir }}:$PATH"
-  register: bin_path_inline_added
-  when:
-    - bash_profile_existed.stat.exists == True
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
-
-#
 - name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
   become: true
   yum:
@@ -221,119 +138,4 @@
   when:
     - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
     - install_dep_pkgs
-
 #
-- name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
-  yum:
-    name: "/home/jomoon/{{ item }}"
-    state: present
-    disable_gpg_check: yes
-  async: 60
-  poll: 5
-  register: etcd_rpm_packages_installed
-  with_items:
-    - "etcd-{{ etcd_version }}.{{ rhel_version }}.x86_64.rpm"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
-
-#
-- name: Install ETCD and Patroni prerequisites rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: present
-    skip_broken: yes
-  async: 180
-  poll: 5
-  with_items:
-    - platform-python-pip
-    - python39-pip
-  register: etcd_patroni_prereq_rpm_packages_installed
-  when:
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
-    - install_dep_pkgs
-# - python34
-# - python34-libs
-# - python34-setuptools
-# - python36-PyYAML
-# - python36-pathspec
-
-#
-- name: Install the python module of dependencies for ETCD on all nodes in workers group
-  become: true
-  become_user: postgres
-  template: src=requirements.txt.{{ rhel_version }}.j2 dest=/var/lib/pgsql/requirements.txt owner=postgres group=postgres mode=644 force=yes
-  register: patroni_prereq_installed
-
-#
-- name: Install python modlue for patroni
-  become: true
-  become_user: root
-  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
-  async: 180
-  poll: 5
-  register: pip3_python_modules_installed
-  with_items:
-    - "setuptools-rust"
-    - "typing"
-    - "wheel"
-    - "-r /var/lib/pgsql/requirements.txt"
-  when: install_pip_module
-
-#
-- name: Upgrade pip3 version
-  become: true
-  become_user: root
-  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install --upgrade pip )
-  async: 60
-  poll: 5
-  register: pip_upgraded
-  when: install_pip_module
-
-#
-- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
-  become: true
-  become_user: root
-  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
-  async: 60
-  poll: 5
-  register: pip3_python_modules_for_vmware_postgres_13_and_earlier_versions_installed
-  with_items:
-    - "psycopg2-binary"
-  when:
-    - major_version|int <= 13
-    - install_pip_module
-
-#
-- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
-  become: true
-  become_user: root
-  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
-  async: 60
-  poll: 5
-  register: pip3_python_modules_for_vmware_postgres_14_and_higher_versions_installed
-  with_items:
-    - "pyopenssl"
-    - "pyrsistent==0.16.0"
-  when:
-    - major_version|int >= 14
-    - install_pip_module
-
-#
-- name: Install prerequesties of python modules for Patroni
-  become: true
-  become_user: root
-  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
-  async: 60
-  poll: 5
-  register: pip3_python_etcd_installed
-  with_items:
-    - "tzlocal"
-    - "requests"
-    - "ydiff"
-    - "psutil"
-    - "prettytable"
-    - "click"
-    - "python-etcd"
-  when: install_pip_module
-

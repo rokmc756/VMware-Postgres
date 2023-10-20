@@ -10,16 +10,16 @@
 - name: Install pgwatch2
   include: install.yml
   tags: install
-  when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
+  # when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
-- name: Uninstall grafana for Red Hat / CentOS
+- name: Uninstall pgwatch2
   include: uninstall.yml
   tags: uninstall
-  when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
+  # when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
-- name: Upgrade grafana for Red Hat / CentOS
+- name: Upgrade pgwatch2
   include: upgrade.yml
   tags: upgrade
-  when: inventory_hostname in groups['monitors']
+  # when: inventory_hostname in groups['monitors']

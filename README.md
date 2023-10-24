@@ -76,3 +76,6 @@ https://docs.microfocus.com/doc/Operations_Orchestration/2023.05/HardeningPatron
 https://access.crunchydata.com/documentation/patroni/2.0.1/environment/
 https://patroni.readthedocs.io/en/master/ENVIRONMENT.html
 
+# patroni cluster
+https://docs.microfocus.com/doc/SMAX/23.4/HASQLPatroni
+https://www.dbi-services.com/blog/how-to-setup-a-consul-cluster-on-rhel-8-rocky-linux-8-almalinux-8-part-2/

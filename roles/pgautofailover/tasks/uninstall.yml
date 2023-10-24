@@ -44,7 +44,7 @@
     - daemonize
     - python3-pathspec
     - python3-rpm-generators
-  when: remove_dep_packages and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
 #
 - name: Uninstall Python3 Packages
@@ -63,7 +63,7 @@
     - yamllint
     - gcc
     - epel-release
-  when: remove_dep_packages
+  when: remove_dep_pkgs
   #  - python3-libs
 
 #

@@ -11,11 +11,9 @@ package_name: "vmware-postgres{{ major_version }}"
 db_name: testdb
 db_user: jomoon
 db_password: 'changeme'
-# username: postgres
 
 bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"
-# bin_dir: "/usr/bin"
-# bin_dir: "/usr/local/bin"
+# bin_dir: "/usr/bin" , "/usr/local/bin"
 patroni_path: "{{ bin_dir }}/patroni"
 patronictl_path: "{{ bin_dir }}/patronictl"
 cluster_name: patclu01
@@ -26,7 +24,6 @@ sync_mode: False
 with_patroni_pkg: True
 
 #
-# enable_ssl: true
 pgsql_base_dir: "/var/lib/pgsql"
 pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
 pgsql_ssl_days: 3660
@@ -137,7 +134,4 @@ pgsql_ssl_email: "jomoon@pivotal.io"
 # vmware-postgres14-14.5-1.el7.x86_64.rpm            # - OK : patroni 2.1.4-1
 # vmware-postgres14-14.6-1.el7.x86_64.rpm            # - OK : patroni 2.1.4-2
 # vmware-postgres15-15.1-1.el7.x86_64.rpm            # - OK : patroni 2.1.4-1
-
 # vmware-postgres15-15.1-1.el8.x86_64.rpm             # OK : patroni 2.1.4-1
-
-

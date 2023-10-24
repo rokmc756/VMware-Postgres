@@ -24,7 +24,7 @@ monitor_database: monitor
 workers_database: ha
 
 #
-enable_ssl_monitor: true
+# enable_ssl_monitor: true
 pgsql_base_dir: "/var/lib/pgsql"
 pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
 pgsql_ssl_days: 3660

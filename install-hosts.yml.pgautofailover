@@ -3,8 +3,9 @@
   become: yes
   vars:
     print_debug: true
-    install_dep_packages: true
-    remove_dep_packages: true
+    install_dep_pkgs: true
+    remove_dep_pkgs: true
+    enable_ssl_monitor: true
   roles:
     - init-hosts
     - pgautofailover

@@ -7,13 +7,13 @@
   when: ansible_os_family != 'RedHat'
 
 - name: Installation of vmware postgres for Red Hat / CentOS
-  include: install.yml
+  import_tasks: install.yml
   tags: install
 
 - name: Uninstallation of vmware postgres for Red Hat / CentOS
-  include: uninstall.yml
+  import_tasks: uninstall.yml
   tags: uninstall
 
 - name: Upgrade of vmware postgres for Red Hat / CentOS
-  include: upgrade.yml
+  import_tasks: upgrade.yml
   tags: upgrade

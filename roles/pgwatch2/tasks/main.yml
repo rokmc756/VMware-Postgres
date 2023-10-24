@@ -8,18 +8,18 @@
 
 #
 - name: Install pgwatch2
-  include: install.yml
+  import_tasks: install.yml
   tags: install
   # when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
 - name: Uninstall pgwatch2
-  include: uninstall.yml
+  import_tasks: uninstall.yml
   tags: uninstall
   # when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
 - name: Upgrade pgwatch2
-  include: upgrade.yml
+  import_tasks: upgrade.yml
   tags: upgrade
   # when: inventory_hostname in groups['monitors']

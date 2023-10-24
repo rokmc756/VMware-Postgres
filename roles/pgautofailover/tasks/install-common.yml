@@ -100,7 +100,7 @@
     - python3-setuptools
     - yamllint
     - gcc
-  when: install_dep_packages
+  when: install_dep_pkgs
 
 #
 - name: Install Python3 Packages on All Nodes
@@ -117,9 +117,9 @@
     - daemonize
     - python3-pathspec
     - python3-rpm-generators
-  when: install_dep_packages and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
-# when: install_dep_packages and rhel_version == "rhel8"
+# when: install_dep_pkgs and rhel_version == "rhel8"
 #    - python-psycopg2
 #    - python34-setuptools
 #    - python36-PyYAML

@@ -46,55 +46,6 @@
 # - python36-PyYAML
 # - python36-pathspec
 
-#- name: Alternative python3.6 version to python3
-#  become: true
-#  become_user: root
-#  command: alternatives --set python3 /usr/bin/python3.6
-#  ignore_errors: yes
-#  register: python3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- debug:
-#    var: python3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#
-#- name: Alternative python3 version to python
-#  become: true
-#  become_user: root
-#  command: alternatives --set python /usr/bin/python3
-#  ignore_errors: yes
-#  register: python_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- debug:
-#    var: python_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- name: Alternative pip3.6 version to pip3
-#  become: true
-#  become_user: root
-#  command: alternatives --set pip3 /usr/bin/pip3.6
-#  ignore_errors: yes
-#  register: pip3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- debug:
-#    var: pip3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- name: Alternative pip3 version to python
-#  become: true
-#  become_user: root
-#  command: alternatives --set pip /usr/bin/pip3
-#  ignore_errors: yes
-#  register: pip_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- debug:
-#    var: pip_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
 #
 - name: Install VMware Postgres RPM Package on all hosts as root
   become: true

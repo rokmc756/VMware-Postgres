@@ -8,47 +8,48 @@
 
 #
 - name: Install GO language
-  include: install-go.yml
+  import_tasks: install-go.yml
   tags: install
   when: install_go == true
 
 #
 - name: Install prometheus / postgresql_exporter
-  include: install-prometheus.yml
+  import_tasks: install-prometheus.yml
   tags: install
   when: install_prometheus == true and inventory_hostname in groups['workers']
 
 #
 - name: Install grafana and influx database packages
-  include: install-grafana.yml
+  import_tasks: install-grafana.yml
   tags: install
   when: install_grafana == true and inventory_hostname in groups['monitors']
 
 #
 - name: Enable SSL on sinlge postgres
-  include: enable-ssl.yml
+  import_tasks: enable-ssl.yml
   tags: install
   when: enable_ssl == true and inventory_hostname in groups['monitors']
 
 #
 - name: Uninstall prometheus / postgresql_exporter
-  include: uninstall-prometheus.yml
+  import_tasks: uninstall-prometheus.yml
   tags: uninstall
   when: uninstall_prometheus == true and inventory_hostname in groups['workers']
 
 #
 - name: Unistall grafana and influx database packages
-  include: uninstall-grafana.yml
+  import_tasks: uninstall-grafana.yml
   tags: uninstall
   when: uninstall_grafana == true and inventory_hostname in groups['monitors']
 
 #
 - name: Uninstall GO language
-  include: uninstall-go.yml
+  import_tasks: uninstall-go.yml
   tags: uninstall
   when: uninstall_go == true
 
 #
 - name: Upgrade grafana for Red Hat / CentOS
-  include: upgrade.yml
+  import_tasks: upgrade.yml
   tags: upgrade
+

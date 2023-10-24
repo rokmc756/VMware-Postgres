@@ -1,9 +1,9 @@
 ---
-#- hosts: all
-#  gather_facts: true
-#  become: yes
-#  roles:
-#    - init-hosts
+- hosts: all
+  gather_facts: true
+  become: yes
+  roles:
+    - init-hosts
 
 #
 - hosts: workers
@@ -11,13 +11,13 @@
   become: yes
   vars:
     print_debug: true
-    config_firewall: false
-    install_dep_pkgs: false
-    install_pip_module: false
-    install_pkgs: false
-    config_env: false
-    enable_ssl: false
-    config_patroni: false
+    config_firewall: true
+    install_dep_pkgs: true    # ok
+    install_pip_module: true   # ok
+    install_pkgs: true
+    config_env: true
+    enable_ssl: true
+    config_patroni: true
     add_users: true
   roles:
     - patroni

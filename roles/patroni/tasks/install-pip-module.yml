@@ -76,4 +76,17 @@
     - "prettytable"
     - "click"
     - "python-etcd"
+    - "psycopg2"
   when: install_pip_module
+
+#
+- name: Install patroni pip module
+  become: true
+  become_user: root
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_patroni_installed
+  with_items:
+    - "patroni==3.0.4"
+  when: install_pip_module == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8

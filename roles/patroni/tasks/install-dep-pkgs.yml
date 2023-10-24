@@ -16,6 +16,7 @@
     - "readline-devel"
     - "libicu-devel"
     - "rsyslog"
+    - "postgresql-devel"
   register: vmware_postgres_depenecies_packages_installed
   when: install_dep_pkgs
 #    - python-psycopg2
@@ -51,6 +52,35 @@
   register: patroni_prereq_rpm_packages_installed
   when: install_dep_pkgs
 
+#
+- name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  with_items:
+    - python39
+    - python39-pip
+    - python39-libs
+    - python39-devel
+  register: python39_installed
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+
+#
+- name: Alternative python3.9 version to python3
+  become: true
+  become_user: root
+  shell: |
+    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 3
+    alternatives --set python3 /usr/bin/python3.9
+    alternatives --set python /usr/bin/python3
+  register: python3_version_alternatives
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  # update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
+
 # - python-psycopg2
 # - etcd
 # - python34
@@ -58,55 +88,6 @@
 # - python34-setuptools
 # - python36-PyYAML
 # - python36-pathspec
-
-#- name: Alternative python3.6 version to python3
-#  become: true
-#  become_user: root
-#  command: alternatives --set python3 /usr/bin/python3.6
-#  ignore_errors: yes
-#  register: python3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- debug:
-#    var: python3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#
-#- name: Alternative python3 version to python
-#  become: true
-#  become_user: root
-#  command: alternatives --set python /usr/bin/python3
-#  ignore_errors: yes
-#  register: python_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- debug:
-#    var: python_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#- name: Alternative pip3.6 version to pip3
-#  become: true
-#  become_user: root
-#  command: alternatives --set pip3 /usr/bin/pip3.6
-#  ignore_errors: yes
-#  register: pip3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- debug:
-#    var: pip3_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- name: Alternative pip3 version to python
-#  become: true
-#  become_user: root
-#  command: alternatives --set pip /usr/bin/pip3
-#  ignore_errors: yes
-#  register: pip_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-#
-#- debug:
-#    var: pip_version_alternative
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
 #
 - name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
@@ -137,7 +118,7 @@
   register: etcd_rpm_packages_installed
   with_items:
     - "etcd-{{ etcd_version }}.{{ rhel_version }}.x86_64.rpm"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
 #
 - name: Install ETCD and Patroni prerequisites rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}

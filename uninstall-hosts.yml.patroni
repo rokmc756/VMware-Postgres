@@ -5,12 +5,12 @@
   vars:
     print_debug: true
     remove_users: true
-    disable_ssl: false
+    disable_ssl: true
     remove_patroni_config: true
     remove_env_config: true
     uninstall_pkgs: true
-    uninstall_pip_module: false
-    uninstall_dep_pkgs: false
+    uninstall_pip_module: true
+    uninstall_dep_pkgs: true
     remove_firewall_config: true
   roles:
     - patroni

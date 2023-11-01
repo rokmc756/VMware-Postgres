@@ -86,10 +86,9 @@
   become: true
   become_user: postgres
   shell: ( source /var/lib/pgsql/.bash_profile ; {{ bin_dir }}/pg_autoctl create monitor --auth trust --ssl-self-signed --pgdata /var/lib/pgsql/{{ monitor_database }} )
-  register: monitor_node_created
   async: 300
   poll: 5
-  register: pg_ctl_install_verified
+  register: monitor_node_created
   args:
     chdir: "/var/lib/pgsql"
     executable: /bin/bash

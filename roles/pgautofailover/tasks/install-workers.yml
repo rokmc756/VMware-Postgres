@@ -16,10 +16,9 @@
   become: true
   become_user: postgres
   shell: ( source /var/lib/pgsql/.bash_profile ; {{ bin_dir }}/pg_autoctl create postgres --pgdata '/var/lib/pgsql/{{ workers_database }}' --auth trust --ssl-self-signed --username ha-admin --dbname '{{ app_database }}' --hostname '{{ inventory_hostname }}' --pgctl {{ bin_dir }}/pg_ctl --monitor "postgres://autoctl_node@{{ hostvars[groups['monitor'][0]].ansible_hostname }}/pg_auto_failover?sslmode={{ sslmode }}" )
-  register: workers_instance_created
   async: 300
   poll: 5
-  register: monitor_state_verified
+  register: workers_instance_created
   args:
     chdir: "/var/lib/pgsql"
     executable: /bin/bash

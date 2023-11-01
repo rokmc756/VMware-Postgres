@@ -1,4 +1,16 @@
 #
+#
+- name: Alternative python version 2 for RHEL/CentOS 7.x
+  become: true
+  shell: |
+    /usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+    /usr/sbin/alternatives --set python /usr/bin/python2
+  register: alternatives_python2
+  when:
+    - hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+    - ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+
+#
 - name: Stop systemd service of workers instance
   become: true
   systemd:
@@ -100,7 +112,8 @@
   become: true
   become_user: root
   yum:
-    name: "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64"
+    name: "vmware-postgres{{ major_version }}"
+    # name: "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64"
     state: absent
     disable_gpg_check: true
   async: 180

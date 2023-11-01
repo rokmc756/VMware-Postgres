@@ -119,6 +119,21 @@
     - python3-rpm-generators
   when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
+#
+- name: Alternative python3 version to python
+  become: true
+  become_user: root
+  shell: |
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+    alternatives --set python /usr/bin/python3
+  register: python3_version_alternatives
+  when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+
+  # when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+  #  update-alternatives --install /usr/bin/python python /usr/local/bin/python3 3
+  #  update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
+ 
+#
 # when: install_dep_pkgs and rhel_version == "rhel8"
 #    - python-psycopg2
 #    - python34-setuptools
@@ -126,3 +141,4 @@
 #    - python34
 #    - python34-libs
 #    - python36-pathspec
+

@@ -8,7 +8,8 @@ Description=etcd - highly-available key value store
 LimitNOFILE=65536
 Restart=on-failure
 Type=notify
-ExecStart=/usr/bin/etcd --config-file /var/lib/pgsql/etcd.yml
+ExecStart=/usr/bin/etcd --enable-v2=true --config-file /var/lib/pgsql/etcd.yml
+
 User=postgres
 
 [Install]

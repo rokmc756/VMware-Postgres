@@ -19,16 +19,17 @@
   when: install_dep_pkgs == true
 
 #
+- name: Install rpm and python packages for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
+  import_tasks: install-pkgs.yml
+  tags: install
+  when: install_pkgs == true
+
+#
 - name: x
   import_tasks: install-pip-module.yml
   tags: install
   when: install_pip_module == true
 
-#
-- name: Install rpm and python packages for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  import_tasks: install-pkgs.yml
-  tags: install
-  when: install_pkgs == true
 
 #
 - name: x

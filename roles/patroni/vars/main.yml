@@ -1,10 +1,21 @@
 ---
 major_version: 15
-minor_version: 4
+minor_version: 5
 patch_version: 1
-rhel_version: el7
-patroni_version: "3.0.4-1"
-etcd_version: "3.2.21-2"
+rhel_version: el9
+patroni_version: "3.2.0-1"
+# etcd_version: "3.2.21-2"
+# etcd_version: "3.4.14-1"
+
+# etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
+etcd_major_version: 3
+etcd_minor_version: 3
+etcd_build_version: 27
+etcd_patch_version: 1
+download_etcd_bin: false
+# etcd_version: "3.4.14"
+
+#  etcd-3.4.14-1.el9s.x86_64.rpm
 # package_name: pivotal-postgres
 package_name: "vmware-postgres{{ major_version }}"
 

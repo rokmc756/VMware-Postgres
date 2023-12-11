@@ -79,3 +79,9 @@ https://patroni.readthedocs.io/en/master/ENVIRONMENT.html
 # patroni cluster
 https://docs.microfocus.com/doc/SMAX/23.4/HASQLPatroni
 https://www.dbi-services.com/blog/how-to-setup-a-consul-cluster-on-rhel-8-rocky-linux-8-almalinux-8-part-2/
+
+# For extra rpms
+# sudo dnf install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm
+
+# Intall etcd binary
+# https://computingforgeeks.com/how-to-install-etcd-on-rhel-centos-rocky-almalinux/

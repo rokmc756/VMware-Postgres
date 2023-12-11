@@ -4,13 +4,13 @@
     print_debug: true
     uninstall_pkgs: true
     uninstall_dep_pkgs: true
-    uninstall_pkgs: true
     uninstall_go: true
     uninstall_prometheus: true
     uninstall_grafana: true
     uninstall_pgwatch2: true
   roles:
-    - { role: grafana }
-    - { role: pgwatch2 }
     - { role: single }
     - { role: init-hosts }
+
+#    - { role: grafana }
+#    - { role: pgwatch2 }

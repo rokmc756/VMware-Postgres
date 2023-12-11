@@ -16,6 +16,7 @@
     - "readline-devel"
     - "libicu-devel"
     - "rsyslog"
+    - "rsync"
     - "postgresql-devel"
   register: vmware_postgres_depenecies_packages_installed
   when: install_dep_pkgs
@@ -48,9 +49,9 @@
     - python3-psycopg2
     - gcc
     - yamllint
-    - daemonize
   register: patroni_prereq_rpm_packages_installed
   when: install_dep_pkgs
+  #  - daemonize
 
 #
 - name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
@@ -62,24 +63,30 @@
   async: 180
   poll: 5
   with_items:
-    - python39
-    - python39-pip
-    - python39-libs
-    - python39-devel
-  register: python39_installed
+    - python3
+    - python3-pip
+    - python3-libs
+    - python3-devel
+  register: python3_installed
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
-
+  # register: python39_installed
+  #  - python39
+  #  - python39-pip
+  #  - python39-libs
+  #  - python39-devel
+ 
 #
-- name: Alternative python3.9 version to python3
-  become: true
-  become_user: root
-  shell: |
-    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 3
-    alternatives --set python3 /usr/bin/python3.9
-    alternatives --set python /usr/bin/python3
-  register: python3_version_alternatives
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+#- name: Alternative python3.9 version to python3
+#  become: true
+#  become_user: root
+#  shell: |
+#    alternatives --set python3 /usr/bin/python3.9
+#    alternatives --set python /usr/bin/python3
+#  register: python3_version_alternatives
+#  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  #  update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 3
   # update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
+  # update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 3
 
 # - python-psycopg2
 # - etcd
@@ -107,18 +114,31 @@
     - install_dep_pkgs
 
 #
-- name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
-  yum:
-    name: "/home/jomoon/{{ item }}"
-    state: present
-    disable_gpg_check: yes
-  async: 60
-  poll: 5
-  register: etcd_rpm_packages_installed
-  with_items:
-    - "etcd-{{ etcd_version }}.{{ rhel_version }}.x86_64.rpm"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+#- name: Copy ETCD {{ etcd_version }} rpm package for RHEL or Rocky 8 to all nodes in workers group
+#  copy:
+#    src: "{{ item }}"
+#    dest: "/home/jomoon/{{ item }}"
+#    mode: 0644
+#    owner: jomoon
+#    group: jomoon
+#  register: etcd_rpm_package_copied
+#  with_items:
+#    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+
+#
+#- name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+#  become: true
+#  yum:
+#    name: "/home/jomoon/{{ item }}"
+#    state: present
+#    disable_gpg_check: yes
+#  async: 60
+#  poll: 5
+#  register: etcd_rpm_packages_installed
+#  with_items:
+#    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
+#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
 #
 - name: Install ETCD and Patroni prerequisites rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}

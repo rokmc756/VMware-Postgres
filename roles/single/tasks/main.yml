@@ -10,37 +10,36 @@
 
 #
 - name: Installation common package for single postgres
-  include: install-common.yml
+  import_tasks: install-common.yml
   tags: install
   when: inventory_hostname in groups['all']
 
 #
 - name: Installation single postgres
-  include: install-postgres.yml
+  import_tasks: install-postgres.yml
   tags: install
   when: inventory_hostname in groups['all']
 
 #
 - name: Enable SSL on sinlge postgres
-  include: enable-ssl.yml
+  import_tasks: enable-ssl.yml
   tags: install
   when: enable_ssl == true and inventory_hostname in groups['all']
 
 #
 - name: Check the status of sinlge postgres
-  include: check-status.yml
+  import_tasks: check-status.yml
   tags: install
   when: inventory_hostname in groups['all']
 
 #
 - name: Uninstallation of sinlge postgres for Red Hat / CentOS
-  include: uninstall.yml
+  import_tasks: uninstall.yml
   tags: uninstall
   when: inventory_hostname in groups['all']
 
 #
 - name: Upgrade of single postgres for Red Hat / CentOS
-  include: upgrade.yml
+  import_tasks: upgrade.yml
   tags: upgrade
   when: inventory_hostname in groups['all']
-

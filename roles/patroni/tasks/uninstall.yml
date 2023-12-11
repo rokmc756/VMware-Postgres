@@ -164,10 +164,10 @@
     - "python3-setuptools"
     - "python27-python-setuptools"
     - "yamllint"
-    - "daemonize"
     - "postgresql-devel"
   when: uninstall_dep_pkgs
   #  - python34-setuptools
+  #  - "daemonize"
 
 #
 - name: Unnstall Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
@@ -222,6 +222,8 @@
     - "/var/lib/pgsql/etcd_logfile"
     - "/var/lib/pgsql/.bash_profile"
     - "/etc/etcd/etcd.conf"
+    - "/usr/bin/etcd"
+    - "/usr/bin/etcdctl"
   when: remove_patroni_config
 
 #

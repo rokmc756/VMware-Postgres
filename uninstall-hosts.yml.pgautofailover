@@ -3,8 +3,7 @@
   become: yes
   vars:
     print_debug: true
-    install_dep_pkgs: true
     remove_dep_pkgs: true
   roles:
     - pgautofailover
-#    - init-hosts
+    - init-hosts

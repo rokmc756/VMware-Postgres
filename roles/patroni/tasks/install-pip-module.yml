@@ -1,5 +1,14 @@
 ---
 #
+- name: Change permission for /home/postgres directory
+  become: true
+  become_user: root
+  shell: (  chown -R postgres.postgres /home/postgres )
+  register: permission_changed
+  ignore_errors: yes
+  when: install_pip_module
+
+#
 - name: Install the python module of dependencies for ETCD on all nodes in workers group
   become: true
   become_user: postgres

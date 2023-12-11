@@ -86,7 +86,6 @@
 - name: Remove pgwatch2 rpm file
   become: true
   become_user: root
-  become: true
   file: path=/root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm state=absent
   ignore_errors: true
   register: pgwatch2_rpm_file_deleted

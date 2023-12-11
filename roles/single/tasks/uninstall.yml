@@ -34,10 +34,10 @@
   with_items:
     - python3-utils
     - python3-PyYAML
-    - daemonize
     - python3-pathspec
     - python3-rpm-generators
   when: uninstall_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  #  - daemonize
 
 #
 - name: Uninstall Python3 Packages

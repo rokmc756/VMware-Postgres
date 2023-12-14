@@ -1,5 +1,4 @@
 ---
-# Install Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
 #
 - name: Copy the VMware Postgres {{ major_version }} rpm package file to all nodes in workers
   copy:
@@ -22,23 +21,8 @@
     group: jomoon
   register: etcd_rpm_package_copied
   with_items:
-    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-
-#
-#- name: Build etcd of github.com
-#  become: true
-#  become_user: root
-#  shell: |
-#    cd /root; git clone https://github.com/coreos/etcd.git
-#    cd /root/etcd; git fetch
-#    cd /root/etcd; git checkout v3.4.28
-#    cd /root/etcd; ./build
-#    cp /root/etcd/bin/etcd /usr/bin/
-#    cp /root/etcd/bin/etcdctl /usr/bin/
-#  register: etcd_build
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+    - "etcd-{{ etcd_major_version }}.{{ etcd_minor_version }}.{{ etcd_build_version }}-{{ etcd_patch_version }}.{{ rhel_version }}.x86_64.rpm"
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
 #
 - name: Download and configure etcd binary
@@ -59,14 +43,6 @@
   with_items:
     - "{{ package_name }}-patroni-{{ patroni_version }}.{{ rhel_version }}.x86_64.rpm"
   when: with_patroni_pkg
-
-# - python-psycopg2
-# - etcd
-# - python34
-# - python34-libs
-# - python34-setuptools
-# - python36-PyYAML
-# - python36-pathspec
 
 #
 - name: Install VMware Postgres RPM Package on all hosts as root
@@ -106,8 +82,8 @@
   poll: 5
   register: etcd_rpm_packages_installed
   with_items:
-    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+    - "etcd-{{ etcd_major_version }}.{{ etcd_minor_version }}.{{ etcd_build_version }}-{{ etcd_patch_version }}.{{ rhel_version }}.x86_64.rpm"
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
 #
 - name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
@@ -122,7 +98,4 @@
   with_items:
     - python-psycopg2
     - etcd
-  when:
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
-    - install_dep_pkgs
-#
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 7

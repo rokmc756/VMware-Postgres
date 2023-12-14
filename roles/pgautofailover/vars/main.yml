@@ -2,12 +2,13 @@
 major_version: 15
 minor_version: 5
 patch_version: 1
-rhel_version: el9
-# package_name: "vmware-postgres"     # In case of version within 12
-# package_name: "pivotal-postgres"     # In case of version within 11
+rhel_version: el8
+# package_name: "vmware-postgres"      # For 12 version
+# package_name: "pivotal-postgres"     # For 11 version
 # bin_dir: "/usr/bin"
-package_name: "vmware-postgres{{ major_version }}"     # In case of version higher than 13
-bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin" # In case of version higher than 13
+
+package_name: "vmware-postgres{{ major_version }}"       # For higher versions than 13
+bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"  # For higher versions than 13
 database_name: testdb
 username: jomoon
 password: changeme
@@ -23,7 +24,6 @@ app_database: appdb
 monitor_database: monitor
 workers_database: ha
 
-#
 # enable_ssl_monitor: true
 pgsql_base_dir: "/var/lib/pgsql"
 pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"

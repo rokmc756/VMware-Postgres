@@ -15,11 +15,11 @@
   roles:
     - patroni
 
-#- hosts: all
-#  gather_facts: true
-#  become: yes
-#  roles:
-#    - init-hosts
+- hosts: all
+  gather_facts: true
+  become: yes
+  roles:
+    - init-hosts
 
 #- hosts: co7-master
 #  become: yes

@@ -13,8 +13,8 @@
     print_debug: true
     config_firewall: true
     install_dep_pkgs: true    # ok
-    install_pip_module: true   # ok
     install_pkgs: true
+    install_pip_module: true   # ok
     config_env: true
     enable_ssl: true
     config_patroni: true

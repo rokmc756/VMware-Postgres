@@ -2,7 +2,7 @@
 #
 - name: Install the 'Development tools' and perl package group and others for VMware Postgres Dependencies
   become: true
-  yum:
+  package:
     name: "{{ item }}"
     state: present
   async: 180
@@ -19,7 +19,7 @@
     - "rsync"
     - "postgresql-devel"
   register: vmware_postgres_depenecies_packages_installed
-  when: install_dep_pkgs
+  when: install_dep_pkgs == true
 #    - python-psycopg2
 #    - python27-python-psycopg2
 #    - python3-policycoreutils
@@ -31,7 +31,7 @@
 #
 - name: Install Patroni prerequisites rpm packages on all nodes in workers group for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
   become: true
-  yum:
+  package:
     name: "{{ item }}"
     state: present
     skip_broken: yes
@@ -41,40 +41,53 @@
     - python3
     - python3-libs
     - python3-devel
+    - python3-pip
     - python3-setuptools
     - python3-rpm-generators
     - python3-PyYAML
     - python3-pathspec
-    - python3-pip
     - python3-psycopg2
     - gcc
     - yamllint
   register: patroni_prereq_rpm_packages_installed
-  when: install_dep_pkgs
+  when: install_dep_pkgs == true
   #  - daemonize
 
+
 #
-- name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+- name: Install Python 2.7 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
   become: true
-  yum:
+  package:
     name: "{{ item }}"
     state: present
     skip_broken: yes
   async: 180
   poll: 5
   with_items:
-    - python3
-    - python3-pip
-    - python3-libs
-    - python3-devel
+    - python2
+    - python2-pip
+    - python2-libs
+    - python2-devel
+  register: python2_installed
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+
+#
+- name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  with_items:
+    - python39
+    - python39-pip
+    - python39-libs
+    - python39-devel
   register: python3_installed
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
-  # register: python39_installed
-  #  - python39
-  #  - python39-pip
-  #  - python39-libs
-  #  - python39-devel
- 
+
 #
 #- name: Alternative python3.9 version to python3
 #  become: true
@@ -99,7 +112,7 @@
 #
 - name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
   become: true
-  yum:
+  package:
     name: "{{ item }}"
     state: present
     skip_broken: yes
@@ -111,53 +124,4 @@
     - etcd
   when:
     - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
-    - install_dep_pkgs
-
-#
-#- name: Copy ETCD {{ etcd_version }} rpm package for RHEL or Rocky 8 to all nodes in workers group
-#  copy:
-#    src: "{{ item }}"
-#    dest: "/home/jomoon/{{ item }}"
-#    mode: 0644
-#    owner: jomoon
-#    group: jomoon
-#  register: etcd_rpm_package_copied
-#  with_items:
-#    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
-
-#
-#- name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-#  become: true
-#  yum:
-#    name: "/home/jomoon/{{ item }}"
-#    state: present
-#    disable_gpg_check: yes
-#  async: 60
-#  poll: 5
-#  register: etcd_rpm_packages_installed
-#  with_items:
-#    - "etcd-{{ etcd_version }}.{{ etcd_rhel_version }}.x86_64.rpm"
-#  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
-
-#
-- name: Install ETCD and Patroni prerequisites rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: present
-    skip_broken: yes
-  async: 180
-  poll: 5
-  with_items:
-    - python3-pip
-  register: etcd_patroni_prereq_rpm_packages_installed
-  when:
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
-    - install_dep_pkgs
-#    - python39-pip
-# - python34
-# - python34-libs
-# - python34-setuptools
-# - python36-PyYAML
-# - python36-pathspec
+    - install_dep_pkgs == true

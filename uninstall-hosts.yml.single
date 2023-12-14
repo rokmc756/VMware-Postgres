@@ -11,6 +11,5 @@
   roles:
     - { role: single }
     - { role: init-hosts }
-
 #    - { role: grafana }
 #    - { role: pgwatch2 }

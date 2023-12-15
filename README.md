@@ -236,6 +236,7 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 ## For PGAutoFailover Cluster
+#### The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgautofailover/images/pgautofailover_architecture.svg)
 #### Configure inventory for PGAutoFailover Cluster
 ~~~

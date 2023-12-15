@@ -1,28 +1,37 @@
 ### What is vmware-postgres ansible playbook?
+~~~
 It is ansible playbook to deploy VMware Postgres conveniently on Baremetal, Virtual Machines and Cloud Infrastructure.
 It provide also pgwatch2 and grafana for monitoring features as well as SSL connection automatically when deploying it.
 The main purpose of this project is actually very simple. Because there are many jobs to install different kind of VMware Postgres versions and reproduce issues & test features as a support
 engineer. I just want to spend less time for it.
 
 If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also use it very utilize with saving time.
+~~~
 
 ### Where is this ansible playbook from and how is it changed?
+~~~
 It's originated by Jack Moon
+~~~
 
 
 ### Supported VMware Postgres versions
+~~~
 Pivotal Postgres 10.x, 11.x
 VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
+~~~
 
 ### Supported Platform and OS
+~~~
 Virtual Machines
 Baremetal
-
 RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
+~~~
 
 ### Prerequisite
+~~~
 MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
 Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
+~~~
 
 ### Prepare ansible host to run gpfarmer
 * MacOS

@@ -135,7 +135,6 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 ## For Patroni Cluster
-#### The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/patroni/images/patroni_architecture.jpeg)
 #### Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni

@@ -1,4 +1,4 @@
-### What is vmware-postgres ansible playbook?
+## What is vmware-postgres ansible playbook?
 ~~~
 It is ansible playbook to deploy VMware Postgres conveniently on Baremetal, Virtual Machines and Cloud Infrastructure.
 It provide also pgwatch2 and grafana for monitoring features as well as SSL connection automatically when deploying it.
@@ -7,27 +7,27 @@ engineer. I just want to spend less time for it.
 
 If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also use it very utilize with saving time.
 ~~~
-### Where is this ansible playbook from and how is it changed?
+## Where is this ansible playbook from and how is it changed?
 ~~~
 It's originated by Jack Moon
 ~~~
-### Supported VMware Postgres versions
+## Supported VMware Postgres versions
 ~~~
 Pivotal Postgres 10.x, 11.x
 VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
 ~~~
-### Supported Platform and OS
+## Supported Platform and OS
 ~~~
 Virtual Machines
 Baremetal
 RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
 ~~~
-### Prerequisite
+## Prerequisite
 ~~~
 MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
 Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
 ~~~
-### Prepare ansible host to run gpfarmer
+## Prepare ansible host to run gpfarmer
 * MacOS
 ~~~
 $ xcode-select --install
@@ -38,9 +38,9 @@ $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Libr
 ~~~
 $ sudo yum install ansible
 ~~~
-### Prepareing OS
+## Prepareing OS
 * Configure Yum / Local & EPEL Repostiory
-### Download / configure / run VMware Postgres
+## Download / configure / run VMware Postgres
 ~~~
 $ git clone https://github.com/rokmc756/vmware-postgres
 $ cd vmware-postgres
@@ -50,7 +50,7 @@ ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in 
 ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo user in managed nodes that vmware-postgres would be installed.
 ~~ snip
 ~~~
-### For Single VMware Postgres
+## For Single VMware Postgres
 #### Configure inventory for Single VMware Postgres
 ~~~
 $ vi ansible-hosts-rh9-single
@@ -134,7 +134,7 @@ $ vi uninstall-hosts.yml
 
 $ make uninstall
 ~~~
-### For Patroni Cluster
+## For Patroni Cluster
 #### Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
 ~~~
@@ -234,7 +234,7 @@ $ vi uninstall-hosts.yml
 
 $ make uninstall
 ~~~
-### For PGAutoFailover Cluster
+## For PGAutoFailover Cluster
 #### Configure inventory for PGAutoFailover Cluster
 ~~~
 $ vi ansible-hosts
@@ -286,7 +286,7 @@ $ vi uninstall-hosts
 
 $ make uninstall
 ~~~
-### Planning
+## Planning
 * Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
 * Add additional extensions inlcuded in vmware-postgres zip file
 * Add falut talerence feature with Keepalived for PGAutofailover and Patroni Cluster

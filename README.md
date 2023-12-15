@@ -52,7 +52,7 @@ ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in 
 ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo user in managed nodes that vmware-postgres would be installed.
 ~~ snip
 ~~~
-### [ For Single VMware Postgres ]
+### For Single VMware Postgres
 #### Configure inventory for Single VMware Postgres
 ~~~
 $ vi ansible-hosts-rh9-single
@@ -136,7 +136,7 @@ $ vi uninstall-hosts.yml
 
 $ make uninstall
 ~~~
-### [ For Patroni Cluster ]
+### For Patroni Cluster
 #### Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
 ~~~

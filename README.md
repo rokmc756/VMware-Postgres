@@ -7,32 +7,26 @@ engineer. I just want to spend less time for it.
 
 If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also use it very utilize with saving time.
 ~~~
-
 ### Where is this ansible playbook from and how is it changed?
 ~~~
 It's originated by Jack Moon
 ~~~
-
-
 ### Supported VMware Postgres versions
 ~~~
 Pivotal Postgres 10.x, 11.x
 VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
 ~~~
-
 ### Supported Platform and OS
 ~~~
 Virtual Machines
 Baremetal
 RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
 ~~~
-
 ### Prerequisite
 ~~~
 MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
 Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
 ~~~
-
 ### Prepare ansible host to run gpfarmer
 * MacOS
 ~~~
@@ -40,15 +34,12 @@ $ xcode-select --install
 $ brew install ansible
 $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
 ~~~
-
 * Fedora/CentOS/RHEL
 ~~~
 $ sudo yum install ansible
 ~~~
-
 ### Prepareing OS
 * Configure Yum / Local & EPEL Repostiory
-
 ### Download / configure / run gpfarmer
 ~~~
 $ git clone https://github.com/rokmc756/vmware-postgres
@@ -61,7 +52,6 @@ ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in 
 ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo user in managed nodes that vmware-postgres would be installed.
 ~~ snip
 ~~~
-
 ### [ For Single VMware Postgres ]
 #### Configure inventory for Single VMware Postgres
 ~~~
@@ -82,7 +72,6 @@ rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
 ~~~
-
 #### Configure variables for Single VMware Postgres
 ~~~
 $ vi roles/single/vars/main.yml
@@ -104,7 +93,6 @@ sslmode: prefer
 app_database: testdb
 ~~ snip
 ~~~
-
 #### Deploy Single VMware Postgres
 ~~~
 $ vi install-hosts.yml
@@ -127,7 +115,6 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-
 #### Destroy Single VMware-Postgres
 ~~~
 $ vi uninstall-hosts.yml
@@ -149,7 +136,6 @@ $ vi uninstall-hosts.yml
 
 $ make uninstall
 ~~~
-
 ### [ For Patroni Cluster ]
 #### Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
@@ -192,7 +178,6 @@ etcd_patch_version: 2
 download_etcd_bin: false
 ~~ snip
 ~~~
-
 #### Deploy Patroni Cluster
 ~~~
 $ vi install-hosts.yml
@@ -222,7 +207,6 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-
 #### Destroy Patroni Cluster
 ~~~
 $ vi uninstall-hosts.yml
@@ -252,8 +236,7 @@ $ vi uninstall-hosts.yml
 
 $ make uninstall
 ~~~
-
-### [ For PGAutoFailover Cluster ]
+### For PGAutoFailover Cluster
 #### Configure inventory for PGAutoFailover Cluster
 ~~~
 $ vi ansible-hosts
@@ -273,7 +256,6 @@ rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
 ~~~
-
 #### Deploy PGAutoFailover Cluster
 ~~~
 $ vi install-hosts.yml
@@ -291,7 +273,6 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-
 #### Destroy PGAutoFailover Cluster
 ~~~
 $ vi uninstall-hosts
@@ -307,9 +288,8 @@ $ vi uninstall-hosts
 
 $ make uninstall
 ~~~
-
 ### Planning
-Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
-Add additional extensions inlcuded in vmware-postgres zip file
-Add falut talerence feature with Keepalived for PGAutofailover and Patroni Cluster
-Add load balance feature with HAProxy for PGAutofailover and Patroni Cluster
+* Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
+* Add additional extensions inlcuded in vmware-postgres zip file
+* Add falut talerence feature with Keepalived for PGAutofailover and Patroni Cluster
+* Add load balance feature with HAProxy for PGAutofailover and Patroni Cluster

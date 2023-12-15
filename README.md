@@ -5,11 +5,11 @@ It provide also pgwatch2 and grafana for monitoring features as well as SSL conn
 The main purpose of this project is actually very simple. Because there are many jobs to install different kind of VMware Postgres versions and reproduce issues & test features as a support
 engineer. I just want to spend less time for it.
 
-If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also use it very utilize with saving time.
+If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also utilize it very conviently as saving time.
 ~~~
 ## Where is this ansible playbook from and how is it changed?
 ~~~
-It's originated by Jack Moon
+It's originated by itself.
 ~~~
 ## Supported VMware Postgres versions
 ~~~

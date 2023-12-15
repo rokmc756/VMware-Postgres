@@ -15,11 +15,13 @@
   roles:
     - patroni
 
+#
 - hosts: all
   gather_facts: true
   become: yes
   roles:
     - init-hosts
+
 
 #- hosts: co7-master
 #  become: yes
@@ -28,7 +30,7 @@
 #  roles:
 #    - { role: haproxy }
 #    - { role: keepalived, keepalived_shared_ip: "192.168.56.89", keepalived_role: "master" }
-#
+
 #- hosts: co7-slave
 #  become: yes
 #  become_user: root
@@ -36,3 +38,4 @@
 #  roles:
 #    - { role: haproxy }
 #    - { role: keepalived, keepalived_shared_ip: "192.168.0.89", keepalived_role: "slave" }
+

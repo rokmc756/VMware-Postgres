@@ -55,7 +55,7 @@
     - python3-PyYAML
     - python3-pathspec
     - python3-rpm-generators
-  when: remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
   #  - daemonize
 
 #
@@ -75,7 +75,7 @@
     - yamllint
     - gcc
     - epel-release
-  when: remove_dep_pkgs
+  when: remove_dep_pkgs == true and remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
   #  - python3-libs
 
 #

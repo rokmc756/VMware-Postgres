@@ -184,7 +184,25 @@
     - python39-libs
     - python39-devel
   register: python39_installed
-  when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#
+- name: Unnstall Python 3.11 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: absent
+    skip_broken: yes
+  async: 180
+  poll: 5
+  with_items:
+    - python3.11
+    - python3.11-pip
+    - python3.11-libs
+    - python3.11-devel
+  register: python311_installed
+  when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
+
 
 #
 - name: Delete the dependencies file of etcd

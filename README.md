@@ -1,87 +1,264 @@
-## What is PostgreSQL Cluster
-postgres-cluster provide ansible playbook to deploy three kind of clusters such as gpfailover, patroni cluster, mutlti master replication ( bdr ).
+# What is vmware-postgres ansible playbook?
+It is ansible playbook to deploy VMware Postgres conveniently on Baremetal, Virtual Machines and Cloud Infrastructure.
+It provide also pgwatch2 and grafana for monitoring features as well as SSL connection automatically when deploying it.
+The main purpose of this project is actually very simple. Because there are many jobs to install different kind of VMware Postgres versions and reproduce issues & test features as a support
+engineer. I just want to spend less time for it.
 
-## patroni cluster
-https://github.com/rokmc756/postgres-cluster/tree/main/roles/vmware-patroni
+If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also use it very utilize with saving time.
 
-## pg_auto_failover cluster
-https://github.com/rokmc756/postgres-cluster/tree/main/roles/vmware-pgautofailover
-
-## Reference links
-https://www.techsupportpk.com/2020/02/how-to-create-highly-available-postgresql-cluster-using-patroni-haproxy-centos-rhel-7.html
-
+# Where is this ansible playbook from and how is it changed?
+It's originated by Jack Moon
 
 
-## Error with sync mode
+# Supported VMware Postgres versions
+Pivotal Postgres 10.x, 11.x
+VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
+
+# Supported Platform and OS
+Virtual Machines
+Baremetal
+
+RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
+
+# Prerequisite
+MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
+Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
+
+# Prepare ansible host to run gpfarmer
+* MacOS
 ~~~
-  File "/usr/lib/python3.6/site-packages/patroni/ha.py", line 1277, in _run_cycle
-    return self.post_bootstrap()
-  File "/usr/lib/python3.6/site-packages/patroni/ha.py", line 1173, in post_bootstrap
-    self.cancel_initialization()
-  File "/usr/lib/python3.6/site-packages/patroni/ha.py", line 1168, in cancel_initialization
-    raise PatroniException('Failed to bootstrap cluster')
-patroni.exceptions.PatroniException: 'Failed to bootstrap cluster'
-~~~
-
-## Replication modes
-~~~
-https://patroni.readthedocs.io/en/latest/replication_modes.html
-~~~
-
-## Replica imaging and bootstrap
-~~~
-https://patroni.readthedocs.io/en/latest/replica_bootstrap.html
-~~~
-
-## Enable SSL on pgautofailover
-~~~
-[postgres@rk8-master certs]$ /opt/vmware/postgres/15/bin/pg_autoctl enable ssl --pgdata /var/lib/pgsql/monitor/ --ssl-ca-file ./ca.key --ssl-crl-file ./ca.srl --server-key ./server.key --server-cert ./server.crt
-21:11:57 54855 INFO  Using default --ssl-mode "verify-full"
-21:11:57 54855 WARN  HBA rules in "/var/lib/pgsql/monitor/pg_hba.conf" have NOT been edited: "host"  records match either SSL or non-SSL connection attempts.
-21:11:57 54855 INFO  Successfully enabled new SSL configuration:
-21:11:57 54855 INFO    SSL is now active
-21:11:57 54855 INFO    pg_autoctl service has been signaled to reload its configuration
-
-moonjaYMD6T:vmware-postgres moonja$ psql -h rk8-master -U postgres
-psql (14.7 (Homebrew), server 15.3 (VMware Postgres 15.3.0))
-WARNING: psql major version 14, server major version 15.
-         Some psql features might not work.
-SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
-Type "help" for help.
-
-postgres=# exit
-
-
-# Disable SSL
-[postgres@rk8-master certs]$ /opt/vmware/postgres/15/bin/pg_autoctl disable ssl --pgdata /var/lib/pgsql/monitor
-21:19:44 60906 WARN  No encryption is used for network traffic! This allows an attacker on the network to read all replication data.
-21:19:44 60906 WARN  Using --ssl-self-signed instead of --no-ssl is recommend to achieve more security with the same ease of deployment.
-21:19:44 60906 WARN  See https://www.postgresql.org/docs/current/libpq-ssl.html for details on how to improve
-21:19:44 60906 INFO  Using default --ssl-mode "prefer"
-21:19:44 60906 WARN  HBA rules in "/var/lib/pgsql/monitor/pg_hba.conf" have NOT been edited: "host"  records match either SSL or non-SSL connection attempts.
-21:19:44 60906 INFO  Successfully enabled new SSL configuration:
-21:19:44 60906 INFO    SSL is now disabled
-21:19:44 60906 INFO    pg_autoctl service has been signaled to reload its configuration
-
-moonjaYMD6T:vmware-postgres moonja$ psql -h rk8-master -U postgres
-psql (14.7 (Homebrew), server 15.3 (VMware Postgres 15.3.0))
-WARNING: psql major version 14, server major version 15.
-         Some psql features might not work.
-Type "help" for help.
-
+$ xcode-select --install
+$ brew install ansible
+$ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
 ~~~
 
-# SSL configure in patroni
-https://docs.microfocus.com/doc/Operations_Orchestration/2023.05/HardeningPatroniCluster
-https://access.crunchydata.com/documentation/patroni/2.0.1/environment/
-https://patroni.readthedocs.io/en/master/ENVIRONMENT.html
+* Fedora/CentOS/RHEL
+~~~
+$ sudo yum install ansible
+~~~
 
-# patroni cluster
-https://docs.microfocus.com/doc/SMAX/23.4/HASQLPatroni
-https://www.dbi-services.com/blog/how-to-setup-a-consul-cluster-on-rhel-8-rocky-linux-8-almalinux-8-part-2/
+## Prepareing OS
+Configure Yum / Local & EPEL Repostiory
 
-# For extra rpms
-# sudo dnf install --nogpgcheck https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm
+# Download / configure / run gpfarmer
+$ git clone https://github.com/rokmc756/vmware-postgres
 
-# Intall etcd binary
-# https://computingforgeeks.com/how-to-install-etcd-on-rhel-centos-rocky-almalinux/
+$ cd vmware-postgres
+
+$ vi Makefile
+~~~
+ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in ansible host that vmware-postgres would be run.
+ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo user in managed nodes that vmware-postgres would be installed.
+~~~
+
+# For single VMware-Postgres
+$ vi ansible-hosts-rh9-single
+~~~
+[all:vars]
+ssh_key_filename="id_rsa"
+remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
+remote_machine_password="changeme"            # Replace with password of sudo user
+
+[monitors]
+rh9-master ansible_ssh_host=192.168.0.191
+
+[slave]
+rh9-slave  ansible_ssh_host=192.168.0.192
+
+[workers]
+rh9-node01 ansible_ssh_host=192.168.0.193
+rh9-node02 ansible_ssh_host=192.168.0.194
+rh9-node03 ansible_ssh_host=192.168.0.195
+~~~
+
+# Install single VMware-Postgres
+~~~
+$ vi roles/single/vars/main.yml
+major_version: 15
+minor_version: 5
+patch_version: 1
+rhel_version: el9
+# package_name: "vmware-postgres"     # In case of version within 12
+# package_name: "pivotal-postgres"     # In case of version within 11
+# bin_dir: "/usr/bin"
+package_name: "vmware-postgres{{ major_version }}"     # In case of version higher than 13
+bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin" # In case of version higher than 13
+database_name: testdb
+username: jomoon
+password: changeme
+user: postgres
+group: postgres
+sslmode: prefer
+app_database: testdb
+~~ snip
+
+$ vi install-hosts.yml
+---
+- hosts: all
+  become: yes
+  vars:
+    print_debug: true
+    install_pkgs: true
+    install_dep_pkgs: true
+    install_go: true
+    install_prometheus: true
+    install_grafana: true
+    install_pgwatch2: true
+  roles:
+    - { role: init-hosts }
+    - { role: single }
+#    - { role: grafana }
+#    - { role: pgwatch2 }
+
+$ make install
+~~~
+
+# Uninstall single VMware-Postgres
+~~~
+$ vi uninstall-hosts.yml
+- hosts: all
+  become: yes
+  vars:
+    print_debug: true
+    uninstall_pkgs: true
+    uninstall_dep_pkgs: true
+    uninstall_go: true
+    uninstall_prometheus: true
+    uninstall_grafana: true
+    uninstall_pgwatch2: true
+  roles:
+    - { role: single }
+    - { role: init-hosts }
+#    - { role: grafana }
+#    - { role: pgwatch2 }
+
+$ make uninstall
+~~~
+
+
+# For patroni cluster with VMware-Postgres
+$ vi ansible-hosts-rh9-patroni
+~~~
+[all:vars]
+ssh_key_filename="id_rsa"
+remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
+remote_machine_password="changeme"            # Replace with password of sudo user
+
+[master]
+rh9-master ansible_ssh_host=192.168.0.191
+
+[slave]
+rh9-slave  ansible_ssh_host=192.168.0.192
+
+[workers]
+rh9-node01 ansible_ssh_host=192.168.0.193
+rh9-node02 ansible_ssh_host=192.168.0.194
+rh9-node03 ansible_ssh_host=192.168.0.195
+~~~
+
+# Configure ansible playbook for patroni cluster of VMware Postgres
+~~~
+$ vi roles/patroni/vars/main.yml
+major_version: 15
+minor_version: 5
+build_version: 1
+patch_version: 1
+rhel_version: el9
+patroni_version: "3.2.0-1"
+
+# etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
+etcd_major_version: 3
+etcd_minor_version: 3
+etcd_build_version: 27
+etcd_patch_version: 2
+
+# etcd_minor_version: 3
+# etcd_patch_version: 1
+download_etcd_bin: false
+~~ snip
+
+$ vi install-hosts.ym
+---
+- hosts: all
+  gather_facts: true
+  become: yes
+  roles:
+    - init-hosts
+
+#
+- hosts: workers
+  gather_facts: true
+  become: yes
+  vars:
+    print_debug: true
+    config_firewall: true
+    install_dep_pkgs: true    # ok
+    install_pkgs: true
+    install_pip_module: true   # ok
+    config_env: true
+    enable_ssl: true
+    config_patroni: true
+    add_users: true
+  roles:
+    - patroni
+
+$ make install
+
+$ vi uninstall-hosts.yml
+---
+- hosts: workers
+  gather_facts: true
+  become: yes
+  vars:
+    print_debug: true
+    remove_users: true
+    disable_ssl: true
+    remove_patroni_config: true
+    remove_env_config: true
+    uninstall_pkgs: true
+    uninstall_pip_module: true
+    uninstall_dep_pkgs: true
+    remove_firewall_config: true
+  roles:
+    - patroni
+
+$ make uninstall
+~~~
+
+
+# 
+~~~
+$ vi uninstall-hosts.yml
+---
+- hosts: workers
+  gather_facts: true
+  become: yes
+  vars:
+    print_debug: true
+    remove_users: true
+    disable_ssl: true
+    remove_patroni_config: true
+    remove_env_config: true
+    uninstall_pkgs: true
+    uninstall_pip_module: true
+    uninstall_dep_pkgs: true
+    remove_firewall_config: true
+  roles:
+    - patroni
+
+#
+- hosts: all
+  gather_facts: true
+  become: yes
+  roles:
+    - init-hosts
+
+$ make uninstall
+~~~
+
+# Planning
+Converting Makefile.init from original project.
+Adding GPCR role
+Adding SELinux role
+Adding tuned role
+Adding gpupgrade

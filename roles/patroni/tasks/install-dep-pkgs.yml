@@ -53,7 +53,6 @@
   when: install_dep_pkgs == true
   #  - daemonize
 
-
 #
 - name: Install Python 2.7 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
   become: true
@@ -69,7 +68,7 @@
     - python2-libs
     - python2-devel
   register: python2_installed
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
 #
 - name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
@@ -86,7 +85,24 @@
     - python39-libs
     - python39-devel
   register: python3_installed
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#
+- name: Install Python 3.11 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  with_items:
+    - python3.11
+    - python3.11-pip
+    - python3.11-libs
+    - python3.11-devel
+  register: python311_installed
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 
 #
 #- name: Alternative python3.9 version to python3

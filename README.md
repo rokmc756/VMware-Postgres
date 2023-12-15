@@ -53,7 +53,7 @@ ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo use
 ~~ snip
 ~~~
 
-### For Single VMware Postgres
+### [ For Single VMware Postgres ]
 #### Configure inventory for Single VMware Postgres
 ~~~
 $ vi ansible-hosts-rh9-single
@@ -141,7 +141,7 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 
-### For Patroni Cluster
+### [ For Patroni Cluster ]
 #### Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
 ~~~
@@ -244,7 +244,7 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 
-### For PGAutoFailover Cluster
+### [ For PGAutoFailover Cluster ]
 #### Configure inventory for PGAutoFailover Cluster
 ~~~
 $ vi ansible-hosts

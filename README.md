@@ -52,7 +52,7 @@ ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo use
 ~~~
 ## For Single VMware Postgres
 #### The Architecure of Single VMware Postgres with pgwatch2 and grafana
-![alt text](hhttps://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
+![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
 #### Configure inventory for Single VMware Postgres
 ~~~
 $ vi ansible-hosts-rh9-single

@@ -25,7 +25,6 @@ $ xcode-select --install
 $ brew install ansible
 $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
 ```
-~~~
 * Fedora/CentOS/RHEL
 ```
 $ sudo yum install ansible

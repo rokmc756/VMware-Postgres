@@ -1,47 +1,41 @@
 ## What is vmware-postgres ansible playbook?
-~~~
 It is ansible playbook to deploy VMware Postgres conveniently on Baremetal, Virtual Machines and Cloud Infrastructure.
 It provide also pgwatch2 and grafana for monitoring features as well as SSL connection automatically when deploying it.
 The main purpose of this project is actually very simple. Because there are many jobs to install different kind of VMware Postgres versions and reproduce issues & test features as a support
 engineer. I just want to spend less time for it.
 
 If you are working with VMware Postgrs such as Developer, Administrator, Field Engineer or Database Administrator you could also utilize it very conviently as saving time.
-~~~
 ## Where is this ansible playbook from and how is it changed?
-~~~
+
 It's originated by itself.
-~~~
 ## Supported VMware Postgres versions
-~~~
-Pivotal Postgres 10.x, 11.x
-VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
-~~~
+* Pivotal Postgres 10.x, 11.x
+* VMware Postgres 10.x, 11.x, 12.x, 13,x, 14.x, 15.x
 ## Supported Platform and OS
-~~~
-Virtual Machines
-Baremetal
-RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
-~~~
+* Virtual Machines
+* Baremetal
+* RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
 ## Prerequisite
-~~~
-MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
-Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
-~~~
+* acOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
+* Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
 ## Prepare ansible host to run vmware-postgres ansible playbook
 * MacOS
-~~~
+```
 $ xcode-select --install
 $ brew install ansible
 $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
+```
 ~~~
 * Fedora/CentOS/RHEL
 ~~~
+```
 $ sudo yum install ansible
+```
 ~~~
 ## Prepareing OS
 * Configure Yum / Local & EPEL Repostiory
 ## Download / configure / run VMware Postgres
-~~~
+```
 $ git clone https://github.com/rokmc756/vmware-postgres
 $ cd vmware-postgres
 $ vi Makefile
@@ -49,12 +43,12 @@ $ vi Makefile
 ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in ansible host that vmware-postgres would be run.
 ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo user in managed nodes that vmware-postgres would be installed.
 ~~ snip
-~~~
+```
 ## For Single VMware Postgres
 #### 1) The Architecure of Single VMware Postgres with pgwatch2 and grafana
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
 #### 2) Configure inventory for Single VMware Postgres
-~~~
+```
 $ vi ansible-hosts-rh9-single
 [all:vars]
 ssh_key_filename="id_rsa"
@@ -71,9 +65,9 @@ rh9-slave  ansible_ssh_host=192.168.0.192
 rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
-~~~
+```
 #### 3) Configure variables for Single VMware Postgres
-~~~
+```
 $ vi roles/single/vars/main.yml
 major_version: 15
 minor_version: 5
@@ -92,9 +86,9 @@ group: postgres
 sslmode: prefer
 app_database: testdb
 ~~ snip
-~~~
+```
 #### 4) Deploy Single VMware Postgres
-~~~
+```
 $ vi install-hosts.yml
 ---
 - hosts: all
@@ -114,9 +108,9 @@ $ vi install-hosts.yml
 #    - { role: pgwatch2 }
 
 $ make install
-~~~
+```
 #### 5) Destroy Single VMware-Postgres
-~~~
+```
 $ vi uninstall-hosts.yml
 - hosts: all
   become: yes
@@ -135,13 +129,13 @@ $ vi uninstall-hosts.yml
 #    - { role: pgwatch2 }
 
 $ make uninstall
-~~~
+```
 ## For Patroni Cluster
 #### 1) The Architecture of Patroni Cluster
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/patroni/images/patroni_architecture.jpeg)
 #### 2) Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
-~~~
+```
 [all:vars]
 ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
@@ -157,10 +151,10 @@ rh9-slave  ansible_ssh_host=192.168.0.192
 rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
-~~~
+```
 
 #### 3) Configure variables for Patroni Cluster
-~~~
+```
 $ vi roles/patroni/vars/main.yml
 major_version: 15
 minor_version: 5
@@ -179,9 +173,9 @@ etcd_patch_version: 2
 # etcd_patch_version: 1
 download_etcd_bin: false
 ~~ snip
-~~~
+```
 #### 4) Deploy Patroni Cluster
-~~~
+```
 $ vi install-hosts.yml
 ---
 - hosts: all
@@ -208,9 +202,9 @@ $ vi install-hosts.yml
     - patroni
 
 $ make install
-~~~
+```
 #### 5) Destroy Patroni Cluster
-~~~
+```
 $ vi uninstall-hosts.yml
 ---
 - hosts: workers
@@ -237,12 +231,12 @@ $ vi uninstall-hosts.yml
     - init-hosts
 
 $ make uninstall
-~~~
+```
 ## For PGAutoFailover Cluster
 #### 1) The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgautofailover/images/pgautofailover_architecture.svg)
 #### 2) Configure inventory for PGAutoFailover Cluster
-~~~
+```
 $ vi ansible-hosts
 [all:vars]
 ssh_key_filename="id_rsa"
@@ -259,9 +253,9 @@ rh9-slave  ansible_ssh_host=192.168.0.192
 rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
-~~~
+```
 #### 3) Deploy PGAutoFailover Cluster
-~~~
+```
 $ vi install-hosts.yml
 ---
 - hosts: all
@@ -276,9 +270,9 @@ $ vi install-hosts.yml
     - pgautofailover
 
 $ make install
-~~~
+```
 #### 4) Destroy PGAutoFailover Cluster
-~~~
+```
 $ vi uninstall-hosts
 ---
 - hosts: all
@@ -291,7 +285,7 @@ $ vi uninstall-hosts
     - init-hosts
 
 $ make uninstall
-~~~
+```
 ## Planning
 * Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
 * Add additional extensions inlcuded in vmware-postgres zip file

@@ -51,9 +51,9 @@ ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo use
 ~~ snip
 ~~~
 ## For Single VMware Postgres
-#### The Architecure of Single VMware Postgres with pgwatch2 and grafana
+#### 1) The Architecure of Single VMware Postgres with pgwatch2 and grafana
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
-#### Configure inventory for Single VMware Postgres
+#### 2) Configure inventory for Single VMware Postgres
 ~~~
 $ vi ansible-hosts-rh9-single
 [all:vars]
@@ -72,7 +72,7 @@ rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
 ~~~
-#### Configure variables for Single VMware Postgres
+#### 3) Configure variables for Single VMware Postgres
 ~~~
 $ vi roles/single/vars/main.yml
 major_version: 15
@@ -93,7 +93,7 @@ sslmode: prefer
 app_database: testdb
 ~~ snip
 ~~~
-#### Deploy Single VMware Postgres
+#### 4) Deploy Single VMware Postgres
 ~~~
 $ vi install-hosts.yml
 ---
@@ -115,7 +115,7 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-#### Destroy Single VMware-Postgres
+#### 5) Destroy Single VMware-Postgres
 ~~~
 $ vi uninstall-hosts.yml
 - hosts: all
@@ -137,8 +137,9 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 ## For Patroni Cluster
+#### 1) The Architecture of Patroni Cluster
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/patroni/images/patroni_architecture.jpeg)
-#### Configure inventory for Patroni Cluster
+#### 2) Configure inventory for Patroni Cluster
 $ vi ansible-hosts-rh9-patroni
 ~~~
 [all:vars]
@@ -158,7 +159,7 @@ rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
 ~~~
 
-#### Configure variables for Patroni Cluster
+#### 3) Configure variables for Patroni Cluster
 ~~~
 $ vi roles/patroni/vars/main.yml
 major_version: 15
@@ -179,7 +180,7 @@ etcd_patch_version: 2
 download_etcd_bin: false
 ~~ snip
 ~~~
-#### Deploy Patroni Cluster
+#### 4) Deploy Patroni Cluster
 ~~~
 $ vi install-hosts.yml
 ---
@@ -208,7 +209,7 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-#### Destroy Patroni Cluster
+#### 5) Destroy Patroni Cluster
 ~~~
 $ vi uninstall-hosts.yml
 ---
@@ -238,9 +239,9 @@ $ vi uninstall-hosts.yml
 $ make uninstall
 ~~~
 ## For PGAutoFailover Cluster
-#### The Architecture
+#### 1) The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgautofailover/images/pgautofailover_architecture.svg)
-#### Configure inventory for PGAutoFailover Cluster
+#### 2) Configure inventory for PGAutoFailover Cluster
 ~~~
 $ vi ansible-hosts
 [all:vars]
@@ -259,7 +260,7 @@ rh9-node01 ansible_ssh_host=192.168.0.193
 rh9-node02 ansible_ssh_host=192.168.0.194
 rh9-node03 ansible_ssh_host=192.168.0.195
 ~~~
-#### Deploy PGAutoFailover Cluster
+#### 3) Deploy PGAutoFailover Cluster
 ~~~
 $ vi install-hosts.yml
 ---
@@ -276,7 +277,7 @@ $ vi install-hosts.yml
 
 $ make install
 ~~~
-#### Destroy PGAutoFailover Cluster
+#### 4) Destroy PGAutoFailover Cluster
 ~~~
 $ vi uninstall-hosts
 ---

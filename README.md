@@ -27,11 +27,9 @@ $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Libr
 ```
 ~~~
 * Fedora/CentOS/RHEL
-~~~
 ```
 $ sudo yum install ansible
 ```
-~~~
 ## Prepareing OS
 * Configure Yum / Local & EPEL Repostiory
 ## Download / configure / run VMware Postgres
@@ -90,7 +88,6 @@ app_database: testdb
 #### 4) Deploy Single VMware Postgres
 ```
 $ vi install-hosts.yml
----
 - hosts: all
   become: yes
   vars:

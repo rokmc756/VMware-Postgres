@@ -74,6 +74,8 @@
 - name: Grant user access from network 192.168.0.0/24 access for access with cert authentication.
   become: true
   become_user: postgres
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
   postgresql_pg_hba:
     dest: /var/lib/pgsql/data/pg_hba.conf
     contype: host

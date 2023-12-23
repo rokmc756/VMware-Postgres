@@ -126,6 +126,15 @@
   when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
   #  - daemonize
 
+#
+- name: Install ipaddress pip3 module
+  become: true
+  become_user: root
+  shell: ( pip3 install ipaddress )
+  register: pip3_ipaddress_installed
+  when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+
+
 # when: install_dep_packages and rhel_version == "rhel8"
 #    - python-psycopg2
 #    - python34-setuptools

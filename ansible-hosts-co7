@@ -2,6 +2,7 @@
 ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"
 remote_machine_password="changeme"
+interpreter_python="/usr/bin/python3"
 
 # For patroni cluster
 [master]

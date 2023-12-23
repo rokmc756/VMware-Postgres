@@ -283,6 +283,7 @@ $ vi uninstall-hosts
 $ make uninstall
 ```
 ## Planning
+* Change centos and rockylinux mirror into local mirrors in Korea
 * Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
 * Add additional extensions inlcuded in vmware-postgres zip file
 * Add falut talerence feature with Keepalived for PGAutofailover and Patroni Cluster

@@ -4,7 +4,7 @@ restapi:
   listen: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:8008'
   connect_address: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:8008'
 etcd:
-  hosts: '{{ groups['workers'] | map('extract', hostvars, ['ansible_eth0', 'ipv4', 'address']) | map('regex_replace', '$', ':2379') | join(',') }}'
+  hosts: '{{ hostvars[groups['workers'][0]]['ansible_eth0']['ipv4']['address'] }}:2379,{{ hostvars[groups['workers'][1]]['ansible_eth0']['ipv4']['address'] }}:2379,{{ hostvars[groups['workers'][2]]['ansible_eth0']['ipv4']['address'] }}:2379'
 bootstrap:
   dcs:
     ttl: 30

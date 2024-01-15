@@ -1,0 +1,84 @@
+---
+#
+- name: Install the 'Development tools' and perl package group and others for VMware Postgres Dependencies
+  package:
+    name: "{{ rh_common_dep_pkgs }}"
+    state: present
+  async: 180
+  poll: 5
+  register: vmware_postgres_depenecies_packages_installed
+  when: install_dep_pkgs == true
+
+# - python-psycopg2
+# - python27-python-psycopg2
+# - python3-policycoreutils
+# - python2-libselinux
+# - libselinux-python2
+# - policycoreutils-python-utils
+# - libselinux-python3
+
+#
+- name: Install Python 2.7 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  package:
+    name: "{{ rh7_python_pkgs }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+# - python-psycopg2
+# - etcd
+# - python34
+# - python34-libs
+# - python34-setuptools
+# - python36-PyYAML
+# - python36-pathspec
+
+#
+- name: Install Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  package:
+    name: "{{ rh8_python_pkgs }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  register: python3_installed
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
+
+#
+- name: Install Python 3.11 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+  package:
+    name: "{{ rh9_python_pkgs }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  register: python311_installed
+  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
+
+#- name: Alternative python3.9 version to python3
+#  become: true
+#  become_user: root
+#  shell: |
+#    alternatives --set python3 /usr/bin/python3.9
+#    alternatives --set python /usr/bin/python3
+#  register: python3_version_alternatives
+#  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+# update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 3
+# update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
+# update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.9 3
+
+#
+- name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
+  package:
+    name: "{{ rh7_dep_pkgs }}"
+    state: present
+    skip_broken: yes
+  async: 180
+  poll: 5
+  register: etcd_prereq_rpm_packages_installed
+  when:
+    - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
+    - install_dep_pkgs == true
+

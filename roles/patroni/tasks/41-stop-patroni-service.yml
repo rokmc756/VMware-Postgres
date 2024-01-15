@@ -1,0 +1,19 @@
+---
+#
+- name: Stop services for patroni and etcd
+  systemd:
+    name: patroni
+    enabled: no
+    state: stopped
+  register: patroni_etcd_service_stopped
+  until: patroni_etcd_service_stopped is succeeded
+  retries: 3
+  with_items:
+    - etcd
+    - patroni
+
+#
+- name: Kill etcd process
+  shell: ( killall etcd )
+  register: etcd_processes_killed
+  ignore_errors: yes

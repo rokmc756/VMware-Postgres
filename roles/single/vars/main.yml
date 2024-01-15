@@ -9,7 +9,7 @@ rhel_version: el7
 # bin_dir: "/usr/bin"
 package_name: "vmware-postgres{{ major_version }}"     # In case of version higher than 13
 bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin" # In case of version higher than 13
-database_name: testdb
+database_name: single_testdb
 username: jomoon
 password: changeme
 user: postgres

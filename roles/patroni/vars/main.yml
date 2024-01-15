@@ -1,60 +1,65 @@
 ---
-major_version: 15
-minor_version: 4
-build_version: 1
-patch_version: 1
-rhel_version: el7
-patroni_version: "3.2.0-1"
-# etcd_version: "3.2.21-2"
-# etcd_version: "3.4.14-1"
+pgsql:
+  major_version: 15
+  minor_version: 5
+  patch_version: 1
+  build_version: 1
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  db_name: patroni_testdb
+  db_user: jomoon
+  db_password: 'changeme'
+  home_dir: "/home/postgres"
+  base_dir: "/var/lib/pgsql"
+  with_patroni_pkg: True
 
-# etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
-#etcd_major_version: 3
-#etcd_minor_version: 2
-#etcd_build_version: 21
-#etcd_patch_version: 2
+common:
+  sudo_user: jomoon
+  sudo_group: jomoon
+  sudo_user_home_dir: "/home/jomoon"
+  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
+  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
+  # pgsql_pkg_name: pivotal-postgres
 
-# For el9
-etcd_major_version: 3
-etcd_minor_version: 3
-etcd_build_version: 27
-etcd_patch_version:
+ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
 
-# etcd_minor_version: 3
-# etcd_patch_version: 1
-download_etcd_bin: false
-# etcd_version: "3.4.14"
+patroni:
+  major_version: 3
+  minor_version: 2
+  patch_version: 0
+  build_version: 1
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  bin_path: "{{ common.pgsql_bin_dir }}/patroni"
+  ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
+  cluster_name: patclu01
+  sync_mode: False
+  # false is for pgbackrest, not found yet how does pgbackrest
+  # interactive with synchronous mode in patroni cluster
+  # sync_mode: on    # one of node will be a Sync Standby role
 
-#  etcd-3.4.14-1.el9s.x86_64.rpm
-# package_name: pivotal-postgres
-package_name: "vmware-postgres{{ major_version }}"
-
-db_name: testdb
-db_user: jomoon
-db_password: 'changeme'
-
-bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"
-# bin_dir: "/usr/bin" , "/usr/local/bin"
-patroni_path: "{{ bin_dir }}/patroni"
-patronictl_path: "{{ bin_dir }}/patronictl"
-cluster_name: patclu01
-# false is for pgbackrest, not found yet how does pgbackrest
-# interactive with synchronous mode in patroni cluster
-# 3sync_mode: on    # one of node will be a Sync Standby role
-sync_mode: False
-with_patroni_pkg: True
-
-#
-pgsql_base_dir: "/var/lib/pgsql"
-pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
-pgsql_ssl_days: 3660
-pgsql_ssl_country: "KR"
-pgsql_ssl_state: "Seoul"
-pgsql_ssl_location: "Guro"
-pgsql_ssl_organization: "VMware"
-pgsql_ssl_organization_unit: "Tanzu"
-pgsql_ssl_common_name: "jtest.pivotal.io"
-pgsql_ssl_email: "jomoon@pivotal.io"
+etcd:
+  major_version: 3
+  minor_version: 3
+  patch_version: 27
+  build_version: ""
+  arch_type: amd64
+  os_version: el9
+  bin_type: tar.gz
+  download_bin: false
+  blank: " "
+  # etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
 
 # Patroni prerequistes =< vmware-postgres13
 # urllib3_ver1: 1.19.1

@@ -40,9 +40,9 @@ ETCD_ADVERTISE_CLIENT_URLS="http://localhost:2379"
 
 {% if enable_ssl == true %}
 [Security]
-ETCD_TRUSTED_CA_FILE="{{ pgsql_ssl_dir }}/ca.crt"
-ETCD_CERT_FILE="{{ pgsql_ssl_dir }}/server.crt"
-ETCD_KEY_FILE="{{ pgsql_ssl_dir }}/server.key"
+ETCD_TRUSTED_CA_FILE="{{ ssl.ssl_dir }}/ca.crt"
+ETCD_CERT_FILE="{{ ssl.ssl_dir }}/server.crt"
+ETCD_KEY_FILE="{{ ssl.ssl_dir }}/server.key"
 {% endif %}
 
 #ETCD_CERT_FILE=""

@@ -1,19 +1,19 @@
 #!/bin/bash
 #
 #
-NET_ADDR="192.168.56"
-# NET_ADDR="192.168.0"
-# HOSTS="191 192 193 194 195"
+# NET_ADDR="192.168.56"
+NET_ADDR="192.168.0"
+HOSTS="191 192 193 194 195"
 # HOSTS="171 172 173 174 175"
 # HOSTS="61 62 63 64 65"
 # HOSTS="71 72 73 74 75"
-HOSTS="81 82 83 84 85"
+# HOSTS="81 82 83 84 85"
 
 for i in `echo $HOSTS`
 do
 
-    ssh root@$NET_ADDR.$i "/usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1"
-    ssh root@$NET_ADDR.$i "/usr/sbin/alternatives --set python /usr/bin/python2"
+    # ssh root@$NET_ADDR.$i "/usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1"
+    # ssh root@$NET_ADDR.$i "/usr/sbin/alternatives --set python /usr/bin/python2"
     ssh root@$NET_ADDR.$i "systemctl stop pgautofailover"
     ssh root@$NET_ADDR.$i "killall postgres; killall postgres; killall postgres"
     ssh root@$NET_ADDR.$i "killall pg_autoctl; killall pg_autoctl; killall pg_autoctl"

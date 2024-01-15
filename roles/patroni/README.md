@@ -88,3 +88,5 @@ $ make uninstall
 $ make upgrade
 ~~~
 
+## Reference
+- https://www.dbi-services.com/blog/using-ansible-to-bring-up-a-three-node-patroni-cluster-in-minutes/

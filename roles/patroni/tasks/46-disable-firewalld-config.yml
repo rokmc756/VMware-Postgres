@@ -1,0 +1,27 @@
+---
+#
+- name: List iptables rules
+  become_user: root
+  shell: ( iptables -nL )
+  register: iptables_rules_listed
+  # ignore_errors: true
+
+#
+- name: Flush iptables rules
+  become_user: root
+  shell: ( iptables -F )
+  register: iptables_rules_flushed
+  # ignore_errors: true
+
+#
+- name: Stop and disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: false
+  register: firewalld_service_stopped
+  ignore_errors: true
+
+- debug: msg={{ iptables_rules_listed.stdout }}
+  tags:
+    - print_debug

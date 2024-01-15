@@ -1,26 +1,24 @@
 ---
 - hosts: workers
-  gather_facts: true
   become: yes
+  gather_facts: true
   vars:
     print_debug: true
-    remove_users: true
-    disable_ssl: true
-    remove_patroni_config: true
-    remove_env_config: true
+    stop_patroni_service: true
     uninstall_pkgs: true
     uninstall_pip_module: true
     uninstall_dep_pkgs: true
+    remove_env_config: true
     remove_firewall_config: true
   roles:
     - patroni
 
 #
-- hosts: all
-  gather_facts: true
-  become: yes
-  roles:
-    - init-hosts
+#- hosts: all
+#  become: yes
+#  gather_facts: true
+#  roles:
+#    - init-hosts
 
 
 #- hosts: co7-master

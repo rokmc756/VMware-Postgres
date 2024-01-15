@@ -1,0 +1,25 @@
+---
+# wget https://github.com/etcd-io/etcd/releases/download/${ETCD_RELEASE}/etcd-${ETCD_RELEASE}-linux-amd64.tar.gz
+- name: Define main version for ETCD
+  set_fact:
+    etcd_main_version: "{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}"
+
+- name: Download ETCD tar if not downloaded
+  copy: src=https://github.com/etcd-io/etcd/releases/download/v{{ etcd_main_version }}/etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz dest=/tmp owner=root mode=755
+  when: etcd.download_bin == true
+
+#
+- name: Copy ETCD
+  copy: src=etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz dest=/tmp owner=root mode=755
+  when: etcd.download_bin == false
+
+#
+- name: Unzip etcd
+  shell: "tar zxf /tmp/etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz -C /tmp"
+
+#
+- name: Copy etcd binary
+  shell: "cp /tmp/etcd-v{{ etcd_main_version }}-linux-amd64/{{ item }} /usr/bin/"
+  with_items:
+    - etcd
+    - etcdctl

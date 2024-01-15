@@ -2,7 +2,6 @@
 # Install Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
 #
 - name: Add line into /etc/locale.conf for LC_TYPE to prevent error
-  become: true
   lineinfile:
     path: /etc/locale.conf
     line: "LC_CTYPE=en_US.UTF-8"
@@ -10,7 +9,6 @@
 
 #
 - name: Make sure we have a 'wheel' group
-  become: true
   group:
     name: wheel
     state: present
@@ -18,7 +16,6 @@
 
 #
 - name: Allow 'wheel' group to have passwordless sudo
-  become: true
   lineinfile:
     dest: /etc/sudoers
     state: present
@@ -29,30 +26,27 @@
 
 #
 - name: Check if .bash_profile exits under /var/lib/pgsql directory
-  become: true
   become_user: postgres
   stat: path=/var/lib/pgsql/.bash_profile
   register: bash_profile_existed
 
 #
 - name: Sanity check for .bash_profile in /var/lib/pgsql
-  become: true
   become_user: postgres
   shell: "{{ item }}"
   with_items:
-    - "touch /var/lib/pgsql/.bash_profile"
-    - "chmod 600 /var/lib/pgsql/.bash_profile"
+    - "touch {{ pgsql.base_dir }}/.bash_profile"
+    - "chmod 600 {{ pgsql.base_dir }}/.bash_profile"
   register: bash_profile_checked
   when:
     - bash_profile_existed.stat.exists == False
 
 #
-- name: Insert executable binary path into .bashrc for VMware Postgres {{ major_version }}
-  become: true
+- name: Insert executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   become_user: postgres
   lineinfile:
-    path: /var/lib/pgsql/.bash_profile
-    line: "export PATH={{ bin_dir }}:$PATH"
+    path: "{{ pgsql.base_dir }}/.bash_profile"
+    line: "export PATH={{ common.pgsql_bin_dir }}:$PATH"
   register: bin_path_inline_added
   when:
     - bash_profile_existed.stat.exists == True

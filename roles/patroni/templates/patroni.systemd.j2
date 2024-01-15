@@ -9,10 +9,10 @@ Group=postgres
 Environment="PATRONI_LOGLEVEL=DEBUG"
 #ExecStartPre=-/usr/bin/sudo /sbin/modprobe softdog
 #ExecStartPre=-/usr/bin/sudo /bin/chown postgres /dev/watchdog
-#ExecStart={{ patroni_path }} /var/lib/pgsql/patroni.yml
-#ExecStart=/bin/bash {{ patroni_path }} /var/lib/pgsql/patroni.yml
-#ExecStart=/bin/bash -c '. "$0" && exec "$@"' /var/lib/pgsql/.bash_profile {{ patroni_path }} /var/lib/pgsql/patroni.yml
-ExecStart=/bin/bash -l -c 'exec "$@"' /var/lib/pgsql/.bash_profile {{ patroni_path }} /var/lib/pgsql/patroni.yml
+#ExecStart={{ patroni.bin_path }} {{ pgsql.base_dir }}/patroni.yml
+#ExecStart=/bin/bash {{ patroni.bin_path }} {{ pgsql.base_dir }}/patroni.yml
+#ExecStart=/bin/bash -c '. "$0" && exec "$@"' {{ pgsql.base_dir }}/.bash_profile {{ patroni.bin_path }} {{ pgsql.base_dir }}/patroni.yml
+ExecStart=/bin/bash -l -c 'exec "$@"' {{ pgsql.base_dir }}/.bash_profile {{ patroni.bin_path }} {{ pgsql.base_dir }}/patroni.yml
 
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=process

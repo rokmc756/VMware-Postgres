@@ -1,65 +1,67 @@
 ---
 #
+- name: Define package names for VMware Postgres/Patroni/ETCD
+  set_fact:
+    pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
+    patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
+    etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}-{{ etcd.build_version }}.{{ etcd.os_version }}.x86_64.rpm"
+
 - name: Copy the VMware Postgres {{ major_version }} rpm package file to all nodes in workers
   copy:
     src: "{{ item }}"
-    dest: "/home/jomoon/{{ item }}"
+    dest: "{{ common.sudo_user_home_dir }}/{{ item }}"
     mode: 0644
-    owner: jomoon
-    group: jomoon
+    owner: "{{ common.sudo_user }}"
+    group: "{{ common.sudo_group }}"
   register: vmware_postgres_copied
   with_items:
-    - "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm"
+    - "{{ pgsql_pkg_name }}"
 
 #
 - name: Copy ETCD {{ etcd_version }} rpm package for RHEL or Rocky 8 to all nodes in workers group
   copy:
     src: "{{ item }}"
-    dest: "/home/jomoon/{{ item }}"
+    dest: "{{ common.sudo_user }}/{{ item }}"
     mode: 0644
-    owner: jomoon
-    group: jomoon
+    owner: "{{ common.sudo_user }}"
+    group: "{{ common.sudo_group }}"
   register: etcd_rpm_package_copied
   with_items:
-    - "etcd-{{ etcd_major_version }}.{{ etcd_minor_version }}.{{ etcd_build_version }}-{{ etcd_patch_version }}.{{ rhel_version }}.x86_64.rpm"
+    - "{{ etcd_pkg_name }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
 #
 - name: Download and configure etcd binary
-  become: true
-  become_user: root
-  import_tasks: install-etcd-bin.yml
+  import_tasks: 05-install-etcd-bin.yml
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 
 #
 - name: Copy the patroni rpm file to all hosts in cluster
   copy:
     src: "{{ item }}"
-    dest: "/home/jomoon/{{ item }}"
+    dest: "{{ common.sudo_user_home_dir }}/{{ item }}"
     mode: 0644
-    owner: jomoon
-    group: jomoon
+    owner: "{{ common.sudo_user }}"
+    group: "{{ common.sudo_group }}"
   register: patroni_rpm_package_copied
   with_items:
-    - "{{ package_name }}-patroni-{{ patroni_version }}.{{ rhel_version }}.x86_64.rpm"
-  when: with_patroni_pkg
+    - "{{ patroni_pkg_name }}"
+  when: pgsql.with_patroni_pkg
 
 #
 - name: Install VMware Postgres RPM Package on all hosts as root
-  become: true
   yum:
-    name: "/home/jomoon/{{ item }}"
+    name: "{{ common.sudo_user_home_dir }}/{{ item }}"
     state: present
     disable_gpg_check: yes
   async: 60
   poll: 5
   register: vmware_postgres_rpm_package_installed
   with_items:
-    - "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm"
+    - "{{ pgsql_pkg_name }}"
 
 #
 - name: Install Patroni RPM Package in VMware Postgres on all hosts as root
-  become: true
   yum:
     name: "/home/jomoon/{{ item }}"
     state: present
@@ -68,26 +70,24 @@
   poll: 5
   register: paroni_rpm_package_installed
   with_items:
-    - "{{ package_name }}-patroni-{{ patroni_version }}.{{ rhel_version }}.x86_64.rpm"
-  when: with_patroni_pkg
+    - "{{ patroni_pkg_name }}"
+  when: pgsql.with_patroni_pkg
 
 #
 - name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  become: true
   yum:
-    name: "/home/jomoon/{{ item }}"
+    name: "{{ common.sudo_user_home_dir }}/{{ item }}"
     state: present
     disable_gpg_check: yes
   async: 60
   poll: 5
   register: etcd_rpm_packages_installed
   with_items:
-    - "etcd-{{ etcd_major_version }}.{{ etcd_minor_version }}.{{ etcd_build_version }}-{{ etcd_patch_version }}.{{ rhel_version }}.x86_64.rpm"
+    - "{{ etcd_pkg_name }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
 #
 - name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
-  become: true
   yum:
     name: "{{ item }}"
     state: present
@@ -99,3 +99,4 @@
     - python-psycopg2
     - etcd
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
+

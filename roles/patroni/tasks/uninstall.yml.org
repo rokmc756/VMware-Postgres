@@ -1,17 +1,6 @@
 ---
-# Destroy VMware Postgres Patroni Cluster
+# Uninstall Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
 #
-- name: Define package names for VMware Postgres/Patroni/ETCD
-  set_fact:
-    pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}"
-    patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}"
-    etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}"
-
-    # pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
-    # patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
-    # etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}-{{ etcd.build_version }}.{{ etcd.os_version }}.x86_64.rpm"
-
-# 41-stop-patroni-service.yml
 - name: Stop services for patroni and etcd
   systemd:
     name: patroni
@@ -33,16 +22,6 @@
   ignore_errors: yes
   when: uninstall_pkgs
 
-# 42-uninstall-pkgs.yml
-- name: Uninstall Patroni RPM Package
-  yum:
-    name: "{{ item }}"
-    state: absent
-  register: patroni_rpm_packages_uninstalled
-  with_items:
-    - "{{ patroni_pkg_name }}"
-  when: pgsql.with_patroni_pkg == true and uninstall_pkgs == true
-
 #
 - name: Uninstall VMware Postgres RPM packages
   yum:
@@ -50,77 +29,90 @@
     state: absent
   register: vmware_postgres_rpm_packages_deleted
   with_items:
-    - "{{ pgsql_pkg_name }}"
+    - "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}"
     - "vmware-postgres"
   when: uninstall_pkgs
 
 #
-- name: Delete the vmwawre-postgres{{ pgsql.major_version }}-paroni rpm file
-  file:
-    path: /home/jomoon/{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.x86_64.rpm
+- name: Uninstall Patroni RPM Package
+  yum:
+    name: "{{ item }}"
     state: absent
-  register: patroni_rpm_packages_deleted
-  ignore_errors: true
+  register: patroni_rpm_packages_uninstalled
+  with_items:
+    - "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}"
   when: pgsql.with_patroni_pkg == true and uninstall_pkgs == true
-
 
 #
 - name: Delete the vmwawre-postgres rpm file
   file:
-    path: /home/jomoon/{{ pgsql_pgk_name }}.x86-64.rpm
+    path: /home/jomoon/{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.x86-64.rpm
     state: absent
   register: vmware_postgres_rpm_packages_deleted
   when: uninstall_pkgs == true
 
-
-# 43-uninstall-pip-module.yml
-- name: Unstall Patroni PIP module
+#
+- name: Unstall Patroni Pip module
   become_user: root
   shell: (  export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item }} -y )
   register: pip3_patroni_uninstalled
   ignore_errors: true
-  with_items: "{{ rh8_pip3_module }}"
+  with_items:
+    - "patroni==3.0.4"
   when: uninstall_pip_module == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
 #
 - name: Uninstall pip3 modules for higher versions than vmware-postgres {{ pgsql.major_version }}
-  shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item.pip3_name }} -y )
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item }} -y )
   register: extra_pip3_modules_for_higher_than_vmware_postgres_14_uninstalled
   ignore_errors: true
-  with_items: "{{ pg14_pip3_module }}"
-  when: uninstall_pip_module and pgsql.major_version >= 14
+  with_items:
+    - "pyopenssl"
+    - "pyrsistent"
+  when:
+    - uninstall_pip_module
+    - pgsql.major_version >= 14
 
 #
 - name: Uninstall pip3 modules for ealier versions than vmware-postgres{{ pgsql.major_version }}
-  shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item.pip3_name }} -y )
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item }} -y )
   register: extra_pip3_modules_for_earlier_than_vmware_postgres_13_uninstalled
   ignore_errors: yes
-  with_items: "{{ pip13_pip3_module }}"
-  when: uninstall_pip_module and pgsql.major_version >= 13
+  with_items:
+    - "psycopg2-binary"
+  when:
+    - uninstall_pip_module
+    - pgsql.major_version >= 13
+
+#
+- name: Uninstall pip modules of Patroni prerequisites on all three nodes
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall -r /var/lib/pgsql/requirements.txt -y )
+  register: pip_prereq_modules_uninstalled
+  ignore_errors: true
+  when: uninstall_pip_module
 
 #
 - name: Uninstall common pip3 modules ( typing/etcd and so on )
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item }} -y )
   register: common_pip3_modules_uninstalled
   ignore_errors: true
-  with_items: "{{ prereq_pip3_module }}"
-  when: uninstall_pip_module
+  with_items:
+    - "psycopg2"
+    - "etcd"
+    - "etcd3"
+    - "python-etcd"
+    - "typing"
+    - "ydiff"
+    - "psutil"
+    - "prettytable"
+    - "click"
+    - "setuptools-rust"
+    - "wheel"
+    - "pip"
+  when:
+    - uninstall_pip_module
 
-#    - "psycopg2"
-#    - "etcd"
-#    - "etcd3"
-#    - "python-etcd"
-#    - "typing"
-#    - "ydiff"
-#    - "psutil"
-#    - "prettytable"
-#    - "click"
-#    - "setuptools-rust"
-#    - "wheel"
-#    - "pip"
-
-
-# 44-uninstall-dep-pkgs.yml
+#
 - name: Uninstall RPM packages of the etcd and Patroni prerequisites
   yum:
     name: "{{ item }}"
@@ -128,9 +120,21 @@
     skip_broken: yes
   register: prereq_rpm_packages_of_patroni_deleted
   ignore_errors: true
-  with_items: "{{ rh7_dep_pkgs }}"
+  with_items:
+    - "python3"
+    - "python3-rpm-generators"
+    - "python3-devel"
+    - "gcc"
+    - "etcd"
+    - "python-psycopg2"
+    - "python3-pip"
+    - "python3-setuptools"
+    - "python27-python-setuptools"
+    - "yamllint"
+    - "postgresql-devel"
   when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-  # - python34-setuptools
+  #  - python34-setuptools
+  #  - "daemonize"
 
 #
 - name: Unnstall Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
@@ -140,45 +144,49 @@
     skip_broken: yes
   register: python39_installed
   ignore_errors: true
-  with_items: "{{ rh8_python_pkgs }}"
+  with_items:
+    - python39
+    - python39-pip
+    - python39-libs
+    - python39-devel
   when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
-
-# xxxxx need to check
-- name: Uninstall prerequisites RPM packages of the ETCD and Patroni
-  yum:
-    name: "{{ item }}"
-    state: absent
-    skip_broken: yes
-  register: prereq_rpm_packages_of_patroni_deleted
-  ignore_errors: true
-  with_items: "{{ rh_common_dep_pkgs }}"
-  when: uninstall_dep_pkgs == true
-
-  # and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-  # - python34-setuptools
 #
 - name: Unnstall Python 3.11 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
   yum:
     name: "{{ item }}"
     state: absent
     skip_broken: yes
-  with_items: "{{ rh9_python_pkgs }}"
+  with_items:
+    - python3.11
+    - python3.11-pip
+    - python3.11-libs
+    - python3.11-devel
   register: python311_installed
   ignore_errors: true
   when: uninstall_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 
-#
-#- name: Delete the dependencies file of etcd
-#  become_user: postgres
-#  file:
-#    path: /var/lib/pgsql/requirements.txt
-#    state: absent
-#  register: patroni_prereq_uninstalled_of_etcd_deleted
-#  ignore_errors: true
-#  when: uninstall_pip_module
 
-# 45-remove-config-files.yml
+#
+- name: Delete the dependencies file of etcd
+  become_user: postgres
+  file:
+    path: /var/lib/pgsql/requirements.txt
+    state: absent
+  register: patroni_prereq_uninstalled_of_etcd_deleted
+  ignore_errors: true
+  when: uninstall_pip_module
+
+#
+- name: Delete the vmwawre-postgres{{ pgsql.major_version }}-paroni rpm file
+  file:
+    path: /home/jomoon/{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}.{{ patroni.os_version }}.x86_64.rpm
+    state: absent
+  register: patroni_rpm_packages_deleted
+  ignore_errors: true
+  when: pgsql.with_patroni_pkg == true and uninstall_pkgs == true
+
+#
 - name: Delete configuration files for patroni and systemd
   file:
     path: "{{ item }}"
@@ -221,8 +229,7 @@
   ignore_errors: true
   when: uninstall_pkgs
 
-
-# 46-disable-firewalld-config.yml
+#
 - name: List iptables rules
   become_user: root
   shell: ( iptables -nL )

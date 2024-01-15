@@ -3,7 +3,7 @@
 - name: Change permission for /home/postgres directory
   become: true
   become_user: root
-  shell: (  chown -R postgres.postgres /home/postgres )
+  shell: (  chown -R postgres.postgres {{ pgsql.home_dir }} )
   register: permission_changed
   ignore_errors: yes
   when: install_pip_module
@@ -12,7 +12,7 @@
 - name: Install the python module of dependencies for ETCD on all nodes in workers group
   become: true
   become_user: postgres
-  template: src=requirements.txt.{{ rhel_version }}.j2 dest=/var/lib/pgsql/requirements.txt owner=postgres group=postgres mode=644 force=yes
+  template: src=requirements.txt.{{ pgsql.os_version }}.j2 dest={{ pgsql.base_dir }}/requirements.txt owner=postgres group=postgres mode=644 force=yes
   register: patroni_prereq_installed
 
 
@@ -63,7 +63,7 @@
   when: install_pip_module
 
 #
-- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
+- name: Install python modules for Patroni in VMware Postgres {{ pgsql.major_version }} on all nodes in workers group
   become: true
   become_user: root
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
@@ -73,11 +73,11 @@
   with_items:
     - "psycopg2-binary"
   when:
-    - major_version|int <= 13
+    - pgsql.major_version|int <= 13
     - install_pip_module
 
 #
-- name: Install python modules for Patroni in VMware Postgres {{ major_version }} on all nodes in workers group
+- name: Install python modules for Patroni in VMware Postgres {{ pgsql.major_version }} on all nodes in workers group
   become: true
   become_user: root
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
@@ -88,7 +88,7 @@
     - "pyopenssl"
     - "pyrsistent==0.16.0"
   when:
-    - major_version|int >= 14
+    - pgsql.major_version|int >= 14
     - install_pip_module
 
 #

@@ -1,8 +1,9 @@
 ---
 major_version: 15
-minor_version: 4
+minor_version: 5
 patch_version: 1
-rhel_version: el8
+build_version: 1
+rhel_version: el9
 # package_name: "vmware-postgres"      # For 12 version
 # package_name: "pivotal-postgres"     # For 11 version
 # bin_dir: "/usr/bin"

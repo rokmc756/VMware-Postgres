@@ -7,60 +7,102 @@
   when: ansible_os_family != 'RedHat'
 
 #
-- name: x
-  import_tasks: config-firewall.yml
+- name: Enabling firewalld and configure firewall ruleset on for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 01-config-firewall.yml
   tags: install
   when: config_firewall == true
 
 #
-- name: x
-  import_tasks: install-dep-pkgs.yml
+- name: Install Dependent RPM Packages for VMware Postgres Patroni Software on {{ ansible_distribution }}
+  import_tasks: 02-install-dep-pkgs.yml
   tags: install
   when: install_dep_pkgs == true
 
 #
-- name: Install rpm and python packages for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  import_tasks: install-pkgs.yml
+- name: Install Dependent Python modules for VMware Postgres Patroni Software on {{ ansible_distribution }}
+  import_tasks: 03-install-pip-module.yml
+  tags: install
+  when: install_pip_module == true
+
+#
+- name: Install RPM and Python packages for VMware Postgres Patroni Software on {{ ansible_distribution }}
+  import_tasks: 04-install-pkgs.yml
   tags: install
   when: install_pkgs == true
 
 #
-- name: x
-  import_tasks: install-pip-module.yml
-  tags: install
-  when: install_pip_module == true
-
+#- name: Install ETCD binary for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+#  import_tasks: 05-install-etcd-bin.yml
+#  tags: install
+#  when: install_etcd_bin == true
 
 #
-- name: x
-  import_tasks: config-env.yml
+- name: Preparing environment for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 06-config-env.yml
   tags: install
   when: config_env == true
 
 #
-- name: Enable SSL for patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  import_tasks: enable-ssl.yml
+- name: Enable SSL in VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 07-enable-ssl.yml
   tags: install
   when: enable_ssl == true
 
 #
-- name: Configure patroni of vmware-postgres in Red Hat / CentOS / Rocky Linux
-  import_tasks: config-patroni.yml
+- name: Configure VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 08-config-patroni.yml
   tags: install
   when: config_patroni == true
 
 #
-- name: Add users for vmware-postgres patroni cluster in Red Hat / CentOS / Rocky Linux
-  import_tasks: add-users.yml
+- name: Add users into VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 09-add-users.yml
   tags: install
   when: add_users == true
 
 #
-- name: Uninstallation of vmware postgres for Red Hat / CentOS
-  import_tasks: uninstall.yml
+- name: Stop Patroni service
+  import_tasks: 41-stop-patroni-service.yml
   tags: uninstall
+  when: stop_patroni_service == true
 
 #
-- name: Upgrade of vmware postgres for Red Hat / CentOS
+- name: Uninstall Packages for VMware Postgres and Patroni
+  import_tasks: 42-uninstall-pkgs.yml
+  tags: uninstall
+  when: uninstall_pkgs == true
+
+#
+- name: Uninstall PIP module
+  import_tasks: 43-uninstall-pip-module.yml
+  tags: uninstall
+  when: uninstall_pip_module == true
+
+#
+- name: Uninstall dependent RPM Packages for VMware Postgres and Patroni
+  import_tasks: 44-uninstall-dep-pkgs.yml
+  tags: uninstall
+  when: uninstall_dep_pkgs == true
+
+#
+- name: Remove config files of environment for VMware Postgres and Patrnio
+  import_tasks: 45-remove-config-files.yml
+  tags: uninstall
+  when: remove_env_config == true
+
+#
+- name: Disable firewalld config
+  import_tasks: 46-disable-firewalld-config.yml
+  tags: uninstall
+  when: remove_firewall_config  == true
+
+#
+#- name: Destroy VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+#  import_tasks: uninstall.yml
+#  tags: uninstall
+
+#
+- name: Upgrade VMware Postgres Patroni Cluser on {{ ansible_distribution }}
   import_tasks: upgrade.yml
   tags: upgrade
+

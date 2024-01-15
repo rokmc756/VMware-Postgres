@@ -1,0 +1,67 @@
+---
+#
+- name: Change permission for /home/postgres directory
+  shell: (  chown -R postgres.postgres {{ pgsql.home_dir }} )
+  register: permission_changed
+  ignore_errors: yes
+
+#
+- name: Setup and configure the Python module dependencies for ETCD on all nodes in workers group
+  template: src=requirements.txt.{{ pgsql.os_version }}.j2 dest={{ pgsql.base_dir }}/requirements.txt owner=postgres group=postgres mode=644 force=yes
+  register: patroni_prereq_installed
+
+#
+- name: Install pip3 module version
+  shell: ( python3 -m pip install --upgrade pip )
+  register: pip_installed
+
+#
+- name: Install Python modlue for Patroni
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 180
+  poll: 5
+  register: pip3_python_modules_installed
+  with_items: "{{ common_pip3_module }}"
+
+#
+- name: Upgrade pip3 module version
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install --upgrade pip )
+  async: 60
+  poll: 5
+  register: pip_upgraded
+
+#
+- name: Install Python modules for VMware Postgres {{ pgsql.major_version }} Patroni on all workers
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item.pip3_name }} )
+  async: 60
+  poll: 5
+  register: pip3_python_modules_for_vmware_postgres_13_and_earlier_versions_installed
+  with_items: "{{ pg13_pip3_module }}"
+  when: pgsql.major_version|int <= 13
+
+#
+- name: Install python modules for Patroni in VMware Postgres {{ pgsql.major_version }} on all nodes in workers group
+  shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item.pip3_name }} )
+  async: 60
+  poll: 5
+  register: pip3_python_modules_for_vmware_postgres_14_and_higher_versions_installed
+  with_items: "{{ pg14_pip3_module }}"
+  when: pgsql.major_version|int >= 14
+
+#
+- name: Install Prerequesties of Python modules for Patroni
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_python_etcd_installed
+  with_items: "{{ prereq_pip3_module }}"
+
+#
+- name: Install Patroni pip module for higher versions than {{ hostvars[inventory_hostname].ansible_distribution }} {{ hostvars[inventory_hostname].ansible_distribution_major_version|int }}
+  shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
+  async: 60
+  poll: 5
+  register: pip3_patroni_installed
+  with_items: "{{ rh8_pip3_module }}"
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
+

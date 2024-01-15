@@ -1,4 +1,4 @@
-scope: '{{ cluster_name }}'
+scope: '{{ patroni.cluster_name }}'
 name: '{{ inventory_hostname }}'
 restapi:
   listen: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:8008'
@@ -46,15 +46,16 @@ bootstrap:
         archive_command: mkdir -p ../wal_archive && test ! -f ../wal_archive/%f && cp %p ../wal_archive/%f
       recovery_conf:
         restore_command: cp ../wal_archive/%f %p
-    synchronous_mode: {{ sync_mode }}
-    synchronous_mode_strict: {{ sync_mode }}
+    synchronous_mode: {{ patroni.sync_mode }}
+    synchronous_mode_strict: {{ patroni.sync_mode }}
   initdb:
     - encoding: UTF8
     - data-checksums
   pg_hba:
-    - host replication replicator {{ hostvars[groups['workers'][0]]['ansible_eth0']['ipv4']['address'] }}/32 md5
-    - host replication replicator {{ hostvars[groups['workers'][1]]['ansible_eth0']['ipv4']['address'] }}/32 md5
-    - host replication replicator {{ hostvars[groups['workers'][2]]['ansible_eth0']['ipv4']['address'] }}/32 md5
+{% for h in groups["workers"] %}
+    - host replication replicator {{ hostvars[h]['ansible_eth0']['ipv4']['address'] }}/32 md5
+{% endfor %}
+    # host replication replicator {{ hostvars[groups['workers'][0-2]]['ansible_eth0']['ipv4']['address'] }}/32 md5
     - host all all 0.0.0.0/0 md5
 {% if enable_ssl == true %}
     - hostssl all all 0.0.0.0/0 md5
@@ -68,8 +69,8 @@ bootstrap:
 postgresql:
   listen: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5432'
   connect_address: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5432'
-  data_dir: /var/lib/pgsql/patroni_data
-  pgpass: /var/lib/pgsql/pgpass0
+  data_dir: {{ pgsql.base_dir }}/patroni_data
+  pgpass: {{ pgsql.base_dir }}/pgpass0
   authentication:
     replication:
       username: replicator
@@ -86,9 +87,9 @@ postgresql:
     synchronous_commit: local
 {% if enable_ssl == true %}
     ssl: 'on'
-    ssl_ca_file: '{{ pgsql_ssl_dir }}/ca.crt'
-    ssl_cert_file: '{{ pgsql_ssl_dir }}/server.crt'
-    ssl_key_file: '{{ pgsql_ssl_dir }}/server.key'
+    ssl_ca_file: '{{ ssl.ssl_dir }}/ca.crt'
+    ssl_cert_file: '{{ ssl.ssl_dir }}/server.crt'
+    ssl_key_file: '{{ ssl.ssl_dir }}/server.key'
 {% endif %}
     # synchronous_commit: "on"
     # synchronous_standby_name: "*"

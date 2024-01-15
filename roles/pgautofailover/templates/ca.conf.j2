@@ -6,7 +6,7 @@ default_ca = myca
 authorityKeyIdentifier=keyid:always
 
 [ myca ]
-dir = {{ pgsql_ssl_dir }}
+dir = {{ ssl.ssl_dir }}
 new_certs_dir = $dir
 unique_subject = no
 certificate = $dir/ca.crt

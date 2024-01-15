@@ -1,0 +1,20 @@
+---
+
+# Install VMWare Postgres for Red Hat / CentOS
+
+# for now fail if it's not a Red Hat based system
+- name: Check OS ( GPDB )
+  fail: msg="Not a Red Hat based system!"
+  when: ansible_os_family != 'RedHat'
+
+- name: Installation of PostgreSQL 9.4 BDR for Red Hat / CentOS
+  include: install.yml
+  tags: install
+
+- name: Uninstallation of PostgreSQL 9.4 BDR for Red Hat / CentOS
+  include: uninstall.yml
+  tags: uninstall
+
+- name: Upgrade of vmware PostgreSQL 9.4 BDR for Red Hat / CentOS
+  include: upgrade.yml
+  tags: upgrade

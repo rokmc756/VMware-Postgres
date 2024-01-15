@@ -1,0 +1,180 @@
+---
+#
+- name: Check OS support
+  debug: msg="The following OS family {{ ansible_os_family }} {{ ansible_architecture }} is not supported" fail=yes
+  when: not ansible_os_family == "RedHat" or not ansible_architecture == "x86_64"
+
+#
+- name: Update alternative python version to python2
+  become: true
+  become_user: root
+  command: update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+  ignore_errors: yes
+  register: update_python2_version_alternative
+
+- debug:
+    var: update_python2_version_alternative
+
+#
+- name: Alternative python version to python2
+  become: true
+  become_user: root
+  command: alternatives --set python /usr/bin/python2
+  ignore_errors: yes
+  register: python_version_alternative
+
+- debug:
+    var: python_version_alternative
+
+ #
+- name: Check if PostgreSQL is running
+  become: true
+  become_user: postgres
+  command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} status"
+  ignore_errors: yes
+  register: postgresql_running
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Start PostgreSQL
+  become: true
+  become_user: postgres
+  command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} start"
+  ignore_errors: yes
+  when:
+    - inventory_hostname in groups['postgres-ha']
+    - "'pg_ctl: no server running' in postgresql_running.stdout"
+
+#
+- name: Check if database is available
+  become: yes
+  become_user: postgres
+  postgresql_ping:
+    db: "{{ postgresql_bdr_database }}"
+  ignore_errors: yes
+  register: ping_database
+  failed_when: ping_database.warnings is defined
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Remove logical replications of BDR
+  postgresql_query:
+    db: "{{ postgresql_bdr_database }}"
+    login_user: "{{ postgresql_bdr_user }}"
+    login_password: "{{ postgresql_bdr_password }}"
+    query: "select bdr.remove_bdr_from_local_node(true)"
+  ignore_errors: yes
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Check if database is existed
+  become: yes
+  become_user: postgres
+  postgresql_ping:
+    db: "{{ postgresql_bdr_database }}"
+  ignore_errors: yes
+  register: ping_database
+  failed_when: ping_database.warnings is defined
+  when: inventory_hostname in groups['postgres-ha']
+
+# SELECT pg_drop_replication_slot('SELECT slot_name FROM pg_replication_slots');
+# SELECT slot_name, active, restart_lsn FROM pg_replication_slots'
+
+# Restarting PostgreSQL could remove connection session held by user instead of running the following query
+- name: Kill all postgresql connections for removing session held by user
+  postgresql_query:
+    db: "{{ postgresql_bdr_database }}"
+    login_user: "{{ postgresql_bdr_user }}"
+    login_password: "{{ postgresql_bdr_password }}"
+    query: "SELECT *, pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = '{{ postgresql_bdr_database }}';"
+  ignore_errors: yes
+  when:
+    - inventory_hostname in groups['postgres-ha']
+    - ping_database.warnings is not defined
+
+#
+- name: Drop the database
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: "{{ postgresql_bdr_database }}"
+    login_host: "{{ inventory_hostname }}"
+    login_user: "{{ postgresql_bdr_user }}"
+    login_password: "{{ postgresql_bdr_password }}"
+    template: "template0"
+    state: absent
+  ignore_errors: yes
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Stop PostgreSQL if are running
+  become: true
+  become_user: postgres
+  command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} stop"
+  ignore_errors: yes
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Remove old PostgreSQL data directory if exists
+  become: true
+  become_user: postgres
+  file:
+    state: absent
+    path: "{{ postgresql_datadir }}"
+  ignore_errors: yes
+  when: inventory_hostname in groups['postgres-ha']
+
+#
+- name: Check package manager support
+  debug: msg="The following packet manager {{ ansible_pkg_mgr }} is not supported" fail=yes
+  when: not ansible_pkg_mgr == "yum"
+
+#
+- name: Alternative python version to python2
+  become: true
+  become_user: root
+  command: alternatives --set python /usr/bin/python2
+  ignore_errors: yes
+  register: python_version_alternative
+
+- debug:
+    var: python_version_alternative
+
+#
+- name: Remove PostgreSQL BDR packages
+  become: yes
+  become_user: root
+  yum:
+    name: "{{ item }}"
+    state: absent
+  ignore_errors: yes
+  with_items:
+    - python-psycopg2
+    - python27-python-psycopg2
+    - postgresql-bdr94
+    - postgresql-bdr94-bdr
+    - postgresql-bdr94-2ndquadrant-redhat
+    - postgresql-bdr94-libs
+  when: inventory_hostname in groups['postgres-ha']
+
+- name: Delete /var/run/postgresql
+  become: true
+  become_user: root
+  command: rm -rf /var/run/postgresql
+  ignore_errors: yes
+  register: pid_dir_deleted
+
+- debug:
+    var: pid_dir_deleted
+
+- name: Delete bdr94 yum repository
+  become: true
+  become_user: root
+  command: rm -f /etc/yum.repos.d/bdr94_repo.repo
+  ignore_errors: yes
+  register: bdr94_repo_deleted
+
+- debug:
+    var: bdr94_repo_deleted
+
+# name=http://packages.2ndquadrant.com/postgresql-bdr94-2ndquadrant/yum-repo-rpms/postgresql-bdr94-2ndquadrant-redhat-1.0-2.noarch.rpm

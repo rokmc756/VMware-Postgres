@@ -1,8 +1,7 @@
 #
 - name: Copy ca.conf
-  become: true
   become_user: postgres
-  template: src=ca.conf.j2 dest={{ pgsql_ssl_dir }}/ca.conf owner=postgres group=postgres mode=644 force=yes
+  template: src=ca.conf.j2 dest={{ ssl.ssl_dir }}/ca.conf owner=postgres group=postgres mode=644 force=yes
   register: ca_conf_copied
   when: inventory_hostname in groups['monitor']
 
@@ -11,63 +10,58 @@
   become: true
   become_user: postgres
   shell: |
-    touch {{ pgsql_ssl_dir }}/certindex
-    echo 01 > {{ pgsql_ssl_dir }}/certserial
-    echo 01 > {{ pgsql_ssl_dir }}/crlnumber
+    touch {{ ssl.ssl_dir }}/certindex
+    echo 01 > {{ ssl.ssl_dir }}/certserial
+    echo 01 > {{ ssl.ssl_dir }}/crlnumber
   register: xx01
   when: inventory_hostname in groups['monitor']
 
 # Test for Client
 - name: xx00
-  become: true
   become_user: postgres
   shell: |
-    openssl ca -batch -config {{ pgsql_ssl_dir }}/ca.conf -notext -in {{ pgsql_ssl_dir }}/server.csr -out {{ pgsql_ssl_dir }}/server.crt
+    openssl ca -batch -config {{ ssl.ssl_dir }}/ca.conf -notext -in {{ ssl.ssl_dir }}/server.csr -out {{ ssl.ssl_dir }}/server.crt
   register: xx00
   when: inventory_hostname in groups['monitor']
 
 # Test for Client
 - name: xx02
-  become: true
   become_user: postgres
   shell: |
-    openssl pkcs12 -export -out {{ pgsql_ssl_dir }}/server.p12 -inkey {{ pgsql_ssl_dir }}/server.key -in {{ pgsql_ssl_dir }}/server.crt -chain -CAfile {{ pgsql_ssl_dir }}/ca.crt -passout pass: -passin pass:""
+    openssl pkcs12 -export -out {{ ssl.ssl_dir }}/server.p12 -inkey {{ ssl.ssl_dir }}/server.key -in {{ ssl.ssl_dir }}/server.crt -chain -CAfile {{ ssl.ssl_dir }}/ca.crt -passout pass: -passin pass:""
   register: xx02
   when: inventory_hostname in groups['monitor']
 
 # Test for Client
 - name: xx03
-  become: true
   become_user: postgres
-  shell: openssl ca -config {{ pgsql_ssl_dir }}/ca.conf -gencrl -keyfile {{ pgsql_ssl_dir }}/ca.key -cert {{ pgsql_ssl_dir }}/ca.crt -out {{ pgsql_ssl_dir }}/root.crl.pem
+  shell: openssl ca -config {{ ssl.ssl_dir }}/ca.conf -gencrl -keyfile {{ ssl.ssl_dir }}/ca.key -cert {{ ssl.ssl_dir }}/ca.crt -out {{ ssl.ssl_dir }}/root.crl.pem
   register: xx03
   when: inventory_hostname in groups['monitor']
 
 # Test for Client
 - name: xx04
-  become: true
   become_user: postgres
   shell: |
-    openssl crl -inform PEM -in {{ pgsql_ssl_dir }}/root.crl.pem -outform DER -out {{ pgsql_ssl_dir }}/root.crl
-    rm {{ pgsql_ssl_dir }}/root.crl.pem
+    openssl crl -inform PEM -in {{ ssl.ssl_dir }}/root.crl.pem -outform DER -out {{ ssl.ssl_dir }}/root.crl
+    rm {{ ssl.ssl_dir }}/root.crl.pem
   register: xx04
   when: inventory_hostname in groups['monitor']
 
 
 # Test for Client
 - name: xx05
-  become: true
   become_user: postgres
   shell: |
-    openssl ca -config {{ pgsql_ssl_dir }}/ca.conf -revoke {{ pgsql_ssl_dir }}/server.crt -keyfile {{ pgsql_ssl_dir }}/ca.key -cert {{ pgsql_ssl_dir }}/ca.crt
+    openssl ca -config {{ ssl.ssl_dir }}/ca.conf -revoke {{ ssl.ssl_dir }}/server.crt -keyfile {{ ssl.ssl_dir }}/ca.key -cert {{ ssl.ssl_dir }}/ca.crt
   register: xx05
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Synchronize ssl directory using rsync protocol on delegate host (push)
   synchronize:
-    src: "{{ pgsql_ssl_dir }}"
-    dest: "{{ pgsql_base_dir }}"
+    src: "{{ ssl.ssl_dir }}"
+    dest: "{{ pgsql.base_dir }}"
     mode: push
     recursive: yes
   delegate_to: "{{groups['monitor'][0]}}"
@@ -78,7 +72,7 @@
 - name: Change permissions for cert files
   become: true
   file:
-    path: "{{ pgsql_ssl_dir }}/{{ item }}"
+    path: "{{ pgsql.ssl_dir }}/{{ item }}"
     state: file
     owner: postgres
     group: postgres

@@ -1,43 +1,52 @@
 ---
-# Install VMWare Postgres for Red Hat / CentOS
-
+# Deploy VMWare Postgres PGAutoFailover Cluster on {{ ansible_distribution }}
+#
 # for now fail if it's not a Red Hat based system
 - name: Check OS ( GPDB )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
-- name: Installation common for pgautofailover
+#
+- name: Install common requirements of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: install-common.yml
   tags: install
 
-- name: Installation monitor for pgautofailover
+#
+- name: Install monitor instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: install-monitor.yml
   tags: install
   when: inventory_hostname in groups['monitor']
 
-- name: Installation workers instance for pgautofailover
+#
+- name: Install primary worker instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: install-workers.yml
   tags: install
   when: inventory_hostname in groups['workers'] and inventory_hostname in groups['primary']
 
-- name: Installation workers instance for pgautofailover
+#
+- name: Install secondary worker instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: install-workers.yml
   when: inventory_hostname in groups['workers'] and inventory_hostname in groups['secondary']
   tags: install
 
-- name: Check the status of pgautofailover
+#
+- name: Check the status of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: check-status-workers.yml
   tags: install
 
+#
 - name: Enable SSL on Monitor
   import_tasks: enable-ssl-monitor.yml
   tags: install
   when: enable_ssl_monitor == true
 
-- name: Uninstallation of vmware postgres for Red Hat / CentOS
+#
+- name: Uninstall VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: uninstall.yml
   tags: uninstall
 
-- name: Upgrade of vmware postgres for Red Hat / CentOS
+#
+- name: Upgrade VMware Postgres GPAutoFailover on {{ ansible_distribution }}
   import_tasks: upgrade.yml
   tags: upgrade
+

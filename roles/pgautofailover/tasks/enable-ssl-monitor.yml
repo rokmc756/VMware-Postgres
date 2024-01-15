@@ -1,16 +1,14 @@
 #
 - name: Create ssl dir on postgres base
-  become: true
   become_user: postgres
-  shell: mkdir {{ pgsql_ssl_dir }}
+  shell: mkdir {{ ssl.ssl_dir }}
   register: create_ssl_dir
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Generate a CA certificate private key
-  become: true
   become_user: postgres
-  shell: openssl genrsa -out {{ pgsql_ssl_dir }}/ca.key 4096
+  shell: openssl genrsa -out {{ ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
   when: inventory_hostname in groups['monitor']
 
@@ -20,73 +18,65 @@
   become_user: postgres
   shell: |
     openssl req -x509 -new -nodes -sha512 -days 3650 \
-    -subj "/C={{ pgsql_ssl_country }}/ST={{ pgsql_ssl_state }}/L={{ pgsql_ssl_location }}/O={{ pgsql_ssl_organization }}/OU={{ pgsql_ssl_organization_unit }}/CN={{ pgsql_ssl_common_name }}/emailAddress={{ pgsql_ssl_email }}" \
-    -key {{ pgsql_ssl_dir }}/ca.key \
-    -out {{ pgsql_ssl_dir }}/ca.crt
+    -subj "/C={{ ssl.ssl_country }}/ST={{ ssl.ssl_state }}/L={{ ssl.ssl_location }}/O={{ ssl.ssl_organization }}/OU={{ ssl.ssl_organization_unit }}/CN={{ ssl.ssl_common_name }}/emailAddress={{ ssl.ssl_email }}" \
+    -key {{ ssl.ssl_dir }}/ca.key \
+    -out {{ ssl.ssl_dir }}/ca.crt
   register: gen_ca_cert
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Generate a private key
-  become: true
   become_user: postgres
-  shell: openssl genrsa -out {{ pgsql_ssl_dir }}/server.key 4096
+  shell: openssl genrsa -out {{ ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Generate a certificate signing request (CSR)
-  become: true
   become_user: postgres
   shell: |
     openssl req -sha512 -new \
-    -subj "/C={{ pgsql_ssl_country }}/ST={{ pgsql_ssl_state }}/L={{ pgsql_ssl_location }}/O={{ pgsql_ssl_organization }}/OU={{ pgsql_ssl_organization_unit }}/CN={{ pgsql_ssl_common_name }}/emailAddress={{ pgsql_ssl_email }}" \
-    -key {{ pgsql_ssl_dir }}/server.key \
-    -out {{ pgsql_ssl_dir }}/server.csr
+    -subj "/C={{ ssl.ssl_country }}/ST={{ ssl.ssl_state }}/L={{ ssl.ssl_location }}/O={{ ssl.ssl_organization }}/OU={{ ssl.ssl_organization_unit }}/CN={{ ssl.ssl_common_name }}/emailAddress={{ ssl.ssl_email }}" \
+    -key {{ ssl.ssl_dir }}/server.key \
+    -out {{ ssl.ssl_dir }}/server.csr
   register: gen_cert_sign_req
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Copy an x509 v3 extension file
-  become: true
-  become_user: root
-  template: src=v3.ext.j2 dest={{ pgsql_ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
+  template: src=v3.ext.j2 dest={{ ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Replace the CRS and CRT file names for Monitor node
-  become: true
   become_user: postgres
   shell: |
-    openssl x509 -req -sha512 -days 3650 -extfile {{ pgsql_ssl_dir }}/v3.ext \
-    -CA {{ pgsql_ssl_dir }}/ca.crt -CAkey {{ pgsql_ssl_dir }}/ca.key -CAcreateserial \
-    -in {{ pgsql_ssl_dir }}/server.csr \
-    -out {{ pgsql_ssl_dir }}/server.crt
+    openssl x509 -req -sha512 -days 3650 -extfile {{ ssl.ssl_dir }}/v3.ext \
+    -CA {{ ssl.ssl_dir }}/ca.crt -CAkey {{ ssl.ssl_dir }}/ca.key -CAcreateserial \
+    -in {{ ssl.ssl_dir }}/server.csr \
+    -out {{ ssl.ssl_dir }}/server.crt
   register: replace_csr_crt
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Disable SSL on Monitor
-  become: true
   become_user: postgres
   shell: |
-    export PGDATA=/var/lib/pgsql/monitor && {{ bin_dir }}/pg_autoctl disable ssl
+    export PGDATA=/var/lib/pgsql/monitor && {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
   register: disable_ssl_monitor
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Disable SSL on Workers
-  become: true
   become_user: postgres
   shell: |
-    export PGDATA=/var/lib/pgsql/ha && {{ bin_dir }}/pg_autoctl disable ssl
+    export PGDATA=/var/lib/pgsql/ha && {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
   register: enable_ssl_workers
   when: inventory_hostname in groups['workers']
 
 #
 - name: Restart pgautofailover to apply changes
-  become: true
   become_user: postgres
   shell: |
     sudo systemctl restart pgautofailover
@@ -95,21 +85,19 @@
 
 #
 - name: Enable SSL on Monitor
-  become: true
   become_user: postgres
   shell: |
-    source /var/lib/pgsql/.bash_profile ; {{ bin_dir }}/pg_autoctl enable ssl --pgdata {{ pgsql_base_dir }}/monitor \
+    source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl enable ssl --pgdata {{ pgsql.base_dir }}/monitor \
     --ssl-ca-file '' --ssl-crl-file '' \
-    --server-key {{ pgsql_ssl_dir }}/server.key --server-cert {{ pgsql_ssl_dir }}/server.crt --ssl-mode prefer
+    --server-key {{ ssl.ssl_dir }}/server.key --server-cert {{ ssl.ssl_dir }}/server.crt --ssl-mode prefer
   register: enable_ssl_monitor
   when: inventory_hostname in groups['monitor']
 
 #
 - name: Synchronize ssl directory using rsync protocol on delegate host (push)
-  become: true
   synchronize:
-    src: "{{ pgsql_ssl_dir }}"
-    dest: "{{ pgsql_base_dir }}"
+    src: "{{ ssl.ssl_dir }}"
+    dest: "{{ pgsql.base_dir }}"
     mode: push
     recursive: yes
   delegate_to: "{{groups['monitor'][0]}}"
@@ -118,9 +106,8 @@
 
 #
 - name: Change permissions for cert files
-  become: true
   file:
-    path: "{{ pgsql_ssl_dir }}/{{ item }}"
+    path: "{{ ssl.ssl_dir }}/{{ item }}"
     state: file
     owner: postgres
     group: postgres
@@ -137,19 +124,17 @@
 
 #
 - name: Enable SSL on Workers
-  become: true
   become_user: postgres
   shell: |
-    source /var/lib/pgsql/.bash_profile ; {{ bin_dir }}/pg_autoctl enable ssl --pgdata {{ pgsql_base_dir }}/ha \
+    source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl enable ssl --pgdata {{ pgsql.base_dir }}/ha \
     --ssl-ca-file '' --ssl-crl-file '' \
-    --server-key {{ pgsql_ssl_dir }}/server.key --server-cert {{ pgsql_ssl_dir }}/server.crt --ssl-mode prefer
+    --server-key {{ ssl.ssl_dir }}/server.key --server-cert {{ ssl.ssl_dir }}/server.crt --ssl-mode prefer
   register: enable_ssl_workers
   when: inventory_hostname in groups['workers']
 
 #
-- name: Restart pgautofailover to apply changes
+- name: Restart PGAutoFailover to apply Changes
   become: true
-  become_user: postgres
   shell: |
     sudo systemctl restart pgautofailover
   register: pgautofailover_restarted

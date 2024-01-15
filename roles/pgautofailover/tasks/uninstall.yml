@@ -1,18 +1,20 @@
 #
+# Destroy VMWare Postgres PGAutoFailover Cluster on {{ ansible_distribution }}
+#
+- set_fact:
+    rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh7_dep_pkgs ~ ',' ~ rh7_python_pkgs }}"
+  when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int <= 7
+- set_fact:
+    rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh8_dep_pkgs ~ ',' ~ rh8_python_pkgs }}"
+  when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int == 8
+- set_fact:
+    rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh9_dep_pkgs ~ ',' ~ rh9_python_pkgs }}"
+  when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int >= 9
 
 #
 - name: Define package names for VMware Postgres
   set_fact:
     pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
-
-- name: Alternative python version 2 for RHEL/CentOS 7.x
-  shell: |
-    /usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1
-    /usr/sbin/alternatives --set python /usr/bin/python2
-  register: alternatives_python2
-  when:
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-    - ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
 
 #
 - name: Stop systemd service of workers instance
@@ -26,137 +28,70 @@
   ignore_errors: yes
 
 #
-- name: Delete configuration files and data directory for pgautofailover
-  become: true
-  file:
-    path: "{{ item }}"
-    state: absent
-  register: patroni_config_files_deleted
-  with_items:
-    - "/var/lib/pgsql/{{ pgfailover.monitor_database }}"
-    - "/var/lib/pgsql/{{ pgfailover.workers_database }}"
-    - "/var/lib/pgsql/{{ pgfailover.app_database }}"
-    - "/var/lib/pgsql/data"
-    - "/var/lib/pgsql/backup"
-    - "/var/lib/pgsql/backups"
-    - "/var/lib/pgsql/pgautofailover.service"
-    - "/var/lib/pgsql/.bash_profile"
-    - "/var/lib/pgsql"
-    - "/home/postgres"
+- name: Alternative python version 2 for RHEL/CentOS 7.x
+  shell: |
+    /usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+    /usr/sbin/alternatives --set python /usr/bin/python2
+  register: alternatives_python2
+  when:
+    - hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+    - ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 
 #
-- name: Uninstall Python3 Packages
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: absent
-    skip_broken: yes
-  async: 120
-  poll: 5
-  with_items:
-    - python3-utils
-    - python3-PyYAML
-    - python3-pathspec
-    - python3-rpm-generators
-  when: remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-
-#
-- name: Uninstall Python3 Packages
-  become: true
-  yum:
-    name: "{{ item }}"
-    state: absent
-    skip_broken: yes
-  async: 120
-  poll: 5
-  with_items:
-    - python3
-    - python3-devel
-    - python3-pip
-    - python3-setuptools
-    - yamllint
-    - gcc
-    - epel-release
-  when: remove_dep_pkgs == true and remove_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
-  #  - python3-libs
-
-#
-- name: Delete "{{ pgsql.user }}" User
-  user:
-    name: "{{ pgsql.user }}"
-    state: absent
-
-#
-- name: Delete "{{ pgsql.group }}" Group
-  group:
-    name: "{{ pgsql.group }}"
-    state: absent
-
-#
-#- name: Disallow 'wheel' group to have passwordless sudo
-#  become: true
-#  lineinfile:
-#    dest: /etc/sudoers
-#    state: absent
-#    regexp: '^%wheel'
-#    line: '^#%wheel ALL=(ALL) NOPASSWD: ALL'
-#    validate: 'visudo -cf %s'
-
-#
-#- name: Make sure we have a 'wheel' group
-#  become: true
-#  group:
-#    name: wheel
-#    state: present
-
-#
-- name: Uninstall VMware Postgres rpm package
+- name: Uninstall VMware Postgres RPM package
   yum:
     name: "{{ common.pgsql_pkg_name }}"
-    # name: "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64"
     state: absent
     disable_gpg_check: true
   async: 180
   poll: 5
 
 #
-- name: Delete vmwawre-postgres rpm package file
-  become: true
+- name: Delete VMware Postgres RPM file
   file:
-    path: /home/jomoon/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}
+    path: "{{ common.sudo_user_home_dir }}/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}"
     state: absent
 
 #
-- name: Stop and disable firewalld
-  become: true
-  service:
-    name: firewalld
-    state: stopped
-    enabled: false
+- name: Delete configuration files and data directory for pgautofailover
+  file:
+    path: "{{ item }}"
+    state: absent
+  register: patroni_config_files_deleted
+  with_items: "{{ delete_file_list }}"
+
+#
+- name: Uninstall Prerequesties RPM Packages for VMware Postgres PGAutoFailover
+  yum:
+    name: "{{ rh_uninstall_pkgs }}"
+    state: absent
+    skip_broken: yes
 
 #
 - name: Reload systemd daemon
-  become: true
   systemd:
     daemon_reload: yes
   register: sysemd_daemon_reloaded
   async: 60
   poll: 5
 
+#
+- name: Stop and disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
 
 #
 - name: Flush iptables rules
-  become: true
   shell: ( iptables -F )
   register: iptables_rules_flushed
 
 #
 - name: List iptables rules
-  become: true
   shell: ( iptables -nL )
   register: iptables_rules_listed
 
 #
 - debug: msg={{ iptables_rules_listed.stdout }}
-  tags:
-    - print_debug
+  tags: print_debug

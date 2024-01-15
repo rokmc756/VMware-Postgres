@@ -1,0 +1,22 @@
+---
+# Configure and Install PGAutoFailover on {{ ansible_distribution }}
+#
+- name: Stop and disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
+
+#
+- name: Flush iptables rules
+  shell: ( iptables -F )
+  register: iptables_rules_flushed
+
+#
+- name: List iptables rules
+  shell: ( iptables -nL )
+  register: iptables_rules_listed
+
+- debug: msg={{ iptables_rules_listed.stdout }}
+  tags: print_debug
+

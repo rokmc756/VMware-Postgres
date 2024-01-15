@@ -4,12 +4,12 @@
   shell: ( source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl show state )
   register: workers_instance_state_verified
   args:
-    chdir: "{{ pgsql.base_dir }}"
+    chdir: "/var/lib/pgsql"
     executable: /bin/bash
   when: inventory_hostname in groups['workers']
 
 #
 - debug: msg={{ workers_instance_state_verified }}
   become_user: postgres
-  when: inventory_hostname in groups['workers']
   tags: print_debug
+  when: inventory_hostname in groups['workers']

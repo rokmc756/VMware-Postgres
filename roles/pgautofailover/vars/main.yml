@@ -33,7 +33,7 @@ pgfailover:
   ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
   cluster_name: pgfailclu01
   sslmode: prefer
-  enable_ssl: no
+  enable_ssl: true
 
 ssl:
   ssl_dir: "{{ pgsql.base_dir }}/certs"

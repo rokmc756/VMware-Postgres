@@ -116,11 +116,11 @@
   with_items:
     - ca.key
     - server.csr
-    - root.crl
     - server.key
     - ca.crt
     - server.crt
   when: inventory_hostname in groups['workers']
+  #  - root.crl
 
 #
 - name: Enable SSL on Workers
@@ -133,15 +133,10 @@
   when: inventory_hostname in groups['workers']
 
 #
-- name: Restart PGAutoFailover to apply Changes
+- name: Restart PGAutoFailover to apply changes of SSL config
   become: true
   shell: |
     sudo systemctl restart pgautofailover
   register: pgautofailover_restarted
   when: inventory_hostname in groups['monitor'] or inventory_hostname in groups['workers']
-
-#
-#- debug: msg={{ enable_ssl_monitor }}
-#  when: inventory_hostname in groups['monitor']
-# when: inventory_hostname in groups['workers'][0]
 

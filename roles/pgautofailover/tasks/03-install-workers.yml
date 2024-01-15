@@ -8,7 +8,6 @@
   with_items:
     - "{{ pgsql.base_dir }}/.bash_profile"
     - "{{ pgsql.home_dir }}/.bashrc"
-  #  path: /var/lib/pgsql/.bashrc
 
 #
 - name: Create workers instance. It will automatically be set by the monitor as the primary node with read-write capability (PGDATA = /var/lib/pgpsql/ha)
@@ -20,9 +19,6 @@
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
-  #  until: workers_instance_created is succeeded
-  # retries: 20
-  # delay: 20
 
 #
 - name: Create systemd service file of workers instance
@@ -38,8 +34,8 @@
 #
 - name: Copy primary systemd service file of workers instance
   copy:
-    src: {{ pgsql.base_dir }}/pgautofailover.service
-    dest: /etc/systemd/system/
+    src: "{{ pgsql.base_dir }}/pgautofailover.service"
+    dest: "/etc/systemd/system/"
     owner: root
     group: root
     mode: 0644
@@ -49,7 +45,7 @@
 - name: Replace database directory for workers
   become_user: postgres
   replace:
-    path: {{ pgsql.base_dir }}/.bash_profile
+    path: "{{ pgsql.base_dir }}/.bash_profile"
     regexp: '^(.*)PGDATA=(.*)$'
     replace: 'PGDATA=/{{ pgsql.base_dir }}/{{ pgfailover.workers_database }}'
     backup: yes
@@ -63,8 +59,4 @@
   register: pgautofailover_service_added
   async: 60
   poll: 5
-  # until: pgautofailover_service_added is succeeded
-  # retries: 10
-  # delay: 10
-  # enabled: yes
 

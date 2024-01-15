@@ -5,7 +5,7 @@
     print_debug: true
     install_dep_pkgs: true
     remove_dep_pkgs: true
-    enable_ssl_monitor: true
+    add_users: true
   roles:
     - init-hosts
     - pgautofailover

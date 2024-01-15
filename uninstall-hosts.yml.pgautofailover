@@ -6,4 +6,4 @@
     remove_dep_pkgs: true
   roles:
     - pgautofailover
-#    - init-hosts
+    - init-hosts

@@ -1,12 +1,6 @@
 ---
 #
-- name: Define package names for VMware Postgres/Patroni/ETCD
-  set_fact:
-    pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
-    patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
-    etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}-{{ etcd.build_version }}.{{ etcd.os_version }}.x86_64.rpm"
-
-- name: Copy the VMware Postgres {{ major_version }} rpm package file to all nodes in workers
+- name: Copy the VMware Postgres {{ pgsql.major_version }} RPM Package
   copy:
     src: "{{ item }}"
     dest: "{{ common.sudo_user_home_dir }}/{{ item }}"
@@ -15,28 +9,10 @@
     group: "{{ common.sudo_group }}"
   register: vmware_postgres_copied
   with_items:
-    - "{{ pgsql_pkg_name }}"
+    - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
 #
-- name: Copy ETCD {{ etcd_version }} rpm package for RHEL or Rocky 8 to all nodes in workers group
-  copy:
-    src: "{{ item }}"
-    dest: "{{ common.sudo_user }}/{{ item }}"
-    mode: 0644
-    owner: "{{ common.sudo_user }}"
-    group: "{{ common.sudo_group }}"
-  register: etcd_rpm_package_copied
-  with_items:
-    - "{{ etcd_pkg_name }}"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
-
-#
-- name: Download and configure etcd binary
-  import_tasks: 05-install-etcd-bin.yml
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
-
-#
-- name: Copy the patroni rpm file to all hosts in cluster
+- name: Copy the VMware Postgres Patroni "{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}" RPM Package
   copy:
     src: "{{ item }}"
     dest: "{{ common.sudo_user_home_dir }}/{{ item }}"
@@ -45,11 +21,11 @@
     group: "{{ common.sudo_group }}"
   register: patroni_rpm_package_copied
   with_items:
-    - "{{ patroni_pkg_name }}"
+    - "{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
   when: pgsql.with_patroni_pkg
 
 #
-- name: Install VMware Postgres RPM Package on all hosts as root
+- name: Install the VMware Postgres {{ pgsql.major_version }} RPM Package
   yum:
     name: "{{ common.sudo_user_home_dir }}/{{ item }}"
     state: present
@@ -58,10 +34,10 @@
   poll: 5
   register: vmware_postgres_rpm_package_installed
   with_items:
-    - "{{ pgsql_pkg_name }}"
+    - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
 #
-- name: Install Patroni RPM Package in VMware Postgres on all hosts as root
+- name: Install the VMware Postgres Patroni "{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}" RPM Package
   yum:
     name: "/home/jomoon/{{ item }}"
     state: present
@@ -70,33 +46,6 @@
   poll: 5
   register: paroni_rpm_package_installed
   with_items:
-    - "{{ patroni_pkg_name }}"
+    - "{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
   when: pgsql.with_patroni_pkg
-
-#
-- name: Install ETCD rpm package on all nodes in workers group for RHEL or Rocky {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
-  yum:
-    name: "{{ common.sudo_user_home_dir }}/{{ item }}"
-    state: present
-    disable_gpg_check: yes
-  async: 60
-  poll: 5
-  register: etcd_rpm_packages_installed
-  with_items:
-    - "{{ etcd_pkg_name }}"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
-
-#
-- name: Install the etcd and Patroni prerequisites on all three nodes for CentOS 7
-  yum:
-    name: "{{ item }}"
-    state: present
-    skip_broken: yes
-  async: 180
-  poll: 5
-  register: etcd_prereq_rpm_packages_installed
-  with_items:
-    - python-psycopg2
-    - etcd
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
 

@@ -1,11 +1,11 @@
 ---
 # Destroy VMware Postgres Patroni Cluster
 #
-- name: Define package names for VMware Postgres/Patroni/ETCD
-  set_fact:
-    pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}"
-    patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}"
-    etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}"
+#- name: Define package names for VMware Postgres/Patroni/ETCD
+#  set_fact:
+#    pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}"
+#    patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}"
+#    etcd_pkg_name: "etcd-{{ etcd.major_version }}.{{ etcd.minor_version }}.{{ etcd.patch_version }}"
 
     # pgsql_pkg_name: "{{ common.pgsql_pkg_name }}-{{ pgsql.major_version }}.{{ pgsql.minor_version }}-{{ pgsql.patch_version }}.{{ pgsql.os_version }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
     # patroni_pkg_name: "{{ common.pgsql_pkg_name }}-patroni-{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"

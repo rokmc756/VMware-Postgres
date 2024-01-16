@@ -1,5 +1,5 @@
 ---
-# Install Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
+# Configure environments and variables
 #
 - name: Add line into /etc/locale.conf for LC_TYPE to prevent error
   lineinfile:
@@ -8,30 +8,13 @@
   register: lctype_line_added
 
 #
-- name: Make sure we have a 'wheel' group
-  group:
-    name: wheel
-    state: present
-  register: wheel_group_added
-
-#
-- name: Allow 'wheel' group to have passwordless sudo
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: 'visudo -cf %s'
-  register: wheel_group_allowed
-
-#
-- name: Check if .bash_profile exits under /var/lib/pgsql directory
+- name: Check if .bash_profile exits under {{ pgsql.base_dir }} directory
   become_user: postgres
   stat: path=/var/lib/pgsql/.bash_profile
   register: bash_profile_existed
 
 #
-- name: Sanity check for .bash_profile in /var/lib/pgsql
+- name: Sanity check for .bash_profile in {{ pgsql.base_dir }}
   become_user: postgres
   shell: "{{ item }}"
   with_items:
@@ -42,7 +25,7 @@
     - bash_profile_existed.stat.exists == False
 
 #
-- name: Insert executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
+- name: Insert Executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   become_user: postgres
   lineinfile:
     path: "{{ pgsql.base_dir }}/.bash_profile"
@@ -51,3 +34,4 @@
   when:
     - bash_profile_existed.stat.exists == True
     - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
+

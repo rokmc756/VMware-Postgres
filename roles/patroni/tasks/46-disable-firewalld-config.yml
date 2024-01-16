@@ -22,6 +22,8 @@
   register: firewalld_service_stopped
   ignore_errors: true
 
+#
 - debug: msg={{ iptables_rules_listed.stdout }}
   tags:
     - print_debug
+

@@ -1,16 +1,6 @@
 ---
 #
-#- name: Delete the dependencies file of etcd
-#  become_user: postgres
-#  file:
-#    path: /var/lib/pgsql/requirements.txt
-#    state: absent
-#  register: patroni_prereq_uninstalled_of_etcd_deleted
-#  ignore_errors: true
-#  when: uninstall_pip_module
-
-#
-- name: Delete configuration files for patroni and systemd
+- name: Delete variables and configuration files for Patroni and ETCD systemd unit
   file:
     path: "{{ item }}"
     state: absent
@@ -42,3 +32,4 @@
     - "wal_archive"
     - "pgpass0"
     - "requirements.txt"
+

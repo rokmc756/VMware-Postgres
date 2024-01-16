@@ -1,22 +1,22 @@
 ---
 #
-- name: Change permission for /home/postgres directory
+- name: Change Permission of /home/postgres directory
   shell: (  chown -R postgres.postgres {{ pgsql.home_dir }} )
   register: permission_changed
   ignore_errors: yes
 
 #
-- name: Setup and configure the Python module dependencies for ETCD on all nodes in workers group
+- name: Setup and Configure the Python module dependencies for ETCD for workers
   template: src=requirements.txt.{{ pgsql.os_version }}.j2 dest={{ pgsql.base_dir }}/requirements.txt owner=postgres group=postgres mode=644 force=yes
   register: patroni_prereq_installed
 
 #
-- name: Install pip3 module version
+- name: Install Python Pip3 module
   shell: ( python3 -m pip install --upgrade pip )
   register: pip_installed
 
 #
-- name: Install Python modlue for Patroni
+- name: Install Python modlue for VMware Postgres Patroni
   shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
   async: 180
   poll: 5
@@ -24,14 +24,14 @@
   with_items: "{{ common_pip3_module }}"
 
 #
-- name: Upgrade pip3 module version
+- name: Upgrade Python Pip3 module version
   shell: (  export PATH=$PATH:/usr/local/bin && pip3 install --upgrade pip )
   async: 60
   poll: 5
   register: pip_upgraded
 
 #
-- name: Install Python modules for VMware Postgres {{ pgsql.major_version }} Patroni on all workers
+- name: Install Python Pip3 modules for VMware Postgres {{ pgsql.major_version }} Patroni on workers
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item.pip3_name }} )
   async: 60
   poll: 5
@@ -40,7 +40,7 @@
   when: pgsql.major_version|int <= 13
 
 #
-- name: Install python modules for Patroni in VMware Postgres {{ pgsql.major_version }} on all nodes in workers group
+- name: Install Python Pip3 modules for Patroni in VMware Postgres {{ pgsql.major_version }} on workers
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 install {{ item.pip3_name }} )
   async: 60
   poll: 5
@@ -57,7 +57,7 @@
   with_items: "{{ prereq_pip3_module }}"
 
 #
-- name: Install Patroni pip module for higher versions than {{ hostvars[inventory_hostname].ansible_distribution }} {{ hostvars[inventory_hostname].ansible_distribution_major_version|int }}
+- name: Install Python Pip3 modules for VMware Posgres Patroni
   shell: (  export PATH=$PATH:/usr/local/bin && pip3 install {{ item }} )
   async: 60
   poll: 5

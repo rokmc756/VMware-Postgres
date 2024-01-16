@@ -41,13 +41,13 @@
     executable: /bin/bash
 
 #
-- name: Grant user access from network 192.168.0.0/24 access for access with cert authentication.
+- name: Grant user access from network {{ pgsql_network_range }} access for access with cert authentication.
   become_user: postgres
   postgresql_pg_hba:
     dest: "{{ pgsql.base_dir }}/{{ pgfailover.monitor_database }}/pg_hba.conf"
     contype: host
     users: all
-    source: 192.168.0.0/24
+    source: "{{ pgsql_network_range }}"
     databases: all
     method: trust
 

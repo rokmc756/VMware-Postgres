@@ -1,10 +1,3 @@
----
-#- hosts: all
-#  become: yes
-#  gather_facts: true
-#  roles:
-#    - init-hosts
-
 #
 - hosts: workers
   become: yes
@@ -15,13 +8,14 @@
     install_dep_pkgs: true
     install_pip_module: true
     install_pkgs: true
-    install_etcd_bin: true
+    install_etcd: true
     config_env: true
     enable_ssl: true
     config_patroni: true
     add_users: true
   roles:
     - patroni
+#    - init-hosts
 
 #- hosts: rh9-master
 #  become: yes

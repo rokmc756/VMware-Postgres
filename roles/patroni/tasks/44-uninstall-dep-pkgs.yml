@@ -1,18 +1,16 @@
 ---
 #
-- name: Uninstall RPM packages of the etcd and Patroni prerequisites
+- name: Uninstall Prerequisites RPM packages for VMware Postgres Patroni and ETCD
   yum:
     name: "{{ item }}"
     state: absent
     skip_broken: yes
   register: prereq_rpm_packages_of_patroni_deleted
   ignore_errors: true
-  with_items: "{{ rh7_dep_pkgs }}"
-  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-  # - python34-setuptools
+  with_items: "{{ rh_uninstall_pkgs }}"
 
 #
-- name: Unnstall Python 3.9 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+- name: Unnstall Python 3.9 RPM Packages for VMware Postgres
   yum:
     name: "{{ item }}"
     state: absent
@@ -22,19 +20,8 @@
   with_items: "{{ rh8_python_pkgs }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
-# xxxxx need to check
-- name: Uninstall prerequisites RPM packages of the ETCD and Patroni
-  yum:
-    name: "{{ item }}"
-    state: absent
-    skip_broken: yes
-  register: prereq_rpm_packages_of_patroni_deleted
-  ignore_errors: true
-  with_items: "{{ remove_rh_common_dep_pkgs }}"
-  # - python34-setuptools
-
 #
-- name: Unnstall Python 3.11 for RHEL or CentOS {{  hostvars[inventory_hostname].ansible_distribution_major_version }}
+- name: Unnstall Python 3.11 RPM Packages for VMware Postgres
   yum:
     name: "{{ item }}"
     state: absent
@@ -43,3 +30,4 @@
   register: python311_installed
   ignore_errors: true
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
+

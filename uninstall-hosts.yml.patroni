@@ -12,14 +12,7 @@
     remove_firewall_config: true
   roles:
     - patroni
-
-#
-#- hosts: all
-#  become: yes
-#  gather_facts: true
-#  roles:
 #    - init-hosts
-
 
 #- hosts: co7-master
 #  become: yes

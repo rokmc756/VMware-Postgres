@@ -1,5 +1,5 @@
 #
-- name: Verify the state of worker's instances
+- name: Verify the state of worker instances
   become_user: postgres
   shell: ( source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl show state )
   register: workers_instance_state_verified
@@ -13,3 +13,4 @@
   become_user: postgres
   tags: print_debug
   when: inventory_hostname in groups['workers']
+

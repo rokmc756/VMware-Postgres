@@ -2,3 +2,4 @@
 # Upgrade VMware Postgres PGAutoFailover on {{ ansible_distribution }}
 
 - debug: msg="{{ Let's upgrade pgautofailvoer }}"
+

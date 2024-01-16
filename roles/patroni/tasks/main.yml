@@ -7,6 +7,13 @@
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or ansible_os_family != 'Rocky'
 
 #
+- name: Set Facts for network, package variables
+  import_tasks: 00-set-facts.yml
+  tags:
+    - install
+    - uninstall
+
+#
 - name: Enabling firewalld and configure firewall ruleset on for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
   import_tasks: 01-config-firewall.yml
   tags: install
@@ -31,10 +38,10 @@
   when: install_pkgs == true
 
 #
-#- name: Install ETCD binary for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
-#  import_tasks: 05-install-etcd-bin.yml
-#  tags: install
-#  when: install_etcd_bin == true
+- name: Install ETCD binary for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+  import_tasks: 05-install-etcd.yml
+  tags: install
+  when: install_etcd == true
 
 #
 - name: Preparing environment for VMware Postgres Patroni Cluster on {{ ansible_distribution }}

@@ -1,5 +1,5 @@
 # Create instance for worker nodes
-
+#
 - name: Insert executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   become_user: postgres
   lineinfile:
@@ -21,7 +21,7 @@
     executable: /bin/bash
 
 #
-- name: Create systemd service file of workers instance
+- name: Create systemd service file of worker instances
   become_user: postgres
   shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd --pgdata '{{ pgsql.base_dir }}/{{ pgfailover.workers_database }}' > pgautofailover.service )
   register: workers_systemd_service_added
@@ -32,7 +32,7 @@
     executable: /bin/bash
 
 #
-- name: Copy primary systemd service file of workers instance
+- name: Copy primary systemd service file of worker instances
   copy:
     src: "{{ pgsql.base_dir }}/pgautofailover.service"
     dest: "/etc/systemd/system/"
@@ -42,7 +42,7 @@
     remote_src: true
 
 #
-- name: Replace database directory for workers
+- name: Replace database directory for worker instacnes
   become_user: postgres
   replace:
     path: "{{ pgsql.base_dir }}/.bash_profile"
@@ -51,7 +51,7 @@
     backup: yes
 
 #
-- name: Reload and start primary systemd service of workers instance
+- name: Reload and start primary systemd service of worker instances
   systemd:
     name: pgautofailover
     state: started

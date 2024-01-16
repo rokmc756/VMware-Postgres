@@ -7,57 +7,65 @@
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
 #
-- name: Stop and Diable firewalld for VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 00-disable-firewall.yml
+- name: Set facts for package name and list and network range
+  import_tasks: set-facts.yml
+  tags:
+    - install
+    - uninstall
+
+#
+- name: Stop and Diable firewalld for VMware Postgres PGAutoFailover
+  import_tasks: disable-firewall.yml
+  when: disable_firwall == true
+
+#
+- name: Install Common Requirements of VMware Postgres PGAutoFailover
+  import_tasks: install-pgsql-pkgs.yml
+  tags: install
+  when: install_dep_pkgs == true
+
+#
+- name: Install Monitor instances of VMware Postgres PGAutoFailover
+  import_tasks: deploy-monitor.yml
+  tags: install
+  when: deploy_monitor == true and inventory_hostname in groups['monitor']
+
+#
+- name: Install Primary worker instances of VMware Postgres PGAutoFailover
+  import_tasks: deploy-workers.yml
+  tags: install
+  when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['primary'] )
+
+#
+- name: Install Secondary worker instances of VMware Postgres PGAutoFailover
+  import_tasks: deploy-workers.yml
+  tags: install
+  when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['secondary'] )
+
+#
+- name: Check the status of VMware Postgres PGAutoFailover
+  import_tasks: check-status-workers.yml
   tags: install
 
 #
-- name: Install Common Requirements of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 01-install-pgsql-pkgs.yml
-  tags: install
-
-#
-- name: Install Monitor instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 02-install-monitor.yml
-  tags: install
-  when: inventory_hostname in groups['monitor']
-
-#
-- name: Install Primary worker instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 03-install-workers.yml
-  tags: install
-  when: inventory_hostname in groups['workers'] and inventory_hostname in groups['primary']
-
-#
-- name: Install Secondary worker instances of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 03-install-workers.yml
-  when: inventory_hostname in groups['workers'] and inventory_hostname in groups['secondary']
-  tags: install
-
-#
-- name: Check the status of VMware Postgres GPAutoFailover on {{ ansible_distribution }}
-  import_tasks: 04-check-status-workers.yml
-  tags: install
-
-#
-- name: Add database and users
-  import_tasks: 06-add-users.yml
+- name: Create Database and Users
+  import_tasks: add-users.yml
   tags: install
   when: add_users == true
 
 #
 - name: Enable SSL on Monitor
-  import_tasks: 05-enable-ssl-monitor.yml
+  import_tasks: enable-ssl-monitor.yml
   tags: install
-  when: pgfailover.enable_ssl == true
+  when: enable_ssl == true
 
 #
-- name: Uninstall VMware Postgres GPAutoFailover on {{ ansible_distribution }}
+- name: Uninstall VMware Postgres GPAutoFailover
   import_tasks: uninstall.yml
   tags: uninstall
 
 #
-- name: Upgrade VMware Postgres GPAutoFailover on {{ ansible_distribution }}
+- name: Upgrade VMware Postgres GPAutoFailover
   import_tasks: upgrade.yml
   tags: upgrade
 

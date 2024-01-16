@@ -8,7 +8,7 @@ gcc,epel-release"
 
 rh7_dep_pkgs: "python-psycopg2,etcd,yamllint"
 rh8_dep_pkgs: "yamllint"
-rh9_dep_pkgs: ""
+rh9_dep_pkgs: "tk"
 
 rh7_python_pkgs: "python2,python2-pip,python2-libs,python2-devel,python3-pathspec"
 rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel,python3-pathspec"

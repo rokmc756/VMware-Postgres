@@ -1,7 +1,7 @@
 ---
 # Configure VMwaer Postgres Patroni Cluster
-
-- name: Insert executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
+#
+- name: Insert Executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   lineinfile:
     path: "{{ item }}"
     line: "export PATH={{ common.pgsql_bin_dir }}:$PATH"
@@ -10,7 +10,7 @@
     - "{{ pgsql.home_dir }}/.bashrc"
 
 #
-- name: Create the etcd.yml configuration file for all nodes
+- name: Create the etcd.yml configuration file
   template: src={{ item.src_fn }} dest={{ item.dest_fn }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
   register: etcd_config_created
   with_items:
@@ -18,7 +18,7 @@
     - { src_fn: 'etcd.conf.j2', dest_fn: '/etc/etcd/etcd.conf', owner: 'root', group: 'root' }
 
 #
-- name: Tune the value of HEARTBEAT INTERNAL and ELECTION TIMEOUT for etcd
+- name: Tune the value of HEARTBEAT INTERNAL and ELECTION TIMEOUT
   replace:
     dest: /etc/etcd/etcd.conf
     regexp: "{{ item.regexp }}"
@@ -66,7 +66,7 @@
   register: patroni_systemd_config_copied
 
 #
-- name: Change the permissions on the database directory in {{ pgsql.base_dir }} directory
+- name: Change the Permissions on the database directory in {{ pgsql.base_dir }} directory
   become_user: postgres
   file:
     path: "{{ pgsql.base_dir }}/{{ item }}"
@@ -80,7 +80,7 @@
   when: pgsql.major_version|int >= 11
 
 #
-- name: Change the permissions on the database directory in /var/lib/pgsql directory
+- name: Change the Permissions on the database directory in {{ pgsql.base_dir }} directory
   become_user: postgres
   file:
     path: "{{ pgsql.base_dir }}/{{ item }}"
@@ -102,7 +102,7 @@
   register: tmp_dir_permission_changed
 
 # Enable and Start services for patroni
-- name: Reload and start systemd service of patroni
+- name: Reload and start systemd service of VMware Postgres Patroni
   systemd:
     daemon_reload: yes
     name: patroni
@@ -145,7 +145,7 @@
     minutes: 1
 
 #
-- name: Run the patronictl command-line utility to view the cluster state with Patroni started on all three nodes,
+- name: Run the patronictl command-line utility to view the cluster state with Patroni started on all worker nodes
   become_user: postgres
   shell: ( {{ patroni.ctl_path }} -c {{ pgsql.base_dir }}/patroni.yml list )
   register: patroni_listed

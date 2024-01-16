@@ -1,45 +1,50 @@
 ---
-# Install VMWare Postgres for Red Hat / CentOS
-
+# Install Single VMWare Postgres
+#
 # for now fail if it's not a Red Hat based system
 - name: Check OS ( GPDB )
   fail: msg="Not a Red Hat based system!"
-  when:
-    - inventory_hostname in groups['all']
-    - ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
+  when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
 #
-- name: Installation common package for single postgres
-  import_tasks: install-common.yml
+- name: Set facts for package name and list and network range
+  import_tasks: set-facts.yml
+  tags:
+    - install
+    - uninstall
+
+#
+- name: Enable firewall
+  import_tasks: enable-firewall.yml
   tags: install
-  when: inventory_hostname in groups['all']
 
 #
-- name: Installation single postgres
-  import_tasks: install-postgres.yml
+- name: Install Common Prerequisties and VMware Postgres RPM Packages For Single Instance
+  import_tasks: install-pkgs.yml
   tags: install
-  when: inventory_hostname in groups['all']
 
 #
-- name: Enable SSL on sinlge postgres
+- name: Initialize VMware Postgres Instance
+  import_tasks: initialize-postgres.yml
+  tags: install
+
+#
+- name: Enable SSL for Single VMware Postgres
   import_tasks: enable-ssl.yml
   tags: install
-  when: enable_ssl == true and inventory_hostname in groups['all']
+  when: enable_ssl == true
 
 #
-- name: Check the status of sinlge postgres
+- name: Check the status of Single VMware Postgres
   import_tasks: check-status.yml
   tags: install
-  when: inventory_hostname in groups['all']
 
 #
-- name: Uninstallation of sinlge postgres for Red Hat / CentOS
+- name: Uninstall RPM Packages for Single VMware Postgres
   import_tasks: uninstall.yml
   tags: uninstall
-  when: inventory_hostname in groups['all']
 
 #
-- name: Upgrade of single postgres for Red Hat / CentOS
+- name: Upgrade RPM Packages for Single VMware Postgres
   import_tasks: upgrade.yml
   tags: upgrade
-  when: inventory_hostname in groups['all']

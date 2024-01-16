@@ -7,19 +7,32 @@
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
 #
-- name: Install pgwatch2
+- name: Set facts for package name and list and network range
+  import_tasks: set-facts.yml
+  tags:
+    - install
+    - uninstall
+
+#
+#- name: Install PGWatch2
+#  import_tasks: install.yml
+#  tags: install
+#  when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
+
+#
+- name: Install PGWatch2
   import_tasks: install.yml
   tags: install
   # when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
-- name: Uninstall pgwatch2
+- name: Uninstall PGWatch2
   import_tasks: uninstall.yml
   tags: uninstall
   # when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
 
 #
-- name: Upgrade pgwatch2
+- name: Upgrade PGWatch2
   import_tasks: upgrade.yml
   tags: upgrade
   # when: inventory_hostname in groups['monitors']

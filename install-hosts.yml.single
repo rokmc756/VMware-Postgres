@@ -3,14 +3,14 @@
   become: yes
   vars:
     print_debug: true
-    install_pkgs: true
-    install_dep_pkgs: true
     install_go: true
     install_prometheus: true
     install_grafana: true
     install_pgwatch2: true
+    install_pkgs: true
+    enable_ssl: true
   roles:
-    - { role: init-hosts }
     - { role: single }
+#    - { role: init-hosts }
 #    - { role: grafana }
 #    - { role: pgwatch2 }

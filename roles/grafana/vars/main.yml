@@ -1,33 +1,63 @@
 ---
 # go1.13.4.linux-amd64.tar.gz
-go_major_version: 1
-go_minor_version: 13
-go_patch_version: 4
+go:
+  major_version: 1
+  minor_version: 13
+  patch_version: 4
 
 # prometheus-2.46.0.linux-amd64.tar.gz
-prometheus_major_version: 2
-prometheus_minor_version: 46
-prometheus_patch_version: 0
+prometheus:
+  major_version: 2
+  minor_version: 46
+  patch_version: 0
 
 # postgres_exporter-0.13.2.linux-amd64.tar.gz
-postgres_exporter_major_version: 0
-postgres_exporter_minor_version: 13
-postgres_exporter_patch_version: 2
+postgres_exporter:
+  major_version: 0
+  minor_version: 13
+  patch_version: 2
 
 # pgwatch2_1.10.0_linux_64-bit.rpm
-pgwatch2_major_version: 1
-pgwatch2_minor_version: 10
-pgwatch2_patch_version: 0
+pgwatch2:
+  major_version: 1
+  minor_version: 10
+  patch_version: 0
 
 #
-enable_ssl: false
-pgsql_base_dir: "/var/lib/pgsql"
-pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
-pgsql_ssl_days: 3660
-pgsql_ssl_country: "KR"
-pgsql_ssl_state: "Seoul"
-pgsql_ssl_location: "Guro"
-pgsql_ssl_organization: "VMware"
-pgsql_ssl_organization_unit: "Tanzu"
-pgsql_ssl_common_name: "jtest.pivotal.io"
-pgsql_ssl_email: "jomoon@pivotal.io"
+pgsql:
+  major_version: 15
+  minor_version: 5
+  patch_version: 1
+  build_version: 1
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  db_name: single_testdb
+  db_user: jomoon
+  db_password: changeme
+  user: postgres
+  group: postgres
+  home_dir: "/home/postgres"
+  base_dir: "/var/lib/pgsql"
+
+#
+common:
+  sudo_user: jomoon
+  sudo_group: jomoon
+  sudo_user_home_dir: "/home/jomoon"
+  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
+  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
+
+#
+ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
+  enable: true
+

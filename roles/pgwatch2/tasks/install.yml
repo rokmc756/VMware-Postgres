@@ -3,21 +3,14 @@
 #
 #
 - name: Copy the pgwatch2 rpm file
-  become: true
-  become_user: root
-  copy: src=pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm dest=/root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm mode=0644 owner=root group=root
+  copy: src=pgwatch2_{{ pgwatch2.major_version }}.{{ pgwatch2.minor_version }}.{{ pgwatch2.patch_version }}_linux_64-bit.rpm dest=/root/pgwatch2_{{ pgwatch2.major_version }}.{{ pgwatch2.minor_version }}.{{ pgwatch2.patch_version }}_linux_64-bit.rpm mode=0644 owner=root group=root
 
 #
 - name: Install pgwatch2 rpm package
-  become: true
-  become_user: root
-  shell: yum localinstall -y /root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm
-  async: 180
-  poll: 5
+  shell: yum localinstall -y /root/pgwatch2_{{ pgwatch2.major_version }}.{{ pgwatch2.minor_version }}.{{ pgwatch2.patch_version }}_linux_64-bit.rpm
 
 #
 - name: Create the database specified in vars
-  become: true
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python2
@@ -29,7 +22,6 @@
 
 #
 - name: Create a user to the pgwatch2 schema. Typically called pgwatch2 but can be anything really, if the schema creation file is adjusted accordingly.
-  become: true
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python2
@@ -40,7 +32,6 @@
 
 #
 - name: Ensure user does not have unnecessary permissions
-  become: true
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python2
@@ -51,7 +42,6 @@
 
 #
 - name: Roll out the pgwatch2 config schema and Bootstrap the metrics storage DB
-  become: true
   become_user: postgres
   shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
   args:
@@ -64,7 +54,6 @@
 
 #
 #- name: Roll out the pgwatch2 config schema and Bootstrap the metrics storage DB
-#  become: true
 #  become_user: postgres
 #  shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
 #  args:
@@ -80,8 +69,6 @@
 
 #
 - name: Install pip modules for pgwatch2
-  become: true
-  become_user: root
   shell: |
     pip3 install setuptools_rust
     python3 -m pip install --upgrade pip
@@ -95,7 +82,6 @@
 
 #
 - name: Create the pgwatch2-web systemd unit file
-  become: true
   template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
   register: etcd_config_created
   with_items:
@@ -105,7 +91,6 @@
 
 #
 - name: Create the pgwatch2-daemon systemd unit file
-  become: true
   template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
   register: etcd_config_created
   with_items:
@@ -115,7 +100,6 @@
 
 #
 - name: Create the pgwatch2 instances yaml file
-  become: true
   template: src={{ item.src }} dest={{ item.dest }} owner={{ item.owner }} group={{ item.group }} mode=644 force=yes
   register: pgwatch2_instacnes_file_created
   with_items:
@@ -123,10 +107,8 @@
   when: inventory_hostname in groups['workers']
 #  - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
 
-
 #
 - name: Reload and start services for pgwatch2-web and daemon
-  become: true
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -137,8 +119,7 @@
   with_items:
     - pgwatch2-web
   when: inventory_hostname in groups['monitors']
-#    - pgwatch2-daemon
-
+# - pgwatch2-daemon
 
 #
 - name: Reload and start services for daemon

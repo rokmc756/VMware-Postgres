@@ -1,0 +1,29 @@
+---
+# Install pg_auto_failover for RHEL or CentOS
+#
+#
+- name: Stop and disable firewalld
+  become: true
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
+
+#
+- name: Flush iptables rules
+  become: true
+  become_user: root
+  shell: ( iptables -F )
+  register: iptables_rules_flushed
+
+#
+- name: List iptables rules
+  become: true
+  become_user: root
+  shell: ( iptables -nL )
+  register: iptables_rules_listed
+
+#
+- debug: msg={{ iptables_rules_listed.stdout }}
+  tags:
+    - print_debug

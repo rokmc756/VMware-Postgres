@@ -1,9 +1,7 @@
 ---
 # Install grafana for RHEL or CentOS
 #
-#
 - name: Copy influxdb yum repo file
-  become: true
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
   register: config_file_copied
   with_items:
@@ -11,7 +9,6 @@
 
 #
 - name: Install Dependent and Grafana RPM packages
-  become: true
   yum:
     name: "{{ item }}"
     state: present
@@ -32,8 +29,6 @@
 
 #
 - name: Install pip modules for grafana
-  become: true
-  become_user: root
   shell: |
     pip3 install setuptools_rust
     python3 -m pip install --upgrade pip
@@ -46,7 +41,6 @@
 
 #
 - name: Copy the grafana ini file
-  become: true
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
   register: systemd_file_copied
   with_items:
@@ -54,12 +48,10 @@
 
   # when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
-
   # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
 
 #
 - name: Reload and start services for grafana
-  become: true
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -73,7 +65,6 @@
 
 #
 - name: Setup pgwatch2 metrics database as default datasource
-  become: true
   become_user: postgres
   shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
   args:
@@ -84,8 +75,6 @@
 
 #
 - name: Add pgwatch2 predefined dashboards to Grafana
-  become: true
-  become_user: root
   shell: |
     /etc/pgwatch2/grafana-dashboards/import_all.sh
   async: 120
@@ -94,8 +83,6 @@
 
 #
 - name: Install Grafana plugin
-  become: true
-  become_user: root
   shell: |
     grafana-cli plugins install savantly-heatmap-panel
   async: 120

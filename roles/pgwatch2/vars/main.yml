@@ -1,5 +1,41 @@
 ---
-# go1.13.4.linux-amd64.tar.gz
-pgwatch2_major_version: 1
-pgwatch2_minor_version: 10
-pgwatch2_patch_version: 0
+pgwatch2:
+  major_version: 1
+  minor_version: 10
+  patch_version: 0
+
+pgsql:
+  major_version: 15
+  minor_version: 5
+  patch_version: 1
+  build_version: 1
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  db_name: single_testdb
+  db_user: jomoon
+  db_password: changeme
+  user: postgres
+  group: postgres
+  home_dir: "/home/postgres"
+  base_dir: "/var/lib/pgsql"
+
+common:
+  sudo_user: jomoon
+  sudo_group: jomoon
+  sudo_user_home_dir: "/home/jomoon"
+  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
+  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
+
+ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
+  enable: true
+

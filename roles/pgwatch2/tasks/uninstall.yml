@@ -1,29 +1,25 @@
 ---
-# Uninstall pgwatch2 daemon and web ui for RHEL or CentOS
-#
+# Uninstall pgwatch2 daemon and Web UI
 #
 - name: Reload stop and services for pgwatch2-web and daemon
-  become: true
   systemd:
     daemon_reexec: true
     daemon_reload: true
     name: "{{ item }}"
     enabled: false
     state: stopped
-  ignore_errors: true
   register: systemd_stopped
+  ignore_errors: true
   with_items:
     - pgwatch2-daemon
     - pgwatch2-web
   when: inventory_hostname in groups['monitors']
 
-
 #
 - name: Delete the pgwatch2-web and pgwatch2-daemon systemd unit file
-  become: true
   file: path={{ item.dest }} state=absent
-  ignore_errors: true
   register: systemd_unit_files_deleted
+  ignore_errors: true
   with_items:
     - { src: 'pgwatch2-web.systemd.j2', dest: '/etc/systemd/system/pgwatch2-web.service', owner: 'root', group: 'root' }
     - { src: 'pgwatch2-daemon.systemd.j2', dest: '/etc/systemd/system/pgwatch2-daemon.service', owner: 'root', group: 'root' }
@@ -32,8 +28,6 @@
 
 #
 - name: Uninstall pip modules for pgwatch2
-  become: true
-  become_user: root
   shell: |
     pip3 uninstall -y -r /etc/pgwatch2/webpy/requirements_pg_metrics.txt
     pip3 uninstall -y wheel
@@ -42,18 +36,17 @@
     pip3 install setuptools_rust
   async: 120
   poll: 5
-  ignore_errors: true
   register: pip_module_uninstalled
+  ignore_errors: true
 
 #
 - name: Drop databases
-  become: true
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python2
   postgresql_db: name={{ item }} template='template0' state=absent login_host=localhost login_user=postgres login_unix_socket=/tmp
-  ignore_errors: true
   register: pgwatch2_database_dropped
+  ignore_errors: true
   with_items:
     - "pgwatch2"
     - "pgwatch2_metrics"
@@ -61,7 +54,6 @@
 
 #
 - name: Delete users to the pgwatch2 schema.
-  become: true
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python2
@@ -74,18 +66,15 @@
 
 #
 - name: Uninstall pgwatch2 rpm package
-  become: true
-  become_user: root
   shell: yum remove -y pgwatch2
   async: 180
   poll: 5
-  ignore_errors: true
   register: pgwatch2_rpm_pkg_uninstalled
+  ignore_errors: true
 
 #
 - name: Remove pgwatch2 rpm file
-  become: true
-  become_user: root
-  file: path=/root/pgwatch2_{{ pgwatch2_major_version }}.{{ pgwatch2_minor_version }}.{{ pgwatch2_patch_version }}_linux_64-bit.rpm state=absent
-  ignore_errors: true
+  file: path=/root/pgwatch2_{{ pgwatch2.major_version }}.{{ pgwatch2.minor_version }}.{{ pgwatch2.patch_version }}_linux_64-bit.rpm state=absent
   register: pgwatch2_rpm_file_deleted
+  ignore_errors: true
+

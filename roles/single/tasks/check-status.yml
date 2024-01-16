@@ -1,14 +1,14 @@
+#
 - name: Verify the state of Postgres instance
-  become: true
   become_user: postgres
-  shell: ( source /var/lib/pgsql/.bash_profile ; {{ bin_dir }}/pg_ctl -V )
-  register: postgres_instance_state_verified
+  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_ctl -V )
+  register: single_postgres_state_verified
   args:
-    chdir: "/var/lib/pgsql"
+    chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-- debug: msg={{ postgres_instance_state_verified }}
-  become: true
+#
+- debug: msg={{ single_postgres_state_verified }}
   become_user: postgres
-  tags:
-    - print_debug
+  tags: print_debug
+

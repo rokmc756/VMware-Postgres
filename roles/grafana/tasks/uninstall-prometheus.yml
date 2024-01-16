@@ -2,7 +2,6 @@
 # Install grafana for RHEL or CentOS
 #
 - name: Stop and disable prometheus and postgres_exporter service
-  become: true
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -17,7 +16,6 @@
 
 #
 - name: Delete the grafana / prometheus / postgres_exporter config and binary files
-  become: true
   file: path={{ item.dest }} state=absent
   ignore_errors: true
   register: systemd_unit_files_deleted
@@ -34,8 +32,6 @@
 
 #
 - name: Uninstall pip modules for grafana
-  become: true
-  become_user: root
   shell: |
     pip3 uninstall -y wheel
     pip3 uninstall -y Pillow
@@ -47,7 +43,6 @@
 
 #
 - name: Uninstall Dependent and Grafana RPM packages
-  become: true
   yum:
     name: "{{ item }}"
     state: absent
@@ -57,3 +52,4 @@
   with_items:
     - postgresql-devel
     - postgresql-contrib
+

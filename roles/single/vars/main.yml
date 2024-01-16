@@ -1,35 +1,43 @@
----
-#
-major_version: 15
-minor_version: 5
-patch_version: 1
-build_version: ""
-rhel_version: el9
-# package_name: "vmware-postgres"     # In case of version within 12
-# package_name: "pivotal-postgres"     # In case of version within 11
-# bin_dir: "/usr/bin"
-package_name: "vmware-postgres{{ major_version }}"     # In case of version higher than 13
-bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin" # In case of version higher than 13
-database_name: single_testdb
-username: jomoon
-password: changeme
-user: postgres
-group: postgres
-sslmode: prefer
-app_database: testdb
+pgsql:
+  major_version: 15
+  minor_version: 5
+  patch_version: 1
+  build_version: 1
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  db_name: single_testdb
+  db_user: jomoon
+  db_password: changeme
+  user: postgres
+  group: postgres
+  home_dir: "/home/postgres"
+  base_dir: "/var/lib/pgsql"
+  # sslmode: prefer
+  # app_database: testdb
 
-#
-enable_ssl: true
-pgsql_base_dir: "/var/lib/pgsql"
-pgsql_ssl_dir: "{{ pgsql_base_dir }}/certs"
-pgsql_ssl_days: 3660
-pgsql_ssl_country: "KR"
-pgsql_ssl_state: "Seoul"
-pgsql_ssl_location: "Guro"
-pgsql_ssl_organization: "VMware"
-pgsql_ssl_organization_unit: "Tanzu"
-pgsql_ssl_common_name: "jtest.pivotal.io"
-pgsql_ssl_email: "jomoon@pivotal.io"
+common:
+  sudo_user: jomoon
+  sudo_group: jomoon
+  sudo_user_home_dir: "/home/jomoon"
+  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
+  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
+  # package_name: "vmware-postgres"      # For 12 version
+  # package_name: "pivotal-postgres"     # For 11 version
+  # bin_dir: "/usr/bin"
+
+ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
+  enable: true
+
 
 # RHEL or Rocky Linux 8
 # vmware-postgres10-10.21-1.el8.x86_64.rpm            # - OK

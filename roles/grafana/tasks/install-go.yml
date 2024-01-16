@@ -3,7 +3,7 @@
 #
 #
 - name: Check if the GO file is is already existed
-  stat: path=/root/go{{ go_major_version }}.{{ go_minor_version }}.{{ go_patch_version }}.linux-amd64.tar.gz
+  stat: path=/root/go{{ go.major_version }}.{{ go.minor_version }}.{{ go.patch_version }}.linux-amd64.tar.gz
   register: go_file_existed
 
 #
@@ -13,24 +13,21 @@
 
 #
 - name: Copy the GO file
-  become: true
-  copy: src=go{{ go_major_version }}.{{ go_minor_version }}.{{ go_patch_version }}.linux-amd64.tar.gz dest=/root/go{{ go_major_version }}.{{ go_minor_version }}.{{ go_patch_version }}.linux-amd64.tar.gz mode=0644 owner=root group=root
+  copy: src=go{{ go.major_version }}.{{ go.minor_version }}.{{ go.patch_version }}.linux-amd64.tar.gz dest=/root/go{{ go.major_version }}.{{ go.minor_version }}.{{ go.patch_version }}.linux-amd64.tar.gz mode=0644 owner=root group=root
   register: go_file_copied
   when: go_file_existed.stat.exists != True
 
 #
 - name: Download GO file if copy fails
-  become: true
-  shell: wget https://dl.google.com/go/go{{ go_major_version }}.{{ go_minor_version }}.{{ go_patch_version }}.linux-amd64.tar.gz -P /root/
+  shell: wget https://dl.google.com/go/go{{ go.major_version }}.{{ go.minor_version }}.{{ go.patch_version }}.linux-amd64.tar.gz -P /root/
   args:
     executable: /bin/bash
   when: go_file_copied is not succeeded
 
-
 #
 - name: Untar GO file
   become: true
-  shell: tar -C /usr/local -xf /root/go{{ go_major_version }}.{{ go_minor_version }}.{{ go_patch_version }}.linux-amd64.tar.gz
+  shell: tar -C /usr/local -xf /root/go{{ go.major_version }}.{{ go.minor_version }}.{{ go.patch_version }}.linux-amd64.tar.gz
   args:
     executable: /bin/bash
   when: go_bin_existed.stat.exists != True

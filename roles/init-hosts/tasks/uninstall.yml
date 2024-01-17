@@ -11,7 +11,7 @@
   # become_method: sudo
 
 #
-- name: Remove config and jar files of Kafka UI
+- name: Remove config and files
   become: yes
   file:
     path: "{{ item }}"

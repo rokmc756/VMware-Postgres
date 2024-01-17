@@ -3,13 +3,13 @@
 #
 - name: Install Common Prerequisties RPM Packages for VMware Postgres
   yum:
-    name: "{{ item }}"
+    name: "{{ rh_install_pkgs }}"
     state: present
     skip_broken: yes
-  async: 120
-  poll: 5
-  with_items: "{{ rh_install_pkgs }}"
   when: install_pkgs
+  # with_items: "{{ rh_install_pkgs }}"
+  #async: 120
+  #poll: 5
 
 #
 - name: Alternative Python3 version to Python

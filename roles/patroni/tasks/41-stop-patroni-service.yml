@@ -6,12 +6,12 @@
     enabled: no
     state: stopped
   register: patroni_etcd_service_stopped
-  until: patroni_etcd_service_stopped is succeeded
-  retries: 3
   with_items:
     - etcd
     - patroni
-
+  # until: patroni_etcd_service_stopped is succeeded
+  # retries: 3
+ 
 #
 - name: Kill etcd process
   shell: ( killall etcd )

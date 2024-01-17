@@ -26,16 +26,16 @@
   when: install_dep_pkgs == true
 
 #
-- name: Install Dependent Python modules for VMware Postgres Patroni Software on {{ ansible_distribution }}
-  import_tasks: 03-install-pip-module.yml
-  tags: install
-  when: install_pip_module == true
-
-#
 - name: Install RPM and Python packages for VMware Postgres Patroni Software on {{ ansible_distribution }}
   import_tasks: 04-install-pkgs.yml
   tags: install
   when: install_pkgs == true
+
+#
+- name: Install Dependent Python modules for VMware Postgres Patroni Software on {{ ansible_distribution }}
+  import_tasks: 03-install-pip-module.yml
+  tags: install
+  when: install_pip_module == true
 
 #
 - name: Install ETCD binary for VMware Postgres Patroni Cluster on {{ ansible_distribution }}

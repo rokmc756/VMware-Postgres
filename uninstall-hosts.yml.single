@@ -3,7 +3,7 @@
   vars:
     print_debug: true
     uninstall_pkgs: true
-    uninstall_dep_pkgs: true
+    uninstall_dep_pkgs: false
     uninstall_go: true
     uninstall_prometheus: true
     uninstall_grafana: true

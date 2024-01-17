@@ -8,4 +8,4 @@
     enable_firewall: true
   roles:
     - pgautofailover
-    - init-hosts
+ #    - init-hosts

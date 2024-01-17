@@ -10,5 +10,5 @@
     add_users: true
     enable_ssl: true
   roles:
-    - init-hosts
     - pgautofailover
+#    - init-hosts

@@ -3,14 +3,15 @@
 #
 - name: Install Common Prerequisties RPM Packages for VMware Postgres PGAutoFailover
   yum:
-    name: "{{ item }}"
+    name:  "{{ rh_install_pkgs }}"
     state: present
-    skip_broken: yes
-  async: 120
-  poll: 5
-  with_items: "{{ rh_install_pkgs }}"
   when: install_dep_pkgs
-
+  #  skip_broken: yes
+  # name:  "{{ item  }}"
+  # async: 120
+  # poll: 5
+  # with_items: "{{ rh_install_pkgs }}"
+ 
 #
 - name: Alternative Python3 version to Python
   become: true

@@ -4,7 +4,7 @@ pgsql:
   minor_version: 5
   patch_version: 1
   build_version: 1
-  os_version: el9
+  os_version: el8
   arch_type: x86_64
   bin_type: rpm
   db_name: patroni_testdb
@@ -51,12 +51,12 @@ patroni:
 
 etcd:
   major_version: 3
-  minor_version: 3
-  patch_version: 27
-  build_version: ""
-  arch_type: amd64
-  os_version: el9
-  bin_type: tar.gz
+  minor_version: 2
+  patch_version: 21
+  build_version: 2
+  arch_type: x86_64
+  os_version: el8
+  bin_type: rpm
   download_bin: false
   blank: " "
   # etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions

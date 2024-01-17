@@ -10,6 +10,6 @@
     uninstall_pgwatch2: true
   roles:
     - { role: single }
-    - { role: init-hosts }
+#    - { role: init-hosts }
 #    - { role: grafana }
 #    - { role: pgwatch2 }

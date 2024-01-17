@@ -1,4 +1,5 @@
 ---
+
 #
 - name: Stop services for VMware Postgres Patroni and ETCD
   systemd:

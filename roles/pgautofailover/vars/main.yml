@@ -4,7 +4,7 @@ pgsql:
   minor_version: 5
   patch_version: 1
   build_version: 1
-  os_version: el8
+  os_version: el7
   arch_type: x86_64
   bin_type: rpm
   db_name: pgfailover_testdb

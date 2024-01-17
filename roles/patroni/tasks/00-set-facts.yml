@@ -1,9 +1,9 @@
 #
-#
 - name: Define facts for list of dependecies packages to install or uninstall
   set_fact:
     rh_install_pkgs: "{{ rh_common_dep_pkgs ~ ',' ~ rh7_dep_pkgs ~ ',' ~ rh7_python_pkgs }}"
     rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh7_dep_pkgs ~ ',' ~ rh7_python_pkgs }}"
+    yum_python_version: "/usr/bin/python2"
   when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int <= 7
 
 #
@@ -11,6 +11,7 @@
   set_fact:
     rh_install_pkgs: "{{ rh_common_dep_pkgs ~ ',' ~ rh8_dep_pkgs ~ ',' ~ rh8_python_pkgs }}"
     rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh8_dep_pkgs ~ ',' ~ rh8_python_pkgs }}"
+    yum_python_version: "/usr/bin/python3"
   when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int == 8
 
 #
@@ -18,6 +19,7 @@
   set_fact:
     rh_install_pkgs: "{{ rh_common_dep_pkgs ~ ',' ~ rh9_dep_pkgs ~ ',' ~ rh9_python_pkgs }}"
     rh_uninstall_pkgs: "{{ remove_rh_common_dep_pkgs ~ ',' ~ rh9_dep_pkgs ~ ',' ~ rh9_python_pkgs }}"
+    yum_python_version: "/usr/bin/python3"
   when: ( ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky" ) and ansible_distribution_major_version|int >= 9
 
 #

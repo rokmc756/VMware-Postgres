@@ -7,19 +7,17 @@
     state: stopped
     daemon_reload: yes
   register: pgautofailover_service_stopped
-  async: 60
-  poll: 5
   when: uninstall_pkgs == true
+  # async: 60
+  # poll: 5
 
 #
-- name: Alternative python version 2
+- name: Alternative Python version
   shell: |
-    /usr/sbin/update-alternatives --install /usr/bin/python python /usr/bin/python2 1
-    /usr/sbin/alternatives --set python /usr/bin/python2
-  register: alternatives_python2
-  when:
-    - hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-    - ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
+    /usr/sbin/update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
+    /usr/sbin/alternatives --set python {{ yum_python_version }}
+  register: alternatives_python
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 
 #
 - name: Uninstall VMware Postgres RPM package
@@ -29,6 +27,8 @@
     disable_gpg_check: true
   async: 180
   poll: 5
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
   when: uninstall_pkgs == true
 
 #
@@ -53,6 +53,8 @@
     name: "{{ rh_uninstall_pkgs }}"
     state: absent
     skip_broken: yes
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
   when: uninstall_dep_pkgs == true
 
 #

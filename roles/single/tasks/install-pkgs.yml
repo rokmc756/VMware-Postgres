@@ -1,27 +1,27 @@
 ---
 # Configure and Install Single VMware Postgres
 #
-- name: Install Common Prerequisties RPM Packages for VMware Postgres
-  yum:
-    name: "{{ rh_install_pkgs }}"
-    state: present
-    skip_broken: yes
-  when: install_pkgs
-  # with_items: "{{ rh_install_pkgs }}"
-  #async: 120
-  #poll: 5
-
-#
-- name: Alternative Python3 version to Python
+- name: Alternative Python version
   become: true
   become_user: root
   shell: |
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-    alternatives --set python /usr/bin/python3
-  register: python3_version_alternatives
-  when: install_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-  # update-alternatives --install /usr/bin/python python /usr/local/bin/python3 3
-  # update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
+    update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
+    alternatives --set python {{ yum_python_version }}
+  register: python_version_alternatives
+  when: install_pkgs
+
+#
+- name: Install Common Prerequisties RPM Packages for VMware Postgres
+  package:
+    name: "{{ rh_install_pkgs }}"
+    state: present
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
+  when: install_pkgs
+  # with_items: "{{ rh_install_pkgs }}"
+  # async: 120
+  # poll: 5
+  # skip_broken: yes
 
 #
 - name: Install ipaddress pip3 module
@@ -35,10 +35,12 @@
 
 #
 - name: Install the VMware Postgres RPM Package
-  yum:
+  package:
     name: "{{ common.sudo_user_home_dir }}/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
     state: present
     disable_gpg_check: true
   async: 180
   poll: 5
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
 

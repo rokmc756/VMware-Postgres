@@ -1,5 +1,12 @@
 ---
 #
+- name: Alternative Python Version
+  shell: |
+    /usr/sbin/update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
+    /usr/sbin/alternatives --set python {{ yum_python_version }}
+  register: alternatives_python
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
+
 #
 - name: Uninstall VMware Postgres Patroni RPM Package
   yum:
@@ -8,6 +15,8 @@
   register: patroni_rpm_packages_uninstalled
   with_items:
     - "{{ patroni_pkg_name }}"
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
   when: pgsql.with_patroni_pkg == true
 
 #
@@ -19,6 +28,8 @@
   with_items:
     - "{{ pgsql_pkg_name }}"
     - "vmware-postgres"
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
 
 #
 - name: Delete the VMware Postgres {{ pgsql.major_version }} Patroni RPM file

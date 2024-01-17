@@ -1,28 +1,29 @@
 ---
 # Configure and Install PGAutoFailover on {{ ansible_distribution }}
 #
+- name: Alternative Python Version
+  shell: |
+    /usr/sbin/update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
+    /usr/sbin/alternatives --set python {{ yum_python_version }}
+  register: alternatives_python
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
+
+#
 - name: Install Common Prerequisties RPM Packages for VMware Postgres PGAutoFailover
   yum:
     name:  "{{ rh_install_pkgs }}"
     state: present
+    skip_broken: yes
+  async: 300
+  poll: 5
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
   when: install_dep_pkgs
-  #  skip_broken: yes
+  # skip_broken: yes
   # name:  "{{ item  }}"
   # async: 120
   # poll: 5
   # with_items: "{{ rh_install_pkgs }}"
- 
-#
-- name: Alternative Python3 version to Python
-  become: true
-  become_user: root
-  shell: |
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-    alternatives --set python /usr/bin/python3
-  register: python3_version_alternatives
-  when: install_dep_pkgs and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
-  # update-alternatives --install /usr/bin/python python /usr/local/bin/python3 3
-  # update-alternatives --install /usr/bin/unversioned-python python /usr/bin/python3.9 1
 
 #
 - name: Copy the VMware Postgres RPM Pacage to all nodes
@@ -34,4 +35,6 @@
     name: "{{ common.sudo_user_home_dir }}/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
     state: present
     disable_gpg_check: true
+  vars:
+    ansible_python_interpreter: "{{ yum_python_version }}"
 

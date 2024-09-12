@@ -1,5 +1,4 @@
 ---
-#
 - name: Copy ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} RPM Package
   copy:
     src: "{{ item }}"
@@ -12,7 +11,7 @@
     - "{{ etcd_pkg_name }}-{{ etcd.build_version }}.{{ etcd.os_version }}.{{ etcd.arch_type }}.{{ etcd.bin_type }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
-#
+
 - name: Install ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} RPM Package and Prerequistes RPMS of Patroni {{ patroni.major_version }}.{{ patroni.minor_version }} RPM Package
   yum:
     name: "{{ item }}"
@@ -26,8 +25,8 @@
     - etcd
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
 
-#
-- name: Install ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} RPM Packag for worker nodes
+
+- name: Install ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} RPM Package for Worker nodes
   yum:
     name: "{{ common.sudo_user_home_dir }}/{{ item }}"
     state: present
@@ -39,24 +38,24 @@
     - "{{ etcd_pkg_name }}-{{ etcd.build_version }}.{{ etcd.os_version }}.{{ etcd.arch_type }}.{{ etcd.bin_type }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
-#
+
 # wget https://github.com/etcd-io/etcd/releases/download/${ETCD_RELEASE}/etcd-${ETCD_RELEASE}-linux-amd64.tar.gz
 - name: Download ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} binary for worker nodes
   copy: src=https://github.com/etcd-io/etcd/releases/download/v{{ etcd_main_version }}/etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz dest=/tmp owner=root mode=755
   when: ( etcd.download_bin == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9 )
 
-#
-- name: Copy ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} tarball for worker nodes
+
+- name: Copy ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} Tarball for Worker Nodes
   copy: src=etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz dest=/tmp owner=root mode=755
   when: ( etcd.download_bin == false and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9 )
 
-#
-- name: Unzip ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} binary for worker nodes
+
+- name: Unzip ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} Binary for Worker Nodes
   shell: "tar zxf /tmp/etcd-v{{ etcd_main_version }}-linux-amd64.tar.gz -C /tmp"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 
-#
-- name: Copy ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} binary for worker nodes
+
+- name: Copy ETCD {{ etcd.major_version }}.{{ etcd.minor_version }} Binary for Worker Nodes
   shell: "cp /tmp/etcd-v{{ etcd_main_version }}-linux-amd64/{{ item }} /usr/bin/"
   with_items:
     - etcd

@@ -1,7 +1,7 @@
 # add the IP address, username and hostname of the target hosts here
 USERNAME=jomoon
 COMMON="yes"
-ANSIBLE_HOST_PASS="rmsidwoalfh"
+ANSIBLE_HOST_PASS="changeme"
 ANSIBLE_TARGET_PASS="changeme"
 # include ./*.mk
 
@@ -47,6 +47,14 @@ init:	setup-hosts.yml update-hosts.yml
 	done
 	ansible-playbook -i ansible-hosts -u ${USERNAME} --ssh-common-args='-o UserKnownHostsFile=./known_hosts -o VerifyHostKeyDNS=true' install-ansible-prereqs.yml
 
+hosts:
+	make -f makefile_configs/Makefile.hosts r=${r} s=${s} c=${c} USERNAME=${USERNAME}
+
+patroni:
+	make -f makefile_configs/Makefile.patroni r=${r} s=${s} c=${c} USERNAME=${USERNAME}
+
+
+
 # - https://ansible-tutorial.schoolofdevops.com/control_structures/
 install: role-update install-hosts.yml
 	ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -i ansible-hosts -u ${USERNAME} install-hosts.yml --tags="install"
@@ -62,9 +70,9 @@ update:
 
 # https://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile
 no_targets__:
-role-update:
-	sh -c "$(MAKE) -p no_targets__ | awk -F':' '/^[a-zA-Z0-9][^\$$#\/\\t=]*:([^=]|$$)/ {split(\$$1,A,/ /);for(i in A)print A[i]}' | grep -v '__\$$' | grep '^ansible-update-*'" | xargs -n 1 make --no-print-directory
-        $(shell sed -i -e '2s/.*/ansible_become_pass: ${ANSIBLE_HOST_PASS}/g' ./group_vars/all.yml )
+#role-update:
+#	sh -c "$(MAKE) -p no_targets__ | awk -F':' '/^[a-zA-Z0-9][^\$$#\/\\t=]*:([^=]|$$)/ {split(\$$1,A,/ /);for(i in A)print A[i]}' | grep -v '__\$$' | grep '^ansible-update-*'" | xargs -n 1 make --no-print-directory
+#        $(shell sed -i -e '2s/.*/ansible_become_pass: ${ANSIBLE_HOST_PASS}/g' ./group_vars/all.yml )
 
 ssh:
 	ssh -o UserKnownHostsFile=./known_hosts ${USERNAME}@${IP}

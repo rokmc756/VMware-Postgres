@@ -1,115 +1,112 @@
 ---
-# Deploy VMWare Postgres Patroni Cluster on on {{ ansible_distribution }}
-#
-# for now fail if it's not a Red Hat based system
-- name: Check OS (PGCC v2)
+- name: Check OS ( Patroni )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or ansible_os_family != 'Rocky'
 
-#
+
 - name: Set Facts for network, package variables
   import_tasks: 00-set-facts.yml
   tags:
     - install
     - uninstall
 
-#
-- name: Enabling firewalld and configure firewall ruleset on for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Enabling firewalld and configure firewall ruleset on for VMware Postgres Patroni Cluster
   import_tasks: 01-config-firewall.yml
   tags: install
   when: config_firewall == true
 
-#
-- name: Install Dependent RPM Packages for VMware Postgres Patroni Software on {{ ansible_distribution }}
+
+- name: Install Dependent RPM Packages for VMware Postgres Patroni Software
   import_tasks: 02-install-dep-pkgs.yml
   tags: install
   when: install_dep_pkgs == true
 
-#
-- name: Install RPM and Python packages for VMware Postgres Patroni Software on {{ ansible_distribution }}
+
+- name: Install RPM and Python packages for VMware Postgres Patroni Software
   import_tasks: 04-install-pkgs.yml
   tags: install
   when: install_pkgs == true
 
-#
-- name: Install Dependent Python modules for VMware Postgres Patroni Software on {{ ansible_distribution }}
+
+- name: Install Dependent Python modules for VMware Postgres Patroni Software
   import_tasks: 03-install-pip-module.yml
   tags: install
   when: install_pip_module == true
 
-#
-- name: Install ETCD binary for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Install ETCD binary for VMware Postgres Patroni Cluster
   import_tasks: 05-install-etcd.yml
   tags: install
   when: install_etcd == true
 
-#
-- name: Preparing environment for VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Preparing environment for VMware Postgres Patroni Cluster
   import_tasks: 06-config-env.yml
   tags: install
   when: config_env == true
 
-#
-- name: Enable SSL in VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Enable SSL in VMware Postgres Patroni Cluster
   import_tasks: 07-enable-ssl.yml
   tags: install
   when: enable_ssl == true
 
-#
-- name: Configure VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Configure VMware Postgres Patroni Cluster
   import_tasks: 08-config-patroni.yml
   tags: install
   when: config_patroni == true
 
-#
-- name: Add users into VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+- name: Add users into VMware Postgres Patroni Cluster
   import_tasks: 09-add-users.yml
   tags: install
   when: add_users == true
 
-#
-- name: Stop Patroni service
+
+- name: Stop Patroni Service
   import_tasks: 41-stop-patroni-service.yml
   tags: uninstall
   when: stop_patroni_service == true
 
-#
+
 - name: Uninstall Packages for VMware Postgres and Patroni
   import_tasks: 42-uninstall-pkgs.yml
   tags: uninstall
   when: uninstall_pkgs == true
 
-#
+
 - name: Uninstall PIP module
   import_tasks: 43-uninstall-pip-module.yml
   tags: uninstall
   when: uninstall_pip_module == true
 
-#
+
 - name: Uninstall dependent RPM Packages for VMware Postgres and Patroni
   import_tasks: 44-uninstall-dep-pkgs.yml
   tags: uninstall
   when: uninstall_dep_pkgs == true
 
-#
-- name: Remove config files of environment for VMware Postgres and Patrnio
+
+- name: Remove config files of environment for VMware Postgres and Patroni
   import_tasks: 45-remove-config-files.yml
   tags: uninstall
   when: remove_env_config == true
 
-#
+
 - name: Disable firewalld config
   import_tasks: 46-disable-firewalld-config.yml
   tags: uninstall
   when: remove_firewall_config  == true
 
-#
-#- name: Destroy VMware Postgres Patroni Cluster on {{ ansible_distribution }}
+
+#- name: Destroy VMware Postgres Patroni Cluster
 #  import_tasks: uninstall.yml
 #  tags: uninstall
 
-#
-- name: Upgrade VMware Postgres Patroni Cluser on {{ ansible_distribution }}
+
+- name: Upgrade VMware Postgres Patroni Cluser
   import_tasks: upgrade.yml
   tags: upgrade
 

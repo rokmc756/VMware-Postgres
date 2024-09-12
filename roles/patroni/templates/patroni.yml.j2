@@ -1,10 +1,10 @@
 scope: '{{ patroni.cluster_name }}'
 name: '{{ inventory_hostname }}'
 restapi:
-  listen: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:8008'
-  connect_address: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:8008'
+  listen: '{{ hostvars[inventory_hostname][_netdev]['ipv4']['address'] }}:8008'
+  connect_address: '{{ hostvars[inventory_hostname][_netdev]['ipv4']['address'] }}:8008'
 etcd:
-  hosts: '{{ groups['workers'] | map('extract', hostvars, ['ansible_eth0', 'ipv4', 'address']) | map('regex_replace', '$', ':2379') | join(',') }}'
+  hosts: '{{ groups['workers'] | map('extract', hostvars, [_netdev, 'ipv4', 'address']) | map('regex_replace', '$', ':2379') | join(',') }}'
 bootstrap:
   dcs:
     ttl: 30
@@ -53,9 +53,9 @@ bootstrap:
     - data-checksums
   pg_hba:
 {% for h in groups["workers"] %}
-    - host replication replicator {{ hostvars[h]['ansible_eth0']['ipv4']['address'] }}/32 md5
+    - host replication replicator {{ hostvars[h][_netdev]['ipv4']['address'] }}/32 md5
 {% endfor %}
-    # host replication replicator {{ hostvars[groups['workers'][0-2]]['ansible_eth0']['ipv4']['address'] }}/32 md5
+    # host replication replicator {{ hostvars[groups['workers'][0-2]][_netdev]['ipv4']['address'] }}/32 md5
     - host all all 0.0.0.0/0 md5
 {% if enable_ssl == true %}
     - hostssl all all 0.0.0.0/0 md5
@@ -67,8 +67,8 @@ bootstrap:
         - createrole
         - createdb
 postgresql:
-  listen: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5432'
-  connect_address: '{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}:5432'
+  listen: '{{ hostvars[inventory_hostname][_netdev]['ipv4']['address'] }}:5432'
+  connect_address: '{{ hostvars[inventory_hostname][_netdev]['ipv4']['address'] }}:5432'
   data_dir: {{ pgsql.base_dir }}/patroni_data
   pgpass: {{ pgsql.base_dir }}/pgpass0
   authentication:

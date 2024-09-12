@@ -41,7 +41,7 @@
   register: patroni_rpm_packages_uninstalled
   with_items:
     - "{{ patroni_pkg_name }}"
-  when: pgsql.with_patroni_pkg == true and uninstall_pkgs == true
+  when: patroni.with_pkgs == true and uninstall_pkgs == true
 
 #
 - name: Uninstall VMware Postgres RPM packages
@@ -61,7 +61,7 @@
     state: absent
   register: patroni_rpm_packages_deleted
   ignore_errors: true
-  when: pgsql.with_patroni_pkg == true and uninstall_pkgs == true
+  when: patroni.with_pkgs == true and uninstall_pkgs == true
 
 
 #

@@ -6,7 +6,7 @@
   register: python2_version_alternatives
   when: install_dep_pkgs
 
-#
+
 - name: Install the Prerequisties RPM Packages for VMware Postgres Patroni
   package:
     name: "{{ rh_install_pkgs }}"
@@ -18,7 +18,7 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: install_dep_pkgs == true
 
-#
+
 - name: Install the Python RPM Packages for VMware Postgres Patroni
   package:
     name: "{{ rh7_python_pkgs }}"
@@ -30,7 +30,7 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
 
-#
+
 - name: Install the Python RPM Packages for VMware Postgres Patroni
   package:
     name: "{{ rh8_python_pkgs }}"
@@ -43,7 +43,7 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
-#
+
 - name: Install the Python RPM Packages for VMware Postgres Patroni
   package:
     name: "{{ rh9_python_pkgs }}"

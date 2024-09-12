@@ -1,19 +1,18 @@
 ---
-# Install Patroni Cluster for RHEL/CentOS/Rocky 7.x and 8.x
-#
-- name: Stop and disable firewalld
+- name: Stop and Disable Firewalld
   systemd:
     name: firewalld
     state: stopped
     enabled: false
   register: firewalld_service_disabled
 
-#
-- name: Flush iptables rules
+
+- name: Flush IPTables Rules
   shell: ( iptables -F )
   register: iptables_rules_flushed
 
-#
-- name: List iptables rules
+
+- name: List IPTables Rules
   shell: ( iptables -nL )
   register: iptables_rules_listed
+

@@ -1,14 +1,12 @@
 ---
-#
-- name: Check OS support
+- name: Check OS Support
   debug: msg="The following OS family {{ ansible_os_family }} {{ ansible_architecture }} is not supported" fail=yes
   when:
     - inventory_hostname in groups['postgres-ha']
     - not ansible_os_family == "RedHat" or not ansible_architecture == "x86_64"
-#
-- name: Alternative python version to python2
-  become: true
-  become_user: root
+
+
+- name: Alternative Python Version to Python2
   command: alternatives --set python /usr/bin/python2
   register: python_version_alternative
   when: inventory_hostname in groups['postgres-ha']
@@ -17,16 +15,15 @@
     var: python_version_alternative
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Check packet manager support
+
+- name: Check Package Manager Support
   debug: msg="The following packet manager {{ ansible_pkg_mgr }} is not supported" fail=yes
   when:
     - inventory_hostname in groups['postgres-ha']
     - not ansible_pkg_mgr == "yum"
 
-- name: Add bdr94 repository
-  become: true
-  become_user: root
+
+- name: Add bdr94 Repository
   yum_repository:
     name: bdr94_repo
     description: Add bdr94 repsotiry
@@ -37,10 +34,12 @@
 - debug:
     var: bdr94_repo_added
 
-#- name: Copy the vmwawre-postgres rpm file to all hosts in cluster
+
+#- name: Copy the VMware Postgres RPM File to All Hosts
 #  copy: src=postgresql-bdr94-bdr-1.0.5-1.el7.x86_64.rpm dest=/home/jomoon/postgresql-bdr94-bdr-1.0.5-1.el7.x86_64.rpm mode=0644 owner=jomoon group=jomoon
 
-#- name: Install VMware Postgres on all hosts as root
+
+#- name: Install VMware Postgres on all Hosts
 #  become: true
 #  yum:
 #    name: /home/jomoon/postgresql-bdr94-bdr-1.0.5-1.el7.x86_64.rpm
@@ -48,10 +47,8 @@
 #  async: 120
 #  poll: 5
 
-#
-- name: Install PostgreSQL BDR packages
-  become: true
-  become_user: root
+
+- name: Install PostgreSQL BDR Packages
   yum:
     name={{ item }}
     state=latest
@@ -60,100 +57,87 @@
     - python27-python-psycopg2
     - postgresql-bdr94-bdr
   when: inventory_hostname in groups['postgres-ha']
-#    - python3-psycopg2
 
-#
-- name: Update alternative python version to python2
-  become: true
-  become_user: root
+
+- name: Update Alternative Python Version to Python2
   command: update-alternatives --install /usr/bin/python python /usr/bin/python2 1
   register: update_python2_version_alternative
-
 - debug:
     var: update_python2_version_alternative
 
-#
-- name: Update alternative python version to python3
-  become: true
-  become_user: root
+
+- name: Update Alternative Python Version to Python3
   command: update-alternatives --install /usr/bin/python python /usr/bin/python3 2
   register: update_python3_version_alternative
-
 - debug:
     var: update_python3_version_alternative
 
-#
-- name: Alternative python version to python2
-  become: true
-  become_user: root
+
+- name: Alternative Python Version to Python2
   command: alternatives --set python /usr/bin/python3
   register: python_version_alternative
-
 - debug:
     var: python_version_alternative
-#
-- name: Install psycopg2
-  become: true
+
+
+- name: Install Psycopg2
   become_user: postgres
   command: /usr/bin/pip3.6 install psycopg2
   when: inventory_hostname in groups['postgres-ha']
 
-#- name: Make sure psycopg2 is installed
-#  become: true
+
+#- name: Make Sure Psycopg2 is Installed
 #  become_user: postgres
 #  pip:
 #    name: psycopg2
 #    state: present
 #  when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Change the permissions on the /tmp directory
-  become: yes
-  become_user: root
+
+- name: Change the Permissions on the /tmp Directory
   file:
     path: /tmp
     state: directory
     mode: 1755
   when: inventory_hostname in groups["postgres-ha"]
 
-#
-- name: Stop PostgreSQL if are running
+
+- name: Stop PostgreSQL if It is Running
   become: true
   become_user: postgres
   command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} stop"
   ignore_errors: yes
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Remove old PostgreSQL data directory if exists
+
+- name: Remove Old PostgreSQL Data Directory if Exists
   become: true
   file:
     dest={{ postgresql_datadir }}
     state=absent
   when: inventory_hostname in groups['postgres-ha']
 
-#- name: Add the user to .pgpass file.
-#become: true
-#become_user: postgres
-#copy:
-#dest: "/var/lib/pgsql/.pgpass"
-#content: |
-#  {{ inventory_hostname }}:5342:postgres:postgres:{{ postgresql_admin_password }}
-#owner: postgres
-#group: postgres
-#mode: 0600
-#when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Initialize new PostgreSQL BDR cluster on upstream server
-  become: true
+#- name: Add the User to .pgpass File
+# become: true
+# become_user: postgres
+# copy:
+# dest: "/var/lib/pgsql/.pgpass"
+# content: |
+#   {{ inventory_hostname }}:5342:postgres:postgres:{{ postgresql_admin_password }}
+# owner: postgres
+# group: postgres
+# mode: 0600
+# when: inventory_hostname in groups['postgres-ha']
+
+
+- name: Initialize New PostgreSQL BDR Cluster on Upstream Server
   become_user: postgres
   command: "/usr/pgsql-9.4/bin/initdb -D {{ postgresql_datadir }} -A {{ postgresql_auth_method }}"
   when: inventory_hostname in groups['postgres-ha']
 
-#
+
 - name: Configure pg_hba.conf for basic authentication
-  become: true
   lineinfile:
     dest: "{{ postgresql_datadir }}/pg_hba.conf"
     state: present
@@ -168,8 +152,8 @@
     - { type: "host",   database: "all",          user: "all",       address: "0.0.0.0/0",     method: "password" }
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Configure pg_hba.conf to enable communication with password authentication between servers
+
+- name: Configure pg_hba.conf to Enable Communication with Password Authentication between Servers
   become: true
   lineinfile:
     dest: "{{ postgresql_datadir }}/pg_hba.conf"
@@ -183,8 +167,8 @@
     - [ "{{ hostvars[groups['monitor'][1]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][0]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][1]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][2]]['ansible_eth0']['ipv4']['address'] }}" ]
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Configure pg_hba.conf to enable communication with trust authentication between servers
+
+- name: Configure pg_hba.conf to Enable Communication with Trust Authentication between Servers
   become: true
   lineinfile:
     dest: "{{ postgresql_datadir }}/pg_hba.conf"
@@ -198,8 +182,8 @@
     - [ "{{ hostvars[groups['monitor'][1]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][0]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][1]]['ansible_eth0']['ipv4']['address'] }}", "{{ hostvars[groups['postgres-ha'][2]]['ansible_eth0']['ipv4']['address'] }}" ]
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Configure postgresql.conf with shared GUCs of PostgreSQL for BDR
+
+- name: Configure postgresql.conf with Shared GUCs of PostgreSQL for BDR
   become: true
   lineinfile:
     dest: "{{ postgresql_datadir }}/postgresql.conf"
@@ -213,14 +197,14 @@
     - "{{ postgresql_shared_guc }}"
   when: inventory_hostname in groups['postgres-ha']
 
-#
+
 - name: Start PostgreSQL
   become: true
   become_user: postgres
   command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} start"
   when: inventory_hostname in groups['postgres-ha']
 
-#
+
 - name: Configure Primary Master's postgresql.conf
   become: true
   lineinfile:
@@ -235,6 +219,7 @@
   when: inventory_hostname in groups['postgres-ha']
 #  when: ansible_default_ipv4.address == postgresql_upstream
 
+
 - name: Configure Slave Master's postgresql.conf
   become: true
   lineinfile:
@@ -248,48 +233,42 @@
     - "{{ postgresql_slave_master_guc }}"
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Final PostgreSQL restart
-  become: true
+
+- name: Final PostgreSQL Restart
   become_user: postgres
   command: "/usr/pgsql-9.4/bin/pg_ctl -D {{ postgresql_datadir }} restart"
   async: 120
   poll: 5
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Create postgresql director under /var/run
-  become: true
-  become_user: root
+
+- name: Create PostgreSQL Director under /var/run
   command: mkdir /var/run/postgresql
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Symbolic to socket
-  become: true
-  become_user: root
+
+- name: Symbolic to Socket
   command: ln -s /tmp/.s.PGSQL.5432 /var/run/postgresql/.s.PGSQL.5432
   when: inventory_hostname in groups['postgres-ha']
 
-#
-#- name: Create database to sync between Master Servers
-#  become: true
+
+#- name: Create a Database to Sync between Master Servers
 #  become_user: postgres
 #  command: createdb "{{ postgresql_bdr_database }}"
 #  when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Create database to sync between Master Servers
+
+- name: Create a Database to Sync between Master Servers
   become: true
   become_user: postgres
   postgresql_db:
     name: "{{ postgresql_bdr_database }}"
     state: present
   when: inventory_hostname in groups['postgres-ha']
-
 # - meta: end_play
 
-#- name: Create a new database with name "{{ postgresql_bdr_database }}"
+
+#- name: Create a New Database with Name "{{ postgresql_bdr_database }}"
 #  postgresql_db:
 #    login_host: "{{ hostvars[inventory_hostname]['ansible_eth0']['ipv4']['address'] }}"
 #    login_user: postgres
@@ -298,8 +277,8 @@
 #    name: "{{ postgresql_bdr_database }}"
 #  when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Connect to database, create user and grant access for all Master Servers
+
+- name: Connect to Database, Create User and Grant Access for All Master Servers
   become: true
   become_user: postgres
   postgresql_user:
@@ -310,8 +289,8 @@
     priv: "ALL"
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Create extentions for BDR
+
+- name: Create Extentions for BDR
   become: true
   become_user: postgres
   postgresql_query:
@@ -324,8 +303,8 @@
     - "CREATE EXTENSION bdr;"
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Create group on Primary Master Server for BDR
+
+- name: Create Group on Primary Master Server for BDR
   become: true
   become_user: postgres
   postgresql_query:
@@ -340,8 +319,8 @@
       );"
   when: inventory_hostname in groups['master']
 
-#
-- name: Join group from other Master Servers
+
+- name: Join Group from Other Master Servers
   become: true
   become_user: postgres
   postgresql_query:
@@ -357,3 +336,4 @@
        dbname={{ postgresql_bdr_database }} password={{ postgresql_bdr_password }}'
       );"
   when: inventory_hostname in groups['slave']
+

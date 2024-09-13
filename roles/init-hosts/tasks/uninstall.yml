@@ -1,14 +1,13 @@
 ---
-#
-- name: Rollback defatul group to /etc/sudoers file
+- name: Rollback Default Group to /etc/sudoers File
   lineinfile:
     dest: /etc/sudoers
     state: absent
     regexp: '^%{{ sudo_user }}'
     line: '%{{ sudo_user }}  ALL=(ALL)        ALL'
 
-#
-- name: Remove bash_history and .ssh directory
+
+- name: Remove bash_history and .ssh Directory
   file:
     path: "{{ item }}"
     state: absent
@@ -18,8 +17,8 @@
     - "/root/.ssh"
     - "/home/{{ sudo_user }}/.ssh"
 
-#
-- name: Remove hostname entries in /etc/hosts file
+
+- name: Remove Hostname Entries in /etc/hosts File
   lineinfile:
     dest: /etc/hosts
     regexp: "{{ domain_name }}"
@@ -43,13 +42,14 @@
   # nohup fuser -k /home/{{ sudo_user }}
 
 
-- name: Delete "{{ sudo_user }}" user and group
+- name: Delete "{{ sudo_user }}" User and Group
   user:
     name: "{{ sudo_user }}"
     group: "{{ sudo_group }}"
     state: absent
+    remove: true
 
-#
+
 - name: Uninstall Prerequest Software Packages
   package:
     name: "{{ item }}"
@@ -64,3 +64,4 @@
   with_items:
     - "devel"
   when: ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "Rocky"
+

@@ -1,7 +1,5 @@
 ---
-# Install PGAutoFailover on {{ ansible_distribution }}
-#
-- name: Verify that pg_autocatl of VMware Postgres PGAutoFailover has been properly installed
+- name: Verify that pg_autocatl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
   shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl version )
   register: pg_autoctl_install_verified
@@ -9,8 +7,8 @@
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-#
-- name: Verify that pg_ctl of VMware Postgres PGAutoFailover has been properly installed
+
+- name: Verify that pg_ctl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
   shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_ctl -V )
   register: pg_ctl_install_verified
@@ -18,8 +16,8 @@
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-#
-- name: Insert executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
+
+- name: Insert Executable Binary Path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   become_user: postgres
   lineinfile:
     path: "{{ item }}"
@@ -28,8 +26,8 @@
     - "{{ pgsql.base_dir }}/.bash_profile"
     - "{{ pgsql.home_dir }}/.bashrc"
 
-#
-- name: Create Monitor node
+
+- name: Create Monitor Mode
   become: true
   become_user: postgres
   shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl create monitor --auth trust --ssl-self-signed --pgdata {{ pgsql.base_dir }}/{{ pgfailover.monitor_database }} )
@@ -40,8 +38,8 @@
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-#
-- name: Grant user access from network {{ pgsql_network_range }} access for access with cert authentication.
+
+- name: Grant User Access from Network {{ pgsql_network_range }} Access for Access with Cert Authentication
   become_user: postgres
   postgresql_pg_hba:
     dest: "{{ pgsql.base_dir }}/{{ pgfailover.monitor_database }}/pg_hba.conf"
@@ -51,8 +49,8 @@
     databases: all
     method: trust
 
-#
-- name: Create systemd service file of monitor instance
+
+- name: Create Systemd Service File of Monitor Instance
   become_user: postgres
   shell: ( source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd --pgdata {{ pgsql.base_dir }}/{{ pgfailover.monitor_database }} > {{ pgsql.base_dir }}/pgautofailover.service )
   register: systemd_service_added
@@ -62,8 +60,8 @@
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-#
-- name: Copy systemd service file of monitor instance
+
+- name: Copy Systemd Service File of Monitor Instance
   copy:
     src: "{{ pgsql.base_dir }}/pgautofailover.service"
     dest: /etc/systemd/system/
@@ -72,8 +70,8 @@
     mode: 0644
     remote_src: true
 
-#
-- name: Reload and start systemd service of monitor instance
+
+- name: Reload and Start Systemd Service of Monitor Instance
   systemd:
     daemon_reload: yes
     enabled: yes
@@ -81,8 +79,8 @@
     name: pgautofailover
   register: monitor_systemd_status
 
-#
-- name: Replace database directory
+
+- name: Replace Database Directory
   become_user: postgres
   replace:
     path: "{{ pgsql.base_dir }}/.bash_profile"
@@ -91,14 +89,14 @@
     backup: yes
   #  replace: 'PGDATA=//var/lib/pgsql/{{ pgfailover.monitor_database }}'
 
-#
-- name: Verify the current state of monitor instance
+
+- name: Verify the Current State of Monitor Instance
   become_user: postgres
   shell: ( ps -ef | grep postgres )
   register: monitor_instance_state_verified
 
-#
-- name: Verify the current state of monitor
+
+- name: Verify the Current State of Monitor
   become_user: postgres
   shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "\l" )
   register: monitor_state_verified
@@ -106,7 +104,7 @@
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
 
-#
+
 - debug: msg={{ monitor_state_verified }}
   tags: print_debug
 

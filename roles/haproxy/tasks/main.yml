@@ -1,19 +1,20 @@
 ---
-# Install Haproxy for CentOS, Rocky, RHEL
-
-# for now fail if it's not a Red Hat based system
-- name: Check OS ( GPDB )
+- name: Check OS ( HAProxy )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or ansible_os_family != 'Rocky'
 
-- name: Installation of Haproxy for CentOS
+
+- name: Install HAProxy
   include: install.yml
   tags: install
 
-- name: Uninstallation of Haproxy for CentOS
+
+- name: Uninstall HAProxy
   include: uninstall.yml
   tags: uninstall
 
-- name: Upgrade of Haproxy for CentOS
+
+- name: Upgrade HAProxy
   include: upgrade.yml
   tags: upgrade
+

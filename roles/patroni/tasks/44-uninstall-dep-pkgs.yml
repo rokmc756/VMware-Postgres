@@ -1,7 +1,6 @@
 ---
-#
 - name: Uninstall Prerequisites RPM packages for VMware Postgres Patroni and ETCD
-  yum:
+  package:
     name: "{{ item }}"
     state: absent
     skip_broken: yes
@@ -9,9 +8,9 @@
   ignore_errors: true
   with_items: "{{ rh_uninstall_pkgs }}"
 
-#
+
 - name: Unnstall Python 3.9 RPM Packages for VMware Postgres
-  yum:
+  package:
     name: "{{ item }}"
     state: absent
     skip_broken: yes
@@ -20,9 +19,9 @@
   with_items: "{{ rh8_python_pkgs }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
 
-#
+
 - name: Unnstall Python 3.11 RPM Packages for VMware Postgres
-  yum:
+  package:
     name: "{{ item }}"
     state: absent
     skip_broken: yes

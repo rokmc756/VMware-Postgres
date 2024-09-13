@@ -1,6 +1,5 @@
 ---
-#
-- name: Delete variables and configuration files for Patroni and ETCD systemd unit
+- name: Delete Variables and Configuration Files for Patroni and ETCD Systemd Unit
   file:
     path: "{{ item }}"
     state: absent
@@ -18,8 +17,8 @@
     - "/usr/bin/etcd"
     - "/usr/bin/etcdctl"
 
-#
-- name: Delete data directories
+
+- name: Delete Data Directories
   file:
     path: "/var/lib/pgsql/{{ item }}"
     state: absent

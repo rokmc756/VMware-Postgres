@@ -1,17 +1,17 @@
-#
-- name: Create ssl dir on postgres base
+---
+- name: Create SSL Directory on Postgres Base
   become_user: postgres
   shell: mkdir -p {{ ssl.ssl_dir }}
   register: create_ssl_dir
 
-#
-- name: Generate a CA certificate private key
+
+- name: Generate a CA Certificate Private Key
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
 
-#
-- name: Generate the CA certificate
+
+- name: Generate the CA Certificate
   become_user: postgres
   shell: |
     openssl req -x509 -new -nodes -sha512 -days 3650 \
@@ -20,14 +20,14 @@
     -out {{ ssl.ssl_dir }}/ca.crt
   register: gen_ca_cert
 
-#
-- name: Generate a private key
+
+- name: Generate a Private Key
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
 
-#
-- name: Generate a certificate signing request (CSR)
+
+- name: Generate a Certificate Signing Request (CSR)
   become_user: postgres
   shell: |
     openssl req -sha512 -new \
@@ -36,13 +36,13 @@
     -out {{ ssl.ssl_dir }}/server.csr
   register: gen_cert_sign_req
 
-#
-- name: Copy an x509 v3 extension file
+
+- name: Copy an x509 v3 Extension File
   template: src=v3.ext.j2 dest={{ ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
 
-#
-- name: Replace the CRS and CRT file names
+
+- name: Replace the CRS and CRT File Names
   become_user: postgres
   shell: |
     openssl x509 -req -sha512 -days 3650 -extfile {{ ssl.ssl_dir }}/v3.ext \
@@ -52,8 +52,7 @@
   register: replace_csr_crt
 
 
-#
-- name: Add ssl configuration file to authenticate ssl user into Postgres Database Server
+- name: Add SSL Configuration File to Authenticate SSL User into Postgres Database Server
   become_user: postgres
   lineinfile:
     dest: "{{ pgsql.base_dir }}/data/{{ item.file }}"
@@ -69,19 +68,19 @@
     - { file: "postgresql.conf", line: "ssl_key_file = '{{ pgsql.base_dir }}/certs/server.key'",           state: present }
   register: ssl_postgres_config
 
-#
-- name: Stop Postgres instance manually to apply systemd unit
+
+- name: Stop Postgres Instance Manually to Apply Systemd Unit
   become_user: postgres
   shell: /opt/vmware/postgres/{{ pgsql.major_version }}/bin/pg_ctl stop -D {{ pgsql.base_dir }}/data -s -m fast
   register: postgres_instance_stoppped
 
-#
-- name: Copy systemd configuration of postgresql into /etc/systemd/system
+
+- name: Copy Systemd Configuration of PostgreSQL into /etc/systemd/system
   template: src=postgresql.systemd.j2 dest=/etc/systemd/system/postgresql.service owner=root group=root mode=644 force=yes
   register: postgresql_systemd_config_copied
 
-#
-- name: Reload and start postgresql through systemd
+
+- name: Reload and Start PostgreSQL through Systemd
   systemd:
     daemon_reexec: true
     daemon_reload: true

@@ -1,19 +1,20 @@
 ---
-# Install VMWare Postgres for Red Hat / CentOS
-
-# for now fail if it's not a Red Hat based system
-- name: Check OS ( GPDB )
+- name: Check OS ( PGBackRest )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat'
 
-- name: Installation of vmware postgres for Red Hat / CentOS
+
+- name: Install VMware Postgres PGBackRest
   import_tasks: install.yml
   tags: install
 
-- name: Uninstallation of vmware postgres for Red Hat / CentOS
+
+- name: Uninstall VMware Postgres PGBackRest
   import_tasks: uninstall.yml
   tags: uninstall
 
-- name: Upgrade of vmware postgres for Red Hat / CentOS
+
+- name: Upgrade VMware Postgres PGBackRest
   import_tasks: upgrade.yml
   tags: upgrade
+

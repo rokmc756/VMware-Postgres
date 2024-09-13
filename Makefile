@@ -53,6 +53,18 @@ hosts:
 patroni:
 	make -f makefile_configs/Makefile.patroni r=${r} s=${s} c=${c} USERNAME=${USERNAME}
 
+pgaf:
+	make -f makefile_configs/Makefile.pgautofailover r=${r} s=${s} c=${c} USERNAME=${USERNAME}
+
+single:
+	make -f makefile_configs/Makefile.single r=${r} s=${s} c=${c} USERNAME=${USERNAME}
+
+
+boot: control-vms.yml
+	ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} control-vms.yml --extra-vars "power_state=powered-on power_title=Power-On VMs"
+
+shutdown: control-vms.yml
+	ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} control-vms.yml --extra-vars "power_state=shutdown-guest power_title=Shutdown VMs"
 
 
 # - https://ansible-tutorial.schoolofdevops.com/control_structures/

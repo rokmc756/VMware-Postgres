@@ -1,71 +1,68 @@
 ---
-# Deploy VMWare Postgres PGAutoFailover Cluster on {{ ansible_distribution }}
-#
-# for now fail if it's not a Red Hat based system
-- name: Check OS ( GPDB )
+- name: Check OS ( PGAutoFailover )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
-#
-- name: Set facts for package name and list and network range
+
+- name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
   tags:
     - install
     - uninstall
 
-#
-- name: Stop and Diable firewalld for VMware Postgres PGAutoFailover
+
+- name: Stop and Diable Firewalld
   import_tasks: disable-firewall.yml
   when: disable_firwall == true
 
-#
-- name: Install Common Requirements of VMware Postgres PGAutoFailover
+
+- name: Install Common Requirements
   import_tasks: install-pgsql-pkgs.yml
   tags: install
   when: install_dep_pkgs == true
 
-#
-- name: Install Monitor instances of VMware Postgres PGAutoFailover
+
+- name: Install Monitor Instances
   import_tasks: deploy-monitor.yml
   tags: install
   when: deploy_monitor == true and inventory_hostname in groups['monitor']
 
-#
-- name: Install Primary worker instances of VMware Postgres PGAutoFailover
+
+- name: Install Primary Worker Instances
   import_tasks: deploy-workers.yml
   tags: install
   when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['primary'] )
 
-#
-- name: Install Secondary worker instances of VMware Postgres PGAutoFailover
+
+- name: Install Secondary Worker Instances
   import_tasks: deploy-workers.yml
   tags: install
   when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['secondary'] )
 
-#
-- name: Check the status of VMware Postgres PGAutoFailover
+
+- name: Check the Status of PGAutoFailover
   import_tasks: check-status-workers.yml
   tags: install
 
-#
+
 - name: Create Database and Users
   import_tasks: add-users.yml
   tags: install
   when: add_users == true
 
-#
+
 - name: Enable SSL on Monitor
   import_tasks: enable-ssl-monitor.yml
   tags: install
   when: enable_ssl == true
 
-#
-- name: Uninstall VMware Postgres GPAutoFailover
+
+- name: Uninstall PGAutoFailover
   import_tasks: uninstall.yml
   tags: uninstall
 
-#
-- name: Upgrade VMware Postgres GPAutoFailover
+
+- name: Upgrade PGAutoFailover
   import_tasks: upgrade.yml
   tags: upgrade
 

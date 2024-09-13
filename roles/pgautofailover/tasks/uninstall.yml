@@ -1,7 +1,5 @@
-#
-# Destroy VMWare Postgres PGAutoFailover Cluster
-#
-- name: Stop systemd service of workers instance
+---
+- name: Stop Systemd Service of Workers Instance
   systemd:
     name: pgautofailover
     state: stopped
@@ -11,16 +9,16 @@
   # async: 60
   # poll: 5
 
-#
-- name: Alternative Python version
+
+- name: Alternative Python Version
   shell: |
     /usr/sbin/update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
     /usr/sbin/alternatives --set python {{ yum_python_version }}
   register: alternatives_python
   when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS' or ansible_distribution == 'Rocky'
 
-#
-- name: Uninstall VMware Postgres RPM package
+
+- name: Uninstall VMware Postgres RPM Package
   yum:
     name: "{{ common.pgsql_pkg_name }}"
     state: absent
@@ -31,15 +29,15 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: uninstall_pkgs == true
 
-#
-- name: Delete VMware Postgres RPM file
+
+- name: Delete VMware Postgres RPM File
   file:
     path: "{{ common.sudo_user_home_dir }}/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
     state: absent
   when: uninstall_pkgs == true
 
-#
-- name: Delete configuration files and data directory for VMware Postgres PGAutoFailover
+
+- name: Delete Configuration Files and Data Directory for VMware Postgres PGAutoFailover
   file:
     path: "{{ item }}"
     state: absent
@@ -47,7 +45,7 @@
   with_items: "{{ delete_file_list }}"
   when: uninstall_pkgs == true
 
-#
+
 - name: Uninstall Prerequesties RPM Packages for VMware Postgres PGAutoFailover
   yum:
     name: "{{ rh_uninstall_pkgs }}"
@@ -57,8 +55,8 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: uninstall_dep_pkgs == true
 
-#
-- name: Reload systemd daemon
+
+- name: Reload Systemd Daemon
   systemd:
     daemon_reload: yes
   register: sysemd_daemon_reloaded
@@ -66,27 +64,27 @@
   poll: 5
   when: uninstall_pkgs == true or uninstall_dep_pkgs == true
 
-#
-- name: Stop and disable firewalld
+
+- name: Stop and Disable Firewalld
   service:
     name: firewalld
     state: stopped
     enabled: false
   when: enable_firewall == true
 
-#
-- name: Flush iptables rules
+
+- name: Flush Iptables Rules
   shell: ( iptables -F )
   register: iptables_rules_flushed
   when: enable_firewall == true
 
-#
-- name: List iptables rules
+
+- name: List Iptables Rules
   shell: ( iptables -nL )
   register: iptables_rules_listed
   when: enable_firewall == true
 
-#
+
 - debug: msg={{ iptables_rules_listed.stdout }}
   tags: print_debug
   when: enable_firewall == true

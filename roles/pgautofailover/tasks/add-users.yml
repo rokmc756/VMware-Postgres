@@ -1,5 +1,5 @@
-#
-- name: Create the database specified in vars
+---
+- name: Create the Database Specified in Vars
   become_user: postgres
   postgresql_db: name={{ pgsql.db_name }}
        template='template0'
@@ -10,8 +10,8 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: inventory_hostname in groups['primary'][0]
 
-#
-- name: Ensure user has access to the new database
+
+- name: Ensure User Has Access to the New Database
   become_user: postgres
   postgresql_user: db={{ pgsql.db_name }}
        name={{ pgsql.db_user }}
@@ -24,8 +24,8 @@
     ansible_python_interpreter: "{{ yum_python_version }}"
   when: inventory_hostname in groups['primary'][0]
 
-#
-- name: Ensure user does not have unnecessary permissions
+
+- name: Ensure User Does Not Have Unnecessary Permissions
   become_user: postgres
   postgresql_user: name={{ pgsql.db_user }}
        role_attr_flags=SUPERUSER,CREATEDB,CREATEROLE,INHERIT,LOGIN,REPLICATION
@@ -46,3 +46,4 @@
 # [NO]REPLICATION
 # [NO]BYPASSRLS
 # https://docs.ansible.com/ansible/2.8/modules/postgresql_user_module.html
+

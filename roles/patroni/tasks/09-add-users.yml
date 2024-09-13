@@ -1,24 +1,23 @@
-#
-- name: Run the patronictl command-line utility to view the cluster state with Patroni started on all three nodes,
+---
+- name: Run the patronictl Command-Line Utility to View the Cluster State with Patroni Started on All Worker Nodes
   become_user: postgres
   shell: ( {{ patroni.ctl_path }} -c /var/lib/pgsql/patroni.yml list )
   register: patroni_listed
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Set fact for taking leader node
+
+- name: Set Fact for Taking Leader Node
   set_fact:
     leader_node: "{{ ( patroni_listed.stdout_lines | select('search', 'Leader') | list | string | split('|') )[1] | replace(' ', '') }}"
   delegate_to: "{{ item }}"
   delegate_facts: True
   with_items: "{{ groups['workers'] }}"
   when: inventory_hostname in groups['workers'][0]
-
 # - debug: msg= "{{ leader_node }}"
 #  when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Create the database specified in vars
+
+- name: Create the Database Specified in Vars
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -29,8 +28,8 @@
   register: database_created
   when: inventory_hostname == leader_node
 
-#
-- name: Ensure user has access to the new database
+
+- name: Ensure User has Access to the New Database
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -43,8 +42,8 @@
   register: user_created
   when: inventory_hostname == leader_node
 
-#
-- name: Ensure user does not have unnecessary permissions
+
+- name: Ensure User does not have Unnecessary Permissions
   become_user: postgres
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -65,3 +64,4 @@
   # [NO]REPLICATION
   # [NO]BYPASSRLS
   # https://docs.ansible.com/ansible/2.8/modules/postgresql_user_module.html
+

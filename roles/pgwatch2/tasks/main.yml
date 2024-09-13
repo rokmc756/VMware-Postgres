@@ -1,38 +1,36 @@
 ---
-# Install VMWare Postgres for Red Hat / CentOS
-
-# for now fail if it's not a Red Hat based system
-- name: Check OS ( GPDB )
+- name: Check OS ( PGWatch2 )
   fail: msg="Not a Red Hat based system!"
   when: ansible_os_family != 'RedHat' or ansible_os_family != 'CentOS' or  ansible_os_family != 'Rocky'
 
-#
-- name: Set facts for package name and list and network range
+
+- name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
   tags:
     - install
     - uninstall
 
-#
+
 #- name: Install PGWatch2
 #  import_tasks: install.yml
 #  tags: install
 #  when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
 
-#
+
 - name: Install PGWatch2
   import_tasks: install.yml
   tags: install
   # when: install_pgwatch2 == true and inventory_hostname in groups['monitors']
 
-#
+
 - name: Uninstall PGWatch2
   import_tasks: uninstall.yml
   tags: uninstall
   # when: uninstall_pgwatch2 == true and inventory_hostname in groups['monitors']
 
-#
+
 - name: Upgrade PGWatch2
   import_tasks: upgrade.yml
   tags: upgrade
   # when: inventory_hostname in groups['monitors']
+

@@ -1,17 +1,14 @@
 ---
-# Install pgBackrest for RHEL or CentOS 7.x
-#
-- name: Stop the stanza on the repository host (only needs to be done on this host)
+- name: Stop the Stanza on the Repository Host ( Only Needs to be Done on This Host )
   become: true
   become_user: postgres
   command: /usr/bin/pgbackrest --stanza=main --log-level-console=info stop
   register: stanza_stopped
   when: inventory_hostname in groups['repository']
-
 - debug: msg={{ stanza_stopped }}
 
-#
-- name: Delete main.stop file for pgbackrest
+
+- name: Delete main.stop File for PGBackRest
   become: true
   become_user: root
   file:
@@ -21,30 +18,28 @@
     - "/tmp/pgbackrest/main.stop"
   when: inventory_hostname in groups['repository']
 
-#
-- name: Delete the stanza on the repository host (only needs to be done on this host)
+
+- name: Delete the Stanza on the Repository Host ( Only Needs to be Done on This Host )
   become: true
   become_user: postgres
   command: /usr/bin/pgbackrest --stanza=main --log-level-console=info stanza-delete --force
   ignore_errors: yes
   register: stanza_deleted
   when: inventory_hostname in groups['repository']
-
 - debug: msg={{ stanza_deleted }}
 
-#
-- name: Kill process of pgbackrest on repository
+
+- name: Kill Process of PGBackRest on Repository
   become: true
   become_user: postgres
   command: killall pgbackrest
   ignore_errors: yes
   register: pgbackrest_killed
   when: inventory_hostname in groups['repository']
-
 - debug: msg={{ pgbackrest_killed }}
 
-#
-- name: Delete configuration file for pgbackrest
+
+- name: Delete Configuration File for PGBackRest
   become: true
   become_user: root
   file:
@@ -53,8 +48,8 @@
   with_items:
     - "/etc/pgbackrest/pgbackrest.conf"
 
-#
-- name: Delete repository location for pgbackrest
+
+- name: Delete Repository Location for PGBackRest
   become: true
   file:
     path: "{{ item }}"
@@ -63,8 +58,8 @@
     - "/var/lib/pgbackrest"
   when: inventory_hostname in groups['repository']
 
-#
-- name: Delete ssh keys to allow password-less login between all nodes
+
+- name: Delete SSH Keys to Allow Password-Less Login between All Hosts
   become: true
   become_user: root
   file:
@@ -76,8 +71,8 @@
     - ".ssh/authorized_keys"
     - ".ssh"
 
-#
-- name: Delete directories and files in all nodes
+
+- name: Delete Directories and Files in all Hosts
   become: true
   file:
     path: "{{ item }}"
@@ -87,8 +82,9 @@
     - "/etc/pgbackrest/conf.d"
     - "/etc/pgbackrest"
 
+
 # Commented due to taking too much time
-#- name: Uninstall  rpm packages of pgBackrest dependencies
+#- name: Uninstall RPM Packages of pgBackrest Dependencies
 #  become: true
 #  become_user: root
 #  yum:
@@ -100,8 +96,8 @@
 #    - perl-Digest-SHA
 #    - perl-JSON-PP
 
-#
-- name: Delete lines for pgbackrest in patroni.yml
+
+- name: Delete Lines for PGBackRest in patroni.yml
   become: true
   become_user: postgres
   lineinfile:
@@ -113,8 +109,8 @@
     - { regexp: '^    archive_command:*', state: absent }
   when: inventory_hostname in groups['postgres-ha']
 
-#
-- name: Return previous values in patroni.yml for pgBackrest
+
+- name: Return Previous Values in patroni.yml for PGBackRest
   become: true
   become_user: root
   lineinfile:
@@ -128,7 +124,8 @@
     - { regexp: "^    port: 5532", line: "    port: 5432", state: present }
   when: inventory_hostname in groups['postgres-ha']
 
-#- name: Replace string for traditional archive and restore command
+
+#- name: Replace String for Traditional Archive and Restore Command
 #  become: true
 #  become_user: root
 #  replace:
@@ -140,8 +137,8 @@
 #    - { regexp: '^#        restore_command:', replace: '        restore_command:' }
 #  when: inventory_hostname in groups['postgres-ha']
 
-# Restart services for patroni
-- name: Reload and start systemd service of patroni
+
+- name: Reload and Start Patroni Systemd Service
   become: true
   become_user: root
   systemd:
@@ -150,17 +147,17 @@
     state: restarted
   when: inventory_hostname in groups["postgres-ha"]
 
-- name: Check the config on each of the two postgres hosts
+
+- name: Check the Config on Each of the Two Postgres Hosts
   become: true
   become_user: postgres
   shell: ( {{ patronictl_path }} -c /var/lib/pgsql/patroni.yml list )
   register: patroni_listed
   when: inventory_hostname in groups["postgres-ha"]
-
 - debug: msg={{ patroni_listed }}
 
-#
-#- name: Uninstall VMware Postgres on all hosts as root
+
+#- name: Uninstall VMware Postgres on all Hosts
 #  become: true
 #  yum:
 #    name: "{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}"
@@ -169,9 +166,10 @@
 #  poll: 5
 #  when: inventory_hostname in groups['repository']
 
-#
-#- name: Remove the vmwawre-postgres rpm file to all hosts in cluster
+
+#- name: Remove the VMware Postgres RPM File to All Hosts in Cluster
 #  file:
 #    path: /home/jomoon/{{ package_name }}-{{ major_version }}.{{ minor_version }}-{{ patch_version }}.{{ rhel_version }}.x86_64.rpm
 #    state: absent
 #  when: inventory_hostname in groups['repository']
+

@@ -1,7 +1,5 @@
 ---
-# Install grafana for VMware Postgres
-#
-- name: Install Dependent and Grafana RPM packages
+- name: Install Dependent and Grafana RPM Packages
   yum:
     name: "{{ item }}"
     state: present
@@ -18,8 +16,8 @@
     - postgresql-devel
   when: install_pkgs
 
-#
-- name: Install pip modules for grafana
+
+- name: Install Pip Modules for Grafana
   shell: |
     pip3 install setuptools_rust
     python3 -m pip install --upgrade pip
@@ -30,28 +28,26 @@
   poll: 5
   register: pip_module_installed
 
-#
-- name: Check the prometheus and postgres exporter tar files are already existed
+
+- name: Check the Prometheus and Postgres Exporter Tar Files Already Exists
   stat: path=/root/{{ item }}
   register: tar_files_existed
   with_items:
     - prometheus-{{ prometheus.major_version }}.{{ prometheus.minor_version }}.{{ prometheus.patch_version }}.linux-amd64.tar.gz
     - postgres_exporter-{{ postgres_exporter.major_version }}.{{ postgres_exporter.minor_version }}.{{ postgres_exporter.patch_version }}.linux-amd64.tar.gz
-
 - debug: msg={{ tar_files_existed }}
 
-#
-- name: Check the prometheus and postgres exporter binary files
+
+- name: Check the Prometheus and Postgres Exporter Binary Files
   stat: path=/usr/local/bin/{{ item }}
   register: bin_files_existed
   with_items:
     - prometheus
     - postgres_exporter
-
 - debug: msg={{ bin_files_existed }}
 
-#
-- name: Copy the prometheus and postgres exporter tar files
+
+- name: Copy the Prometheus and Postgres Exporter Tar Files
   copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
   register: tar_files_copied
   with_items:
@@ -60,8 +56,8 @@
   when: not ( tar_files_existed.results | map( attribute='stat.exists') ) is all
   # when: tar_files_existed.stat.exists != True
 
-#
-- name: Untar the prometheus and postgres exporter tar files
+
+- name: Untar the Prometheus and Postgres Exporter Tar Files
   shell: tar -C /root -xf /root/{{ item }}
   args:
     executable: /bin/bash
@@ -71,8 +67,8 @@
   when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
 
-#
-- name: Copy binary of the prometheus and postgres exporter into /usr/local/bin directory
+
+- name: Copy Binary of the Prometheus and Postgres Exporter into /usr/local/bin Directory
   shell: cp -f /root/{{ item.src }} /usr/local/bin/{{ item.dest }}
   args:
     executable: /bin/bash
@@ -82,8 +78,8 @@
   when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
 
-#
-- name: Copy the grafana / prometheus / postgres_exporter systemd file
+
+- name: Copy the Grafana and Prometheus and Postgres Exporter Systemd File
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
   register: systemd_file_copied
   with_items:
@@ -94,8 +90,8 @@
   # when: bin_files_existed.stat.exists != True
   # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
 
-#
-- name: Reload and start services for grafana
+
+- name: Reload and Start Services for Grafana
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -106,3 +102,4 @@
   with_items:
     - postgres_exporter
     - prometheus
+

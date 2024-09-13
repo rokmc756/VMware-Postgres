@@ -1,19 +1,19 @@
 ---
-- name: List iptables rules
+- name: List IPTables Rules
   become_user: root
   shell: ( iptables -nL )
   register: iptables_rules_listed
   ignore_errors: true
 
 
-- name: Flush iptables rules
+- name: Flush IPTables Rules
   become_user: root
   shell: ( iptables -F )
   register: iptables_rules_flushed
   ignore_errors: true
 
 
-- name: Stop and disable firewalld
+- name: Stop and Disable Firewalld
   systemd:
     name: firewalld
     state: stopped

@@ -1,7 +1,5 @@
 ---
-
-#
-- name: Stop services for VMware Postgres Patroni and ETCD
+- name: Stop Services for VMware Postgres Patroni and ETCD
   systemd:
     name: patroni
     enabled: no
@@ -13,9 +11,10 @@
     - patroni
   # until: patroni_etcd_service_stopped is succeeded
   # retries: 3
- 
-#
-- name: Kill etcd process
+
+
+- name: Kill ETCD Process
   shell: ( killall etcd )
   register: etcd_processes_killed
   ignore_errors: true
+

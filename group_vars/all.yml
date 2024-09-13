@@ -12,8 +12,10 @@ pgsql:
   os_version: el9
   arch_type: x86_64
   bin_type: rpm
-  db_name: patroni_testdb
+  db_name: pgsql_testdb
   db_user: jomoon
+  user: postgres
+  group: postgres
   db_password: 'changeme'
   home_dir: "/home/postgres"
   base_dir: "/var/lib/pgsql"
@@ -47,4 +49,28 @@ common:
   pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
   # pgsql_pkg_name: pivotal-postgres
 
+
+jdk:
+  oss:
+    install: true
+    jvm_home: "/usr/lib/jvm"
+    major_version: 1
+    minor_version: 8
+    patch_version: 0
+    # 1.8.0
+    # 11.0.4
+    # 17.0.2
+  oracle:
+    install: false
+    jvm_home: "/usr/lib/jvm"
+    major_version: 13
+    minor_version: 0
+    patch_version: 2
+    download: false
+
+
+vmware:
+  esxi_hostname: "192.168.0.231"
+  esxi_username: "root"
+  esxi_password: "Changeme34#$"
 

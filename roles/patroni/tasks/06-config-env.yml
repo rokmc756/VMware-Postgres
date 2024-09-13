@@ -1,20 +1,18 @@
 ---
-# Configure environments and variables
-#
-- name: Add line into /etc/locale.conf for LC_TYPE to prevent error
+- name: Add Line into /etc/locale.conf for LC_TYPE to Prevent Error
   lineinfile:
     path: /etc/locale.conf
     line: "LC_CTYPE=en_US.UTF-8"
   register: lctype_line_added
 
-#
-- name: Check if .bash_profile exits under {{ pgsql.base_dir }} directory
+
+- name: Check if .bash_profile exits under {{ pgsql.base_dir }} Directory
   become_user: postgres
   stat: path=/var/lib/pgsql/.bash_profile
   register: bash_profile_existed
 
-#
-- name: Sanity check for .bash_profile in {{ pgsql.base_dir }}
+
+- name: Sanity Check for .bash_profile in {{ pgsql.base_dir }}
   become_user: postgres
   shell: "{{ item }}"
   with_items:
@@ -24,8 +22,8 @@
   when:
     - bash_profile_existed.stat.exists == False
 
-#
-- name: Insert Executable binary path into .bashrc for VMware Postgres {{ pgsql.major_version }}
+
+- name: Insert Executable Binary Path into .bashrc for VMware Postgres {{ pgsql.major_version }}
   become_user: postgres
   lineinfile:
     path: "{{ pgsql.base_dir }}/.bash_profile"

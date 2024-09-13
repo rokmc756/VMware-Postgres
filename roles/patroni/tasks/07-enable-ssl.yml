@@ -1,19 +1,19 @@
-#
-- name: Create SSL Directory on {{ pgsql.base_dir }} directory for Primary worker node
+---
+- name: Create SSL Directory on {{ pgsql.base_dir }} directory for Primary Worker Node
   become_user: postgres
   shell: mkdir -p {{ ssl.ssl_dir }}
   register: create_ssl_dir
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Generate a CA certificate private key on {{ pgsql.base_dir }}/certs directory for Primary worker node
+
+- name: Generate a CA Certificate Private Key on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Generate the CA certificate on {{ pgsql.base_dir }}/certs directory for Primary worker node
+
+- name: Generate the CA Certificate on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: |
     openssl req -x509 -new -nodes -sha512 -days 3650 \
@@ -23,15 +23,15 @@
   register: gen_ca_cert
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Generate a private key on {{ pgsql.base_dir }}/certs directory for Primary worker node
+
+- name: Generate a Private Key on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Generate a certificate signing request (CSR) on {{ pgsql.base_dir }}/certs directory for Primary worker node
+
+- name: Generate a Certificate Signing Request (CSR) on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: |
     openssl req -sha512 -new \
@@ -41,14 +41,14 @@
   register: gen_cert_sign_req
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Copy an x509 v3 extension file on {{ pgsql.base_dir }}/certs directory for Promary worker node
+
+- name: Copy an x509 v3 Extension File on {{ pgsql.base_dir }}/certs Directory for Promary Worker Node
   template: src=v3.ext.j2 dest={{ ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Replace the CRS and CRT file names on {{ pgsql.base_dir }}/certs directory for Primary worker node
+
+- name: Replace the CRS and CRT File Names on {{ pgsql.base_dir }}/certs Directory for Primary worker node
   become_user: postgres
   shell: |
     openssl x509 -req -sha512 -days 3650 -extfile {{ ssl.ssl_dir }}/v3.ext \
@@ -58,8 +58,8 @@
   register: replace_csr_crt
   when: inventory_hostname in groups['workers'][0]
 
-#
-- name: Synchronize ssl directory using rsync protocol on delegate host (push) for {{ pgsql.base_dir }}/certs directory in Primary worker node
+
+- name: Synchronize SSL Directory Using Rsync Protocol on Delegate Host (push) for {{ pgsql.base_dir }}/certs Directory in Primary Worker Node
   synchronize:
     src: "{{ ssl.ssl_dir }}"
     dest: "{{ pgsql.base_dir }}"
@@ -69,8 +69,8 @@
   register: ssl_dir_synced
   when: inventory_hostname not in groups['workers'][0]
 
-#
-- name: Change permissions for cert files in {{ pgsql.base_dir }}/certs directory for all worker nodes
+
+- name: Change Permissions for Cert Files in {{ pgsql.base_dir }}/certs Directory for All Worker Nodes
   file:
     path: "{{ ssl.ssl_dir }}/{{ item }}"
     state: file

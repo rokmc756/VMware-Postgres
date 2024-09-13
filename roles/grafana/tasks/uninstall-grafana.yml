@@ -1,7 +1,5 @@
 ---
-# Install grafana for RHEL or CentOS
-#
-- name: Stop and disable services for grafana
+- name: Stop and Disable Services for Grafana
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -14,16 +12,16 @@
     - grafana-server
     - influxdb
 
-#
-- name: Delete the grafana config files
+
+- name: Delete the Grafana Config Files
   file: path={{ item.dest }} state=absent
   ignore_errors: true
   register: grafana_init_file_deleted
   with_items:
     - { src: "grafana.ini.j2",                   dest: "/etc/grafana/grafana.ini" }
 
-#
-- name: Uninstall pip modules for grafana
+
+- name: Uninstall Pip Modules for Grafana
   shell: |
     pip3 uninstall -y wheel
     pip3 uninstall -y Pillow
@@ -33,8 +31,8 @@
   ignore_errors: true
   register: pip_module_uninstalled
 
-#
-- name: Uninstall Dependent and Grafana RPM packages
+
+- name: Uninstall Dependent and Grafana RPM Packages
   yum:
     name: "{{ item }}"
     state: present
@@ -50,8 +48,8 @@
     - grafana-pcp
     - grafana
 
-#
-- name: Delete the influxdb yum repo file
+
+- name: Delete the influxdb Yum Repo File
   file: path={{ item.dest }} state=absent
   ignore_errors: true
   register: influxdb_repo_file_deleted

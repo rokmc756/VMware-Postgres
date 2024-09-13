@@ -1,19 +1,19 @@
 #
-- name: Create SSL dir on {{ pgsql.base_dir }} diretory
+- name: Create SSL Directory on {{ pgsql.base_dir }} diretory
   become_user: postgres
   shell: mkdir {{ ssl.ssl_dir }}
   register: create_ssl_dir
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Generate a CA certificate private key on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Generate a CA Certificate Private Key on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Generate the CA certificate on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Generate the CA Certificate on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   become: true
   become_user: postgres
   shell: |
@@ -24,15 +24,15 @@
   register: gen_ca_cert
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Generate a private key on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Generate a Private Key on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   become_user: postgres
   shell: openssl genrsa -out {{ ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Generate a certificate signing request (CSR) on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Generate a Certificate Signing Request (CSR) on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   become_user: postgres
   shell: |
     openssl req -sha512 -new \
@@ -42,14 +42,14 @@
   register: gen_cert_sign_req
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Copy an x509 v3 extension file onto "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Copy an x509 v3 Extension File onto "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   template: src=v3.ext.j2 dest={{ ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Replace the CRS and CRT file names on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory for Monitor node
+
+- name: Replace the CRS and CRT File Names on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory for Monitor Node
   become_user: postgres
   shell: |
     openssl x509 -req -sha512 -days 3650 -extfile {{ ssl.ssl_dir }}/v3.ext \
@@ -59,7 +59,7 @@
   register: replace_csr_crt
   when: inventory_hostname in groups['monitor']
 
-#
+
 - name: Disable SSL on Monitor
   become_user: postgres
   shell: |
@@ -67,7 +67,7 @@
   register: disable_ssl_monitor
   when: inventory_hostname in groups['monitor']
 
-#
+
 - name: Disable SSL on Workers
   become_user: postgres
   shell: |
@@ -75,15 +75,15 @@
   register: enable_ssl_workers
   when: inventory_hostname in groups['workers']
 
-#
-- name: Restart PGAutoFailover service to apply SSL Changes
+
+- name: Restart PGAutoFailover Service to Apply SSL Changes
   become_user: postgres
   shell: |
     sudo systemctl restart pgautofailover
   register: pgautofailover_restarted
   when: inventory_hostname in groups['monitor'] or inventory_hostname in groups['workers']
 
-#
+
 - name: Enable SSL on Monitor
   become_user: postgres
   shell: |
@@ -93,8 +93,8 @@
   register: enable_ssl_monitor
   when: inventory_hostname in groups['monitor']
 
-#
-- name: Synchronize "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory using rsync protocol on delegate host (push)
+
+- name: Synchronize "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory Using Rsync Protocol on Delegate Host ( Push )
   synchronize:
     src: "{{ ssl.ssl_dir }}"
     dest: "{{ pgsql.base_dir }}"
@@ -104,8 +104,8 @@
   register: ssl_dir_synced
   when: inventory_hostname in groups['workers']
 
-#
-- name: Change permissions for cert files on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" diretory
+
+- name: Change Permissions for Cert Files on "{{ pgsql.base_dir }}/{{ ssl.ssl_dir }}" Diretory
   file:
     path: "{{ ssl.ssl_dir }}/{{ item }}"
     state: file
@@ -122,7 +122,7 @@
   when: inventory_hostname in groups['workers']
   #  - root.crl
 
-#
+
 - name: Enable SSL on Workers
   become_user: postgres
   shell: |
@@ -132,8 +132,8 @@
   register: enable_ssl_workers
   when: inventory_hostname in groups['workers']
 
-#
-- name: Restart PGAutoFailover to apply changes of SSL config
+
+- name: Restart PGAutoFailover to Apply Changes of SSL Config
   become: true
   shell: |
     sudo systemctl restart pgautofailover

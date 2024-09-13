@@ -33,8 +33,8 @@ $ sudo yum install ansible
 * Configure Yum / Local & EPEL Repostiory
 ## Download / configure / run VMware Postgres
 ```
-$ git clone https://github.com/rokmc756/vmware-postgres
-$ cd vmware-postgres
+$ git clone https://github.com/rokmc756/VMware-Postgres
+$ cd VMware-Postgres
 $ vi Makefile
 ~~ snip
 ANSIBLE_HOST_PASS="changeme"    # It should be changed with password of user in ansible host that vmware-postgres would be run.

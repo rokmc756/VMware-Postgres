@@ -137,96 +137,85 @@ ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
 remote_machine_password="changeme"            # Replace with password of sudo user
 
-[master]
-rh9-master ansible_ssh_host=192.168.0.191
-
-[slave]
-rh9-slave  ansible_ssh_host=192.168.0.192
-
 [workers]
-rh9-node01 ansible_ssh_host=192.168.0.193
-rh9-node02 ansible_ssh_host=192.168.0.194
-rh9-node03 ansible_ssh_host=192.168.0.195
+rk9-node01 ansible_ssh_host=192.168.2.191
+rk9-node02 ansible_ssh_host=192.168.2.192
+rk9-node03 ansible_ssh_host=192.168.2.193
+rk9-node04 ansible_ssh_host=192.168.2.194
+rk9-node05 ansible_ssh_host=192.168.2.195
 ```
 
 #### 3) Configure variables for Patroni Cluster
 ```
 $ vi roles/patroni/vars/main.yml
-major_version: 15
-minor_version: 5
-build_version: 1
-patch_version: 1
-rhel_version: el9
-patroni_version: "3.2.0-1"
+---
+_ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
 
-# etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
-etcd_major_version: 3
-etcd_minor_version: 3
-etcd_build_version: 27
-etcd_patch_version: 2
+_patroni:
+  major_version: "3"
+  minor_version: "2"
+  patch_version: "0"
+  build_version: "1"
+  os_version: el9
+  arch_type: x86_64
+  bin_type: rpm
+  bin_path: "{{ common.pgsql_bin_dir }}/patroni"
+  ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
+  cluster_name: patclu01
+  sync_mode: True
+  with_pkgs: True
+  enable_ssl: False
+  # false is for pgbackrest, not found yet how does pgbackrest
+  # interactive with synchronous mode in patroni cluster
+  # sync_mode: on    # one of node will be a Sync Standby role
 
-# etcd_minor_version: 3
-# etcd_patch_version: 1
-download_etcd_bin: false
+_etcd:
+  major_version: "3"
+  minor_version: "3"
+  patch_version: "27"
+  build_version: ""
+  arch_type: x86_64
+  os_version: el9
+  bin_type: rpm
+  download_bin: false
+  blank: " "
 ~~ snip
 ```
 #### 4) Deploy Patroni Cluster
 ```
-$ vi install-hosts.yml
----
-- hosts: all
-  gather_facts: true
-  become: yes
-  roles:
-    - init-hosts
+$ make hosts r=init
 
-#
-- hosts: workers
-  gather_facts: true
-  become: yes
-  vars:
-    print_debug: true
-    config_firewall: true
-    install_dep_pkgs: true    # ok
-    install_pkgs: true
-    install_pip_module: true   # ok
-    config_env: true
-    enable_ssl: true
-    config_patroni: true
-    add_users: true
-  roles:
-    - patroni
+or
+$ make patroni r=config s=firewall
+$ make patroni r=install s=pkgs
+$ make patroni r=install s=etcd
+$ make patroni r=config s=env
+$ make patroni r=enable s=ssl
+$ make patroni r=install s=patroni
+$ make patroni r=add s=user
 
-$ make install
+or
+$ make patroni r=install s=all
+
 ```
 #### 5) Destroy Patroni Cluster
 ```
-$ vi uninstall-hosts.yml
----
-- hosts: workers
-  gather_facts: true
-  become: yes
-  vars:
-    print_debug: true
-    remove_users: true
-    disable_ssl: true
-    remove_patroni_config: true
-    remove_env_config: true
-    uninstall_pkgs: true
-    uninstall_pip_module: true
-    uninstall_dep_pkgs: true
-    remove_firewall_config: true
-  roles:
-    - patroni
+$ make patroni r=stop s=service
+$ make patroni r=uninstall s=pkgs
+$ make patroni r=remove s=env
+$ make patroni r=disable s=firewall
 
-#
-- hosts: all
-  gather_facts: true
-  become: yes
-  roles:
-    - init-hosts
-
-$ make uninstall
+or
+$ make patroni r=uninstall s=all
 ```
 ## For PGAutoFailover Cluster
 #### 1) The Architecture

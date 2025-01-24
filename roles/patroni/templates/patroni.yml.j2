@@ -1,4 +1,4 @@
-scope: '{{ patroni.cluster_name }}'
+scope: '{{ _patroni.cluster_name }}'
 name: '{{ inventory_hostname }}'
 restapi:
   listen: '{{ hostvars[inventory_hostname][_netdev]['ipv4']['address'] }}:8008'
@@ -46,8 +46,8 @@ bootstrap:
         archive_command: mkdir -p ../wal_archive && test ! -f ../wal_archive/%f && cp %p ../wal_archive/%f
       recovery_conf:
         restore_command: cp ../wal_archive/%f %p
-    synchronous_mode: {{ patroni.sync_mode }}
-    synchronous_mode_strict: {{ patroni.sync_mode }}
+    synchronous_mode: {{ _patroni.sync_mode }}
+    synchronous_mode_strict: {{ _patroni.sync_mode }}
   initdb:
     - encoding: UTF8
     - data-checksums
@@ -57,7 +57,7 @@ bootstrap:
 {% endfor %}
     # host replication replicator {{ hostvars[groups['workers'][0-2]][_netdev]['ipv4']['address'] }}/32 md5
     - host all all 0.0.0.0/0 md5
-{% if enable_ssl == true %}
+{% if _patroni.enable_ssl == true %}
     - hostssl all all 0.0.0.0/0 md5
 {% endif %}
   users:
@@ -85,23 +85,26 @@ postgresql:
     unix_socket_directories: /tmp
     port: 5432
     synchronous_commit: local
-{% if enable_ssl == true %}
+{% if _patroni.enable_ssl == true %}
     ssl: 'on'
-    ssl_ca_file: '{{ ssl.ssl_dir }}/ca.crt'
-    ssl_cert_file: '{{ ssl.ssl_dir }}/server.crt'
-    ssl_key_file: '{{ ssl.ssl_dir }}/server.key'
+    ssl_ca_file: '{{ _ssl.ssl_dir }}/ca.crt'
+    ssl_cert_file: '{{ _ssl.ssl_dir }}/server.crt'
+    ssl_key_file: '{{ _ssl.ssl_dir }}/server.key'
 {% endif %}
     # synchronous_commit: "on"
     # synchronous_standby_name: "*"
     # synchronous_standby_name: none
+
 
 watchdog:
   mode: automatic
   device: /dev/watchdog
   safety_margin: 5
 
+
 tags:
   nofailover: false
   noloadbalance: false
   clonefrom: false
   nosync: false
+

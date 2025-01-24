@@ -82,24 +82,24 @@
   with_items: "{{ rh8_pip3_module }}"
   when: uninstall_pip_module == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 8
 
-#
-- name: Uninstall pip3 modules for higher versions than vmware-postgres {{ pgsql.major_version }}
+
+- name: Uninstall Pip3 Modules for higher versions than vmware-postgres {{ pgsql.major_version }}
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item.pip3_name }} -y )
   register: extra_pip3_modules_for_higher_than_vmware_postgres_14_uninstalled
   ignore_errors: true
   with_items: "{{ pg14_pip3_module }}"
   when: uninstall_pip_module and pgsql.major_version >= 14
 
-#
-- name: Uninstall pip3 modules for ealier versions than vmware-postgres{{ pgsql.major_version }}
+
+- name: Uninstall Pip3 Modules for ealier versions than vmware-postgres{{ pgsql.major_version }}
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item.pip3_name }} -y )
   register: extra_pip3_modules_for_earlier_than_vmware_postgres_13_uninstalled
   ignore_errors: yes
   with_items: "{{ pip13_pip3_module }}"
   when: uninstall_pip_module and pgsql.major_version >= 13
 
-#
-- name: Uninstall common pip3 modules ( typing/etcd and so on )
+
+- name: Uninstall Common Pip3 Modules ( typing/etcd and so on )
   shell: ( export PATH=$PATH:/usr/local/bin && pip3 uninstall {{ item }} -y )
   register: common_pip3_modules_uninstalled
   ignore_errors: true

@@ -18,7 +18,7 @@
     - "{{ patroni_pkg_name }}"
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: patroni.with_pkgs == true
+  when: _patroni.with_pkgs == true
 
 
 - name: Uninstall VMware Postgres RPM Packages
@@ -36,11 +36,11 @@
 
 - name: Delete the VMware Postgres {{ pgsql.major_version }} Patroni RPM File
   file:
-    path: /home/jomoon/{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.x86_64.rpm
+    path: /home/jomoon/{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.x86_64.rpm
     state: absent
   register: patroni_rpm_packages_deleted
   ignore_errors: true
-  when: patroni.with_pkgs == true
+  when: _patroni.with_pkgs == true
 
 
 - name: Delete the VMware Postgres {{ pgsql.major_version }} Patroni RPM File

@@ -13,7 +13,7 @@
   register: extra_pip3_modules_for_higher_than_vmware_postgres_14_uninstalled
   ignore_errors: true
   with_items: "{{ pg14_pip3_module }}"
-  when: pgsql.major_version >= 14
+  when: pgsql.major_version|int >= 14
 
 
 - name: Uninstall Pip3 Modules for Ealier Versions than VMware Postgres {{ pgsql.major_version }}
@@ -21,7 +21,7 @@
   register: extra_pip3_modules_for_earlier_than_vmware_postgres_13_uninstalled
   ignore_errors: true
   with_items: "{{ pg13_pip3_module }}"
-  when: pgsql.major_version >= 13
+  when: pgsql.major_version|int >= 13
 
 
 - name: Uninstall Common Pip3 Modules ( typing/etcd and so on )

@@ -1,29 +1,5 @@
 ---
-#pgsql:
-#  major_version: 15
-#  minor_version: 5
-#  patch_version: 1
-#  build_version: 1
-#  os_version: el7
-#  arch_type: x86_64
-#  bin_type: rpm
-#  db_name: patroni_testdb
-#  db_user: jomoon
-#  db_password: 'changeme'
-#  home_dir: "/home/postgres"
-#  base_dir: "/var/lib/pgsql"
-#  with_patroni_pkg: True
-#
-#common:
-#  sudo_user: jomoon
-#  sudo_group: jomoon
-#  sudo_user_home_dir: "/home/jomoon"
-#  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
-#  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
-#  # pgsql_pkg_name: pivotal-postgres
-
-
-ssl:
+_ssl:
   ssl_dir: "{{ pgsql.base_dir }}/certs"
   ssl_days: 3660
   ssl_country: "KR"
@@ -34,30 +10,32 @@ ssl:
   ssl_common_name: "jtest.pivotal.io"
   ssl_email: "jomoon@pivotal.io"
 
+
 # vmware-postgres15-patroni-3.2.0-1.el9.x86_64.rpm
-patroni:
-  major_version: 3
-  minor_version: 2
-  patch_version: 0
-  build_version: 1
+_patroni:
+  major_version: "3"
+  minor_version: "2"
+  patch_version: "0"
+  build_version: "1"
   os_version: el9
   arch_type: x86_64
   bin_type: rpm
   bin_path: "{{ common.pgsql_bin_dir }}/patroni"
   ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
   cluster_name: patclu01
-  sync_mode: False
+  sync_mode: True
   with_pkgs: True
+  enable_ssl: False
   # false is for pgbackrest, not found yet how does pgbackrest
   # interactive with synchronous mode in patroni cluster
   # sync_mode: on    # one of node will be a Sync Standby role
 
 
-etcd:
-  major_version: 3
-  minor_version: 2
-  patch_version: 21
-  build_version: 2
+_etcd:
+  major_version: "3"
+  minor_version: "3"
+  patch_version: "27"
+  build_version: ""
   arch_type: x86_64
   os_version: el9
   bin_type: rpm
@@ -166,3 +144,23 @@ etcd:
 # vmware-postgres14-14.6-1.el7.x86_64.rpm            # - OK : patroni 2.1.4-2
 # vmware-postgres15-15.1-1.el7.x86_64.rpm            # - OK : patroni 2.1.4-1
 # vmware-postgres15-15.1-1.el8.x86_64.rpm            # - OK : patroni 2.1.4-1
+
+
+# config_firewall: true
+# install_dep_pkgs: true
+# install_pip_module: true
+# install_pkgs: true
+# install_etcd: true
+# config_env: true
+
+enable_ssl: false
+
+# config_patroni: true
+# add_users: true
+# stop_patroni_service: true
+# remove_firewall_config: true
+# uninstall_dep_pkgs: true
+# uninstall_pkgs: true
+# remove_env_config: true
+# uninstall_pip_module: true
+

@@ -7,8 +7,8 @@
 # HOSTS="81 82 83 84 85"
 # HOSTS="81 82 83 84 85"
 
-HOSTS="71 72 73 74 75"
-NET_ADDR="192.168.0"
+HOSTS="191 192 193 194 195"
+NET_ADDR="192.168.2"
 
 for i in `echo $HOSTS`
 do
@@ -28,3 +28,4 @@ do
     ssh root@$NET_ADDR.$i "rm -rf /home/postgres /var/lib/pgsql"
 
 done
+

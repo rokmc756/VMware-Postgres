@@ -1,7 +1,7 @@
 ---
 - name: Run the patronictl Command-Line Utility to View the Cluster State with Patroni Started on All Worker Nodes
   become_user: postgres
-  shell: ( {{ patroni.ctl_path }} -c /var/lib/pgsql/patroni.yml list )
+  shell: ( {{ _patroni.ctl_path }} -c /var/lib/pgsql/patroni.yml list )
   register: patroni_listed
   when: inventory_hostname in groups['workers'][0]
 

@@ -11,7 +11,7 @@
     - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
 
-- name: Copy the VMware Postgres Patroni "{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}" RPM Package
+- name: Copy the VMware Postgres Patroni RPM Package
   copy:
     src: "{{ item }}"
     dest: "{{ common.sudo_user_home_dir }}/{{ item }}"
@@ -20,8 +20,8 @@
     group: "{{ common.sudo_group }}"
   register: patroni_rpm_package_copied
   with_items:
-    - "{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
-  when: patroni.with_pkgs
+    - "{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.{{ _patroni.arch_type }}.{{ _patroni.bin_type }}"
+  when: _patroni.with_pkgs
 
 
 - name: Install the VMware Postgres {{ pgsql.major_version }} RPM Package
@@ -36,7 +36,7 @@
     - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
 
-- name: Install the VMware Postgres Patroni "{{ patroni.major_version }}.{{ patroni.minor_version }}.{{ patroni.patch_version }}" RPM Package
+- name: Install the VMware Postgres Patroni RPM Package
   yum:
     name: "/home/jomoon/{{ item }}"
     state: present
@@ -45,6 +45,6 @@
   poll: 5
   register: paroni_rpm_package_installed
   with_items:
-    - "{{ patroni_pkg_name }}-{{ patroni.build_version }}.{{ patroni.os_version }}.{{ patroni.arch_type }}.{{ patroni.bin_type }}"
-  when: patroni.with_pkgs
+    - "{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.{{ _patroni.arch_type }}.{{ _patroni.bin_type }}"
+  when: _patroni.with_pkgs
 

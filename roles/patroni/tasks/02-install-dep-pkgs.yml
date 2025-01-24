@@ -4,7 +4,6 @@
     update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
     alternatives --set python {{ yum_python_version }}
   register: python2_version_alternatives
-  when: install_dep_pkgs
 
 
 - name: Install the Prerequisties RPM Packages for VMware Postgres Patroni
@@ -16,7 +15,6 @@
   register: install_prereq_pkgs
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: install_dep_pkgs == true
 
 
 - name: Install the Python RPM Packages for VMware Postgres Patroni
@@ -28,7 +26,7 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
 
 
 - name: Install the Python RPM Packages for VMware Postgres Patroni
@@ -41,7 +39,7 @@
   register: python3_installed
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
 
 
 - name: Install the Python RPM Packages for VMware Postgres Patroni
@@ -54,7 +52,7 @@
   register: python311_installed
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: install_dep_pkgs == true and hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
+  when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 
 # alternatives --set python3 /usr/bin/python3.9
 # alternatives --set python /usr/bin/python3

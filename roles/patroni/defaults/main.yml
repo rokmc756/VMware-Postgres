@@ -18,10 +18,12 @@ rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel"
 # python3-pathspec"
 rh9_python_pkgs: "python3.11,python3.11-pip,python3.11-libs,python3.11-devel"
 
+#  - "setuptools-rust"
 common_pip3_module:
-  - "setuptools-rust"
+  - "cdiff"
   - "typing"
   - "wheel"
+  - "setuptools==58.2.0"                  # This version allow to install requirements.txt in EL 9.x version
   - "-r /var/lib/pgsql/requirements.txt"
 
 # Prerequesties for Patroni
@@ -49,3 +51,4 @@ rh8_pip3_module:
 # For patroni
 rh9_pip3_module:
   - "patroni==3.0.4"
+

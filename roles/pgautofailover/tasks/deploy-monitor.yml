@@ -1,8 +1,9 @@
 ---
 - name: Verify that pg_autocatl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl version )
-  register: pg_autoctl_install_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl version
+  register: verify_pg_autoctl_installed
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -10,8 +11,9 @@
 
 - name: Verify that pg_ctl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_ctl -V )
-  register: pg_ctl_install_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_ctl -V
+  register: verify_pg_ctl_installed
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -30,10 +32,12 @@
 - name: Create Monitor Mode
   become: true
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl create monitor --auth trust --ssl-self-signed --pgdata {{ pgsql.base_dir }}/{{ pgfailover.monitor_database }} )
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl create monitor \
+    --auth trust --ssl-self-signed --pgdata {{ pgsql.base_dir }}/{{ _pgfailover.monitor_database }}
   async: 300
   poll: 5
-  register: monitor_node_created
+  register: create_monitor_node
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -42,7 +46,7 @@
 - name: Grant User Access from Network {{ pgsql_network_range }} Access for Access with Cert Authentication
   become_user: postgres
   postgresql_pg_hba:
-    dest: "{{ pgsql.base_dir }}/{{ pgfailover.monitor_database }}/pg_hba.conf"
+    dest: "{{ pgsql.base_dir }}/{{ _pgfailover.monitor_database }}/pg_hba.conf"
     contype: host
     users: all
     source: "{{ pgsql_network_range }}"
@@ -52,8 +56,10 @@
 
 - name: Create Systemd Service File of Monitor Instance
   become_user: postgres
-  shell: ( source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd --pgdata {{ pgsql.base_dir }}/{{ pgfailover.monitor_database }} > {{ pgsql.base_dir }}/pgautofailover.service )
-  register: systemd_service_added
+  shell: |
+    source /var/lib/pgsql/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd \
+    --pgdata {{ pgsql.base_dir }}/{{ _pgfailover.monitor_database }} > {{ pgsql.base_dir }}/pgautofailover.service
+  register: create_systemd_service
   async: 180
   poll: 5
   args:
@@ -77,7 +83,7 @@
     enabled: yes
     state: started
     name: pgautofailover
-  register: monitor_systemd_status
+  register: status_monitor_systemd
 
 
 - name: Replace Database Directory
@@ -85,26 +91,26 @@
   replace:
     path: "{{ pgsql.base_dir }}/.bash_profile"
     regexp: '^(.*)PGDATA=(.*)$'
-    replace: 'PGDATA=/{{ pgsql.base_dir }}/{{ pgfailover.workers_database }}'
+    replace: 'PGDATA=/{{ pgsql.base_dir }}/{{ _pgfailover.workers_database }}'
     backup: yes
-  #  replace: 'PGDATA=//var/lib/pgsql/{{ pgfailover.monitor_database }}'
+  #  replace: 'PGDATA=//var/lib/pgsql/{{ _pgfailover.monitor_database }}'
 
 
 - name: Verify the Current State of Monitor Instance
   become_user: postgres
-  shell: ( ps -ef | grep postgres )
-  register: monitor_instance_state_verified
+  shell: |
+    ps -ef | grep postgres
+  register: verify_monitor_instance_state
 
 
 - name: Verify the Current State of Monitor
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "\l" )
-  register: monitor_state_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/psql -c "\l"
+  register: verify_monitor_state
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
-
-
-- debug: msg={{ monitor_state_verified }}
+- debug: msg={{ verify_monitor_state }}
   tags: print_debug
 

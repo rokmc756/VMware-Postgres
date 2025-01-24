@@ -8,7 +8,7 @@
 
 
 - name: Install Common Prerequisties RPM Packages for VMware Postgres PGAutoFailover
-  yum:
+  package:
     name:  "{{ rh_install_pkgs }}"
     state: present
     skip_broken: yes
@@ -16,7 +16,7 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: install_dep_pkgs
+
   # skip_broken: yes
   # name:  "{{ item  }}"
   # async: 120
@@ -29,7 +29,7 @@
 
 
 - name: Install VMware Postgres RPM Packge on All Nodes
-  yum:
+  package:
     name: "{{ common.sudo_user_home_dir }}/{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
     state: present
     disable_gpg_check: true

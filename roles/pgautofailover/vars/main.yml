@@ -1,35 +1,8 @@
 ---
-#pgsql:
-#  major_version: 15
-#  minor_version: 5
-#  patch_version: 1
-#  build_version: 1
-#  os_version: el9
-#  arch_type: x86_64
-#  bin_type: rpm
-#  db_name: pgfailover_testdb
-#  db_user: jomoon
-#  db_password: changeme
-#  user: postgres
-#  group: postgres
-#  home_dir: "/home/postgres"
-#  base_dir: "/var/lib/pgsql"
-#
-#common:
-#  sudo_user: jomoon
-#  sudo_group: jomoon
-#  sudo_user_home_dir: "/home/jomoon"
-#  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
-#  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
-#  # package_name: "vmware-postgres"      # For 12 version
-#  # package_name: "pivotal-postgres"     # For 11 version
-#  # bin_dir: "/usr/bin"
-
-
-pgfailover:
-  monitor_database: monitor                         # Database names
+_pgfailover:
+  monitor_database: monitor                           # Database names
   workers_database: ha
-  app_database: appdb                               # Application database name for replication
+  app_database: appdb                                 # Application database name for replication
   bin_path: "{{ common.pgsql_bin_dir }}/patroni"
   ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
   cluster_name: pgfailclu01
@@ -37,7 +10,7 @@ pgfailover:
   enable_ssl: true
 
 
-ssl:
+_ssl:
   ssl_dir: "{{ pgsql.base_dir }}/certs"
   ssl_days: 3660
   ssl_country: "KR"

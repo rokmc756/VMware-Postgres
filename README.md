@@ -189,13 +189,25 @@ rk9-node03 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Deploy PGAutoFailover Cluster
 ```
+$ make pgautofailover r=disable s=firewall
+$ make pgautofailover r=install s=pkgs
+$ make pgautofailover r=create s=ssl
+$ make pgautofailover r=deploy s=monitor
+$ make pgautofailover r=deploy s=primary
+$ make pgautofailover r=deploy s=secondary
+
+
+
+$ make pgautofailover r=uninstall s=all
 ```
 #### 4) Destroy PGAutoFailover Cluster
 ```
 ```
 ## Planning
-* Change centos and rockylinux mirror into local mirrors in Korea
-* Add monitoring features with pgwatch2 and grafana for Single Postgres, PGAutofailover and Patroni Cluster
-* Add additional extensions inlcuded in vmware-postgres zip file
-* Add falut talerence feature with Keepalived for PGAutofailover and Patroni Cluster
-* Add load balance feature with HAProxy for PGAutofailover and Patroni Cluster
+[] Need to fix SEGFAULT when enabling SSL - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
+[] Change CentOS and Rocky Linux Mirror into Local Mirrors in Korea
+[] Add Monitoring Features With PGWatch2 and Grafana for Single Postgres, PGAutofailover and Patroni Cluster
+[] Add Additional Extensions Inlcuded in VMware-Postgres Zip File
+[] Add Falut Talerence Feature with Keepalived for PGAutofailover and Patroni Cluster
+[] Add Load Balance Feature with HAProxy for PGAutofailover and Patroni Cluster
+

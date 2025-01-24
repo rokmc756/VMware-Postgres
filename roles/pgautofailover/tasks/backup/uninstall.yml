@@ -5,7 +5,8 @@
     state: stopped
     daemon_reload: yes
   register: pgautofailover_service_stopped
-  when: uninstall_pkgs == true
+
+  # when: uninstall_pkgs == true
   # async: 60
   # poll: 5
 
@@ -27,7 +28,7 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  when: uninstall_pkgs == true
+  # when: uninstall_pkgs == true
 
 
 - name: Delete VMware Postgres RPM File
@@ -81,7 +82,7 @@
 
 - name: List Iptables Rules
   shell: ( iptables -nL )
-  register: iptables_rules_listed
+  register: list_iptables_rules
   when: enable_firewall == true
 
 

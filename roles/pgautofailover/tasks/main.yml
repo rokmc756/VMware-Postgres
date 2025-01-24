@@ -6,60 +6,71 @@
 
 - name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
-  tags:
-    - install
-    - uninstall
+  tags: install, uninstall, enable, disable, deploy, destroy, create, delete
 
 
 - name: Stop and Diable Firewalld
   import_tasks: disable-firewall.yml
-  when: disable_firwall == true
+  tags: disable
+  when: ( firewall is defined and firewall == true )
 
 
 - name: Install Common Requirements
   import_tasks: install-pgsql-pkgs.yml
   tags: install
-  when: install_dep_pkgs == true
+  when: ( pkgs is defined and pkgs == true )
 
 
 - name: Install Monitor Instances
   import_tasks: deploy-monitor.yml
-  tags: install
-  when: deploy_monitor == true and inventory_hostname in groups['monitor']
+  tags: deploy
+  when: (( monitor is defined and monitor == true ) and ( ssl is not defined )) and inventory_hostname in groups['monitor']
 
 
 - name: Install Primary Worker Instances
   import_tasks: deploy-workers.yml
-  tags: install
-  when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['primary'] )
+  tags: install, deploy
+  when: ( primary is defined and primary == true ) and inventory_hostname in groups['primary']
 
 
 - name: Install Secondary Worker Instances
   import_tasks: deploy-workers.yml
-  tags: install
-  when: deploy_workers == true and ( inventory_hostname in groups['workers'] and inventory_hostname in groups['secondary'] )
+  tags: install, deploy
+  when: ( secondary is defined and secondary == true ) and inventory_hostname in groups['secondary']
+
+
+- name: Import Enable SSL Playbook
+  import_tasks: ssl/main.yml
 
 
 - name: Check the Status of PGAutoFailover
   import_tasks: check-status-workers.yml
-  tags: install
+  tags: install, check
+  when: ( status is defined and status == true ) and ( pgautofailover_all is defined and pgautofailover_all == true )
 
 
 - name: Create Database and Users
   import_tasks: add-users.yml
-  tags: install
-  when: add_users == true
+  tags: install, add
+  when: ( add is defined and add == true ) and inventory_hostname in groups['primary']
 
 
-- name: Enable SSL on Monitor
-  import_tasks: enable-ssl-monitor.yml
-  tags: install
-  when: enable_ssl == true
+- name: Stop and Disable PGAutoFailover
+  import_tasks: stop-pgautofailover-service.yml
+  tags: uninstall, destroy, delete, stop
+  when: ( service is defined and service == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
 
 
-- name: Uninstall PGAutoFailover
-  import_tasks: uninstall.yml
-  tags: uninstall
+- name: Uninstall PGAutoFailover Packages
+  import_tasks: uninstall-pgsql-pkgs.yml
+  tags: uninstall, destroy, delete
+  when: ( pkgs is defined and pkgs == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
+
+
+- name: Enable Firewall
+  import_tasks: enable-firewall.yml
+  tags: uninstall, destroy, enable
+  when: ( firewall is defined and firewall == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
 
 
 - name: Upgrade PGAutoFailover

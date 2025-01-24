@@ -53,78 +53,26 @@ remote_machine_username="jomoon"              # Replace with sudo user of vmware
 remote_machine_password="changeme"            # Replace with password of sudo user
 
 [monitors]
-rh9-master ansible_ssh_host=192.168.0.191
+rk9-master ansible_ssh_host=192.168.2.191
 
 [slave]
-rh9-slave  ansible_ssh_host=192.168.0.192
+rk9-slave  ansible_ssh_host=192.168.2.192
 
 [workers]
-rh9-node01 ansible_ssh_host=192.168.0.193
-rh9-node02 ansible_ssh_host=192.168.0.194
-rh9-node03 ansible_ssh_host=192.168.0.195
+rk9-node01 ansible_ssh_host=192.168.2.193
+rk9-node02 ansible_ssh_host=192.168.2.194
+rk9-node03 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Configure variables for Single VMware Postgres
 ```
 $ vi roles/single/vars/main.yml
-major_version: 15
-minor_version: 5
-patch_version: 1
-rhel_version: el9
-# package_name: "vmware-postgres"                        # In case of version within 12
-# package_name: "pivotal-postgres"                       # In case of version within 11
-# bin_dir: "/usr/bin"
-package_name: "vmware-postgres{{ major_version }}"       # In case of version higher than 13
-bin_dir: "/opt/vmware/postgres/{{ major_version }}/bin"  # In case of version higher than 13
-database_name: testdb
-username: jomoon
-password: changeme
-user: postgres
-group: postgres
-sslmode: prefer
-app_database: testdb
 ~~ snip
 ```
 #### 4) Deploy Single VMware Postgres
 ```
-$ vi install-hosts.yml
-- hosts: all
-  become: yes
-  vars:
-    print_debug: true
-    install_pkgs: true
-    install_dep_pkgs: true
-    install_go: true
-    install_prometheus: true
-    install_grafana: true
-    install_pgwatch2: true
-  roles:
-    - { role: init-hosts }
-    - { role: single }
-#    - { role: grafana }
-#    - { role: pgwatch2 }
-
-$ make install
 ```
 #### 5) Destroy Single VMware-Postgres
 ```
-$ vi uninstall-hosts.yml
-- hosts: all
-  become: yes
-  vars:
-    print_debug: true
-    uninstall_pkgs: true
-    uninstall_dep_pkgs: true
-    uninstall_go: true
-    uninstall_prometheus: true
-    uninstall_grafana: true
-    uninstall_pgwatch2: true
-  roles:
-    - { role: single }
-    - { role: init-hosts }
-#    - { role: grafana }
-#    - { role: pgwatch2 }
-
-$ make uninstall
 ```
 ## For Patroni Cluster
 #### 1) The Architecture of Patroni Cluster
@@ -229,47 +177,21 @@ remote_machine_username="jomoon"              # Replace with sudo user of vmware
 remote_machine_password="changeme"            # Replace with password of sudo user
 
 [monitors]
-rh9-master ansible_ssh_host=192.168.0.191
+rk9-master ansible_ssh_host=192.168.2.191
 
 [slave]
-rh9-slave  ansible_ssh_host=192.168.0.192
+rk9-slave  ansible_ssh_host=192.168.2.192
 
 [workers]
-rh9-node01 ansible_ssh_host=192.168.0.193
-rh9-node02 ansible_ssh_host=192.168.0.194
-rh9-node03 ansible_ssh_host=192.168.0.195
+rk9-node01 ansible_ssh_host=192.168.2.193
+rk9-node02 ansible_ssh_host=192.168.2.194
+rk9-node03 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Deploy PGAutoFailover Cluster
 ```
-$ vi install-hosts.yml
----
-- hosts: all
-  become: yes
-  vars:
-    print_debug: true
-    install_dep_pkgs: true
-    remove_dep_pkgs: true
-    enable_ssl_monitor: true
-  roles:
-    - init-hosts
-    - pgautofailover
-
-$ make install
 ```
 #### 4) Destroy PGAutoFailover Cluster
 ```
-$ vi uninstall-hosts
----
-- hosts: all
-  become: yes
-  vars:
-    print_debug: true
-    remove_dep_pkgs: true
-  roles:
-    - pgautofailover
-    - init-hosts
-
-$ make uninstall
 ```
 ## Planning
 * Change centos and rockylinux mirror into local mirrors in Korea

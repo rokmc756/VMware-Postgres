@@ -215,10 +215,10 @@ $ make pgautofailover r=uninstall s=all
 
 
 ## Planning
-[] Need to fix SEGFAULT when enabling SSL - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
-[] Change CentOS and Rocky Linux Mirror into Local Mirrors in Korea
-[] Add Monitoring Features With PGWatch2 and Grafana for Single Postgres, PGAutofailover and Patroni Cluster
-[] Add Additional Extensions Inlcuded in VMware-Postgres Zip File
-[] Add Falut Talerence Feature with Keepalived for PGAutofailover and Patroni Cluster
-[] Add Load Balance Feature with HAProxy for PGAutofailover and Patroni Cluster
+- [O] Need to fix SEGFAULT when enabling SSL - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
+- [ ] Change CentOS and Rocky Linux Mirror into Local Mirrors in Korea
+- [ ] Add Monitoring Features With PGWatch2 and Grafana for Single Postgres, PGAutofailover and Patroni Cluster
+- [ ] Add Additional Extensions Inlcuded in VMware-Postgres Zip File
+- [ ] Add Falut Talerence Feature with Keepalived for PGAutofailover and Patroni Cluster
+- [ ] Add Load Balance Feature with HAProxy for PGAutofailover and Patroni Cluster
 

@@ -6,9 +6,7 @@
 
 - name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
-  tags:
-    - install
-    - uninstall
+  tags: install, uninstall
 
 
 #- name: Install PGWatch2

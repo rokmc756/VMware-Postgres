@@ -4,6 +4,7 @@ pgwatch2:
   minor_version: 10
   patch_version: 0
 
+
 pgsql:
   major_version: 15
   minor_version: 5
@@ -20,12 +21,14 @@ pgsql:
   home_dir: "/home/postgres"
   base_dir: "/var/lib/pgsql"
 
+
 common:
   sudo_user: jomoon
   sudo_group: jomoon
   sudo_user_home_dir: "/home/jomoon"
   pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
   pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
+
 
 ssl:
   ssl_dir: "{{ pgsql.base_dir }}/certs"

@@ -6,7 +6,7 @@
 
 - name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
-  tags: install, uninstall, init, enable, config, stop, add
+  tags: install, uninstall, init, enable, disable, config, stop, add
 
 
 - name: Stop and Diable Firewalld and SELinux

@@ -1,4 +1,4 @@
-## What is vmware-postgres ansible playbook?
+## What is VMware-Postgres Ansible Playbook?
 It is ansible playbook to deploy VMware Postgres conveniently on Baremetal, Virtual Machines and Cloud Infrastructure.
 It provide also pgwatch2 and grafana for monitoring features as well as SSL connection automatically when deploying it.
 The main purpose of this project is actually very simple. Because there are many jobs to install different kind of VMware Postgres versions and reproduce issues & test features as a support
@@ -20,19 +20,19 @@ It's originated by itself.
 * Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
 ## Prepare ansible host to run vmware-postgres ansible playbook
 * MacOS
-```
+```yaml
 $ xcode-select --install
 $ brew install ansible
 $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
 ```
 * Fedora/CentOS/RHEL
-```
+```yaml
 $ sudo yum install ansible
 ```
 ## Prepareing OS
 * Configure Yum / Local & EPEL Repostiory
 ## Download / configure / run VMware Postgres
-```
+```yaml
 $ git clone https://github.com/rokmc756/VMware-Postgres
 $ cd VMware-Postgres
 $ vi Makefile
@@ -45,7 +45,7 @@ ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo use
 #### 1) The Architecure of Single VMware Postgres with pgwatch2 and grafana
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
 #### 2) Configure Inventory for Single VMware Postgres
-```
+```yaml
 $ vi ansible-hosts-rk9-single
 [all:vars]
 ssh_key_filename="id_rsa"
@@ -64,12 +64,24 @@ rk9-node04 ansible_ssh_host=192.168.2.194
 rk9-node05 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Configure variables for Single VMware Postgres
-```
+```yaml
 $ vi roles/single/vars/main.yml
+---
+_ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
+  enable: true
 ~~ snip
 ```
 #### 4) Deploy Single VMware Postgres
-```
+```yaml
 $ make single r=disable s=security
 $ make single r=install s=pkgs
 $ make single r=init s=postgres
@@ -80,7 +92,7 @@ or
 $ make single r=install s=all
 ```
 #### 5) Destroy Single VMware-Postgres
-```
+```yaml
 $ make single r=stop s=service
 $ make single r=uninstall s=pkgs
 $ make single r=enable s=security
@@ -93,7 +105,7 @@ $ make single r=uninstall s=all
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/patroni/images/patroni_architecture.jpeg)
 #### 2) Configure Inventory for Patroni Cluster
 $ vi ansible-hosts-rk9-patroni
-```
+```yaml
 [all:vars]
 ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
@@ -108,7 +120,7 @@ rk9-node05 ansible_ssh_host=192.168.2.195
 ```
 
 #### 3) Configure Variables for Patroni Cluster
-```
+```yaml
 $ vi roles/patroni/vars/main.yml
 ---
 _ssl:
@@ -157,7 +169,7 @@ _etcd:
 ~~ snip
 ```
 #### 4) Deploy Patroni Cluster
-```
+```yaml
 $ make hosts r=init
 
 or
@@ -174,7 +186,7 @@ $ make patroni r=install s=all
 
 ```
 #### 5) Destroy Patroni Cluster
-```
+```yaml
 $ make patroni r=stop s=service
 $ make patroni r=uninstall s=pkgs
 $ make patroni r=remove s=env
@@ -186,8 +198,38 @@ $ make patroni r=uninstall s=all
 ## For PGAutoFailover Cluster
 #### 1) The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgautofailover/images/pgautofailover_architecture.svg)
-#### 2) Configure Variables for PGAutoFailover Cluster
+
+#### 2) Configure Inventory
+$ vi ansible-hosts-rk9-pgautofailover
+```yaml
+[all:vars]
+ssh_key_filename="id_rsa"
+remote_machine_username="jomoon"
+remote_machine_password="changeme"
+
+
+# For VMware Postgres PGAutoFailover
+[monitor]
+rk9-node01 ansible_ssh_host=192.168.2.191
+
+
+[primary]
+rk9-node03 ansible_ssh_host=192.168.2.193
+
+
+[secondary]
+rk9-node04 ansible_ssh_host=192.168.2.194
+rk9-node05 ansible_ssh_host=192.168.2.195
+
+
+[workers]
+rk9-node03 ansible_ssh_host=192.168.2.193
+rk9-node04 ansible_ssh_host=192.168.2.194
+rk9-node05 ansible_ssh_host=192.168.2.195
 ```
+
+#### 3) Configure Variables for PGAutoFailover Cluster
+```yaml
 $ vi roles/pgautofailover/vars/main.yml
 ---
 _pgfailover:
@@ -214,8 +256,8 @@ _ssl:
   # enable_ssl_monitor: true
 ~~ snip
 ```
-#### 3) Deploy PGAutoFailover Cluster
-```
+#### 4) Deploy PGAutoFailover Cluster
+```yaml
 $ dnf versionlock openssl-*                   # For openssl-3.0.7-27
 $ make pgautofailover r=disable s=security
 $ make pgautofailover r=install s=pkgs
@@ -229,8 +271,8 @@ $ make pgautofailover r=enable s=ssl c=monitor
 $ make pgautofailover r=enable s=ssl c=workers
 ```
 
-#### 4) Destroy PGAutoFailover Cluster
-```
+#### 5) Destroy PGAutoFailover Cluster
+```yaml
 $ make pgautofailover r=disable s=ssl c=workers
 $ make pgautofailover r=disable s=ssl c=monitor
 $ make pgautofailover r=stop s=service

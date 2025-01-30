@@ -10,7 +10,7 @@
 
 
 - name: Stop and Diable Firewalld and SELinux
-  import_tasks: disable-security.yml
+  import_tasks: security/disable-security.yml
   tags: disable
   when: ( security is defined and security == true )
 
@@ -69,7 +69,7 @@
 
 
 - name: Enable Firewalld and SELinux
-  import_tasks: enable-security.yml
+  import_tasks: security/enable-security.yml
   tags: uninstall, destroy, enable
   when: ( security is defined and security == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
 

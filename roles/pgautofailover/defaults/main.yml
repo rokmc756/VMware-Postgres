@@ -9,8 +9,9 @@ rh8_dep_pkgs: "tk"
 rh9_dep_pkgs: "tk"
 
 rh7_python_pkgs: "python-psycopg2"
-rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel,python3-psycopg2"
-rh9_python_pkgs: "python3.11,python3.11-pip,python3.11-libs,python3.11-devel,python3-psycopg2"
+rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel,python3-psycopg2,selinux-policy-targeted"
+rh9_python_pkgs: "python3.11,python3.11-pip,python3.11-libs,python3.11-devel,python3-psycopg2,selinux-policy-targeted"
+
 
 delete_file_list:
   - "/var/lib/pgsql/ha"

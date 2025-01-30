@@ -25,7 +25,7 @@ _patroni:
   cluster_name: patclu01
   sync_mode: True
   with_pkgs: True
-  enable_ssl: False
+  enable_ssl: True
   # false is for pgbackrest, not found yet how does pgbackrest
   # interactive with synchronous mode in patroni cluster
   # sync_mode: on    # one of node will be a Sync Standby role
@@ -153,7 +153,7 @@ _etcd:
 # install_etcd: true
 # config_env: true
 
-enable_ssl: false
+# enable_ssl: false
 
 # config_patroni: true
 # add_users: true

@@ -1,34 +1,5 @@
 ---
-#pgsql:
-#  major_version: 15
-#  minor_version: 5
-#  patch_version: 1
-#  build_version: 1
-#  os_version: el7
-#  arch_type: x86_64
-#  bin_type: rpm
-#  db_name: single_testdb
-#  db_user: jomoon
-#  db_password: changeme
-#  user: postgres
-#  group: postgres
-#  home_dir: "/home/postgres"
-#  base_dir: "/var/lib/pgsql"
-#  # sslmode: prefer
-#  # app_database: testdb
-#
-#common:
-#  sudo_user: jomoon
-#  sudo_group: jomoon
-#  sudo_user_home_dir: "/home/jomoon"
-#  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
-#  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
-#  # package_name: "vmware-postgres"      # For 12 version
-#  # package_name: "pivotal-postgres"     # For 11 version
-#  # bin_dir: "/usr/bin"
-
-
-ssl:
+_ssl:
   ssl_dir: "{{ pgsql.base_dir }}/certs"
   ssl_days: 3660
   ssl_country: "KR"

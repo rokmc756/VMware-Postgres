@@ -44,24 +44,24 @@ ANSIBLE_TARGET_PASS="changeme"  # It should be changed with password of sudo use
 ## For Single VMware Postgres
 #### 1) The Architecure of Single VMware Postgres with pgwatch2 and grafana
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgwatch2/images/pgwatch2_architecture.png)
-#### 2) Configure inventory for Single VMware Postgres
+#### 2) Configure Inventory for Single VMware Postgres
 ```
-$ vi ansible-hosts-rh9-single
+$ vi ansible-hosts-rk9-single
 [all:vars]
 ssh_key_filename="id_rsa"
-remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
-remote_machine_password="changeme"            # Replace with password of sudo user
+remote_machine_username="jomoon"
+remote_machine_password="changeme"
 
 [monitors]
-rk9-master ansible_ssh_host=192.168.2.191
+rk9-node01 ansible_ssh_host=192.168.2.191
 
 [slave]
-rk9-slave  ansible_ssh_host=192.168.2.192
+rk9-node02  ansible_ssh_host=192.168.2.192
 
 [workers]
-rk9-node01 ansible_ssh_host=192.168.2.193
-rk9-node02 ansible_ssh_host=192.168.2.194
-rk9-node03 ansible_ssh_host=192.168.2.195
+rk9-node03 ansible_ssh_host=192.168.2.193
+rk9-node04 ansible_ssh_host=192.168.2.194
+rk9-node05 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Configure variables for Single VMware Postgres
 ```
@@ -70,15 +70,29 @@ $ vi roles/single/vars/main.yml
 ```
 #### 4) Deploy Single VMware Postgres
 ```
+$ make single r=disable s=security
+$ make single r=install s=pkgs
+$ make single r=init s=postgres
+$ make single r=add s=user
+$ make single r=enable s=ssl
+
+or
+$ make single r=install s=all
 ```
 #### 5) Destroy Single VMware-Postgres
 ```
+$ make single r=stop s=service
+$ make single r=uninstall s=pkgs
+$ make single r=enable s=security
+
+or
+$ make single r=uninstall s=all
 ```
 ## For Patroni Cluster
 #### 1) The Architecture of Patroni Cluster
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/patroni/images/patroni_architecture.jpeg)
-#### 2) Configure inventory for Patroni Cluster
-$ vi ansible-hosts-rh9-patroni
+#### 2) Configure Inventory for Patroni Cluster
+$ vi ansible-hosts-rk9-patroni
 ```
 [all:vars]
 ssh_key_filename="id_rsa"
@@ -93,7 +107,7 @@ rk9-node04 ansible_ssh_host=192.168.2.194
 rk9-node05 ansible_ssh_host=192.168.2.195
 ```
 
-#### 3) Configure variables for Patroni Cluster
+#### 3) Configure Variables for Patroni Cluster
 ```
 $ vi roles/patroni/vars/main.yml
 ---
@@ -108,6 +122,8 @@ _ssl:
   ssl_common_name: "jtest.pivotal.io"
   ssl_email: "jomoon@pivotal.io"
 
+
+# vmware-postgres15-patroni-3.2.0-1.el9.x86_64.rpm
 _patroni:
   major_version: "3"
   minor_version: "2"
@@ -121,10 +137,11 @@ _patroni:
   cluster_name: patclu01
   sync_mode: True
   with_pkgs: True
-  enable_ssl: False
+  enable_ssl: True
   # false is for pgbackrest, not found yet how does pgbackrest
   # interactive with synchronous mode in patroni cluster
   # sync_mode: on    # one of node will be a Sync Standby role
+
 
 _etcd:
   major_version: "3"
@@ -136,6 +153,7 @@ _etcd:
   bin_type: rpm
   download_bin: false
   blank: " "
+  # etcd 3.4.x and 3.5.x does not work for vmware-postgres 15.x versions
 ~~ snip
 ```
 #### 4) Deploy Patroni Cluster
@@ -168,24 +186,33 @@ $ make patroni r=uninstall s=all
 ## For PGAutoFailover Cluster
 #### 1) The Architecture
 ![alt text](https://github.com/rokmc756/vmware-postgres/blob/main/roles/pgautofailover/images/pgautofailover_architecture.svg)
-#### 2) Configure inventory for PGAutoFailover Cluster
+#### 2) Configure Variables for PGAutoFailover Cluster
 ```
-$ vi ansible-hosts
-[all:vars]
-ssh_key_filename="id_rsa"
-remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
-remote_machine_password="changeme"            # Replace with password of sudo user
+$ vi roles/pgautofailover/vars/main.yml
+---
+_pgfailover:
+  monitor_database: monitor                           # Database names
+  workers_database: ha
+  app_database: appdb                                 # Application database name for replication
+  bin_path: "{{ common.pgsql_bin_dir }}/"
+  ctl_path: "{{ common.pgsql_bin_dir }}/"
+  cluster_name: pgfailclu01
+  sslmode: prefer   # require
+  enable_ssl: true
 
-[monitors]
-rk9-master ansible_ssh_host=192.168.2.191
 
-[slave]
-rk9-slave  ansible_ssh_host=192.168.2.192
-
-[workers]
-rk9-node01 ansible_ssh_host=192.168.2.193
-rk9-node02 ansible_ssh_host=192.168.2.194
-rk9-node03 ansible_ssh_host=192.168.2.195
+_ssl:
+  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_days: 3660
+  ssl_country: "KR"
+  ssl_state: "Seoul"
+  ssl_location: "Guro"
+  ssl_organization: "VMware"
+  ssl_organization_unit: "Tanzu"
+  ssl_common_name: "jtest.pivotal.io"
+  ssl_email: "jomoon@pivotal.io"
+  # enable_ssl_monitor: true
+~~ snip
 ```
 #### 3) Deploy PGAutoFailover Cluster
 ```
@@ -195,6 +222,7 @@ $ make pgautofailover r=install s=pkgs
 $ make pgautofailover r=deploy s=monitor
 $ make pgautofailover r=deploy s=primary
 $ make pgautofailover r=deploy s=secondary
+$ make pgautofailover r=add s=user
 
 $ make pgautofailover r=create s=ssl c=key
 $ make pgautofailover r=enable s=ssl c=monitor

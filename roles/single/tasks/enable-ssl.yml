@@ -1,8 +1,12 @@
 ---
-- name: Create SSL Directory SSL diretory
+- name: Create SSL Directory
   become_user: postgres
-  shell: |
-    mkdir {{ _ssl.ssl_dir }}
+  file:
+    path: "{{ _ssl.ssl_dir }}"
+    state: directory
+    mode: 0755
+    owner: postgres
+    group: postgres
   register: create_ssl_dir
 
 

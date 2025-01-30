@@ -91,7 +91,18 @@ $ make single r=enable s=ssl
 or
 $ make single r=install s=all
 ```
-#### 5) Destroy Single VMware-Postgres
+#### 5) Deploy PGWatch2 Web and Daemon
+```yaml
+$ make pgwatch2 r=install s=pkgs
+$ make pgwatch2 r=install s=db
+$ make pgwatch2 r=install s=pip
+$ make pgwatch2 r=install s=web
+$ make pgwatch2 r=install s=daemon
+
+or
+$ make pgwatch2 r=install s=all
+```
+#### 6) Destroy Single VMware-Postgres
 ```yaml
 $ make single r=stop s=service
 $ make single r=uninstall s=pkgs

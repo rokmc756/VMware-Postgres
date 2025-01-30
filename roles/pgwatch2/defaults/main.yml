@@ -34,3 +34,4 @@ delete_file_list:
 # - "/home/postgres/"
 # - "/var/lib/pgsql"
 # - "/var/lib/pgsql/.bash_profile"
+

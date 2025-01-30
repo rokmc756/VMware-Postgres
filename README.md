@@ -189,20 +189,31 @@ rk9-node03 ansible_ssh_host=192.168.2.195
 ```
 #### 3) Deploy PGAutoFailover Cluster
 ```
-$ make pgautofailover r=disable s=firewall
+$ dnf versionlock openssl-*                   # For openssl-3.0.7-27
+$ make pgautofailover r=disable s=security
 $ make pgautofailover r=install s=pkgs
-$ make pgautofailover r=create s=ssl
 $ make pgautofailover r=deploy s=monitor
 $ make pgautofailover r=deploy s=primary
 $ make pgautofailover r=deploy s=secondary
 
-
-
-$ make pgautofailover r=uninstall s=all
+$ make pgautofailover r=create s=ssl c=key
+$ make pgautofailover r=enable s=ssl c=monitor
+$ make pgautofailover r=enable s=ssl c=workers
 ```
+
 #### 4) Destroy PGAutoFailover Cluster
 ```
+$ make pgautofailover r=disable s=ssl c=workers
+$ make pgautofailover r=disable s=ssl c=monitor
+$ make pgautofailover r=stop s=service
+$ make pgautofailover r=uninstall s=pkgs
+$ make pgautofailover r=enable s=security
+
+or
+$ make pgautofailover r=uninstall s=all
 ```
+
+
 ## Planning
 [] Need to fix SEGFAULT when enabling SSL - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
 [] Change CentOS and Rocky Linux Mirror into Local Mirrors in Korea

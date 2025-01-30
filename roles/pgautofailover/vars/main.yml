@@ -3,10 +3,10 @@ _pgfailover:
   monitor_database: monitor                           # Database names
   workers_database: ha
   app_database: appdb                                 # Application database name for replication
-  bin_path: "{{ common.pgsql_bin_dir }}/patroni"
-  ctl_path: "{{ common.pgsql_bin_dir }}/patronictl"
+  bin_path: "{{ common.pgsql_bin_dir }}/"
+  ctl_path: "{{ common.pgsql_bin_dir }}/"
   cluster_name: pgfailclu01
-  sslmode: prefer
+  sslmode: prefer   # require
   enable_ssl: true
 
 

@@ -39,6 +39,26 @@ temp:
 		else\
 			echo "No actions to prepare/clean temp";\
 		fi;\
+	elif [ "${r}" = "start" ] || [ "${r}" = "stop" ]; then\
+		if [ ! -z ${r} ] && [ "${s}" != "all" ]; then\
+			if [ -z ${c} ];  then\
+				ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} setup-temp.yml -e '{"${s}": True}' --tags='${r}';\
+			elif [ ! -z ${c} ];  then\
+				ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} setup-temp.yml -e '{"${s}": True}' -e '{"${c}": True}' --tags='${r}';\
+			else\
+				echo "No actions to start/stop temp";\
+			fi\
+		elif [ ! -z ${r} ] && [ "${s}" = "all" ]; then\
+			if [ -z ${c} ];  then\
+				ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} setup-temp.yml -e '{temp_all: True}' --tags='${r}';\
+			elif [ ! -z ${c} ];  then\
+				ansible-playbook --ssh-common-args='-o UserKnownHostsFile=./known_hosts' -u ${USERNAME} setup-temp.yml -e '{"${s}": True}' -e '{"${c}": True}' --tags='${r}';\
+			else\
+				echo "No actions to start/stop temp";\
+			fi\
+		else\
+			echo "No actions to start/stop temp";\
+		fi;\
 	elif [ "${r}" = "enable" ] || [ "${r}" = "disable" ]; then\
 		if [ ! -z ${r} ] && [ "${s}" != "all" ]; then\
 			if [ -z ${c} ];  then\

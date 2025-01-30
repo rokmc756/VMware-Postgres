@@ -2,7 +2,7 @@
 - name: Verify that pg_autocatl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
   shell: |
-    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl version
+    source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl version
   register: verify_pg_autoctl_installed
   args:
     chdir: "{{ pgsql.base_dir }}"
@@ -12,7 +12,7 @@
 - name: Verify that pg_ctl of VMware Postgres PGAutoFailover has been Properly Installed
   become_user: postgres
   shell: |
-    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_ctl -V
+    source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_ctl -V
   register: verify_pg_ctl_installed
   args:
     chdir: "{{ pgsql.base_dir }}"
@@ -33,7 +33,7 @@
   become: true
   become_user: postgres
   shell: |
-    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl create monitor \
+    source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl create monitor \
     --auth trust --ssl-self-signed --pgdata {{ pgsql.base_dir }}/{{ _pgfailover.monitor_database }}
   async: 300
   poll: 5
@@ -57,7 +57,7 @@
 - name: Create Systemd Service File of Monitor Instance
   become_user: postgres
   shell: |
-    source /var/lib/pgsql/.bash_profile && {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd \
+    source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl -q show systemd \
     --pgdata {{ pgsql.base_dir }}/{{ _pgfailover.monitor_database }} > {{ pgsql.base_dir }}/pgautofailover.service
   register: create_systemd_service
   async: 180
@@ -106,7 +106,7 @@
 - name: Verify the Current State of Monitor
   become_user: postgres
   shell: |
-    source {{ pgsql.base_dir }}/.bash_profile && {{ common.pgsql_bin_dir }}/psql -c "\l"
+    source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "\l"
   register: verify_monitor_state
   args:
     chdir: "{{ pgsql.base_dir }}"

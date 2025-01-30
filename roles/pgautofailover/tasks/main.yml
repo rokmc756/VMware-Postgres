@@ -6,13 +6,13 @@
 
 - name: Set Facts for Package Name and List and Network Range
   import_tasks: set-facts.yml
-  tags: install, uninstall, enable, disable, deploy, destroy, create, delete
+  tags: install, uninstall, enable, disable, deploy, destroy, create, delete, add, stop
 
 
-- name: Stop and Diable Firewalld
-  import_tasks: disable-firewall.yml
+- name: Stop and Diable Firewalld and SELinux
+  import_tasks: disable-security.yml
   tags: disable
-  when: ( firewall is defined and firewall == true )
+  when: ( security is defined and security == true )
 
 
 - name: Install Common Requirements
@@ -39,10 +39,6 @@
   when: ( secondary is defined and secondary == true ) and inventory_hostname in groups['secondary']
 
 
-- name: Import Enable SSL Playbook
-  import_tasks: ssl/main.yml
-
-
 - name: Check the Status of PGAutoFailover
   import_tasks: check-status-workers.yml
   tags: install, check
@@ -52,7 +48,12 @@
 - name: Create Database and Users
   import_tasks: add-users.yml
   tags: install, add
-  when: ( add is defined and add == true ) and inventory_hostname in groups['primary']
+  when: ( user is defined and user == true ) and inventory_hostname in groups['primary']
+
+
+- name: Import Enable SSL Playbook
+  import_tasks: ssl/main.yml
+  when: ( ssl is defined and ssl == true )
 
 
 - name: Stop and Disable PGAutoFailover
@@ -67,10 +68,10 @@
   when: ( pkgs is defined and pkgs == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
 
 
-- name: Enable Firewall
-  import_tasks: enable-firewall.yml
+- name: Enable Firewalld and SELinux
+  import_tasks: enable-security.yml
   tags: uninstall, destroy, enable
-  when: ( firewall is defined and firewall == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
+  when: ( security is defined and security == true ) or ( pgautofailover_all is defined and pgautofailover_all == true )
 
 
 - name: Upgrade PGAutoFailover

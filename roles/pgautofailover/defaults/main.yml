@@ -9,20 +9,26 @@ rh8_dep_pkgs: "tk"
 rh9_dep_pkgs: "tk"
 
 rh7_python_pkgs: "python-psycopg2"
-rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel"
-rh9_python_pkgs: "python3.11,python3.11-pip,python3.11-libs,python3.11-devel"
+rh8_python_pkgs: "python39,python39-pip,python39-libs,python39-devel,python3-psycopg2"
+rh9_python_pkgs: "python3.11,python3.11-pip,python3.11-libs,python3.11-devel,python3-psycopg2"
 
 delete_file_list:
+  - "/var/lib/pgsql/ha"
   - "/var/lib/pgsql/{{ pgsql.db_name }}"
   - "/var/lib/pgsql/data"
   - "/var/lib/pgsql/backup"
   - "/var/lib/pgsql/backups"
   - "/var/lib/pgsql/.local"
-  - "/var/lib/pgsql/certs"
+  - "/var/lib/pgsql/.bash_profile"
   - "/home/postgres/.local"
   - "/home/postgres/.ansible_async"
+  - "/var/lib/pgsql/monitor"
+  - "/var/lib/pgsql/pgautofailover.service"
+  - "/var/lib/pgsql/certs"
+
 
 #  - "/var/lib/pgsql/pgautofailover.service"
 # - "/home/postgres/"
 # - "/var/lib/pgsql"
 # - "/var/lib/pgsql/.bash_profile"
+

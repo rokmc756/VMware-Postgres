@@ -1,7 +1,5 @@
 ---
-# Install grafana for RHEL or CentOS
-#
-- name: Stop and disable prometheus and postgres_exporter service
+- name: Stop and Disable Prometheus and Postgres_Exporter Services
   systemd:
     daemon_reexec: true
     daemon_reload: true
@@ -9,29 +7,29 @@
     enabled: false
     state: stopped
   ignore_errors: true
-  register: systemd_restarted
+  register: stop_prometheus_services
   with_items:
     - prometheus
     - postgres_exporter
 
-#
-- name: Delete the grafana / prometheus / postgres_exporter config and binary files
+
+- name: Delete the Grafana / Prometheus / Postgres_Exporter Config and Binary Files
   file: path={{ item.dest }} state=absent
   ignore_errors: true
-  register: systemd_unit_files_deleted
+  register: delete_config_files
   with_items:
     - { src: "prometheus.yml.j2",              dest: "/usr/local/etc/prometheus.yml" }
     - { src: "postgres_exporter.systemd.j2",   dest: "/etc/systemd/system/postgres_exporter.service" }
     - { src: "prometheus.systemd.j2",          dest: "/etc/systemd/system/prometheus.service" }
     - { src: "prometheus binary",              dest: "/usr/local/bin/prometheus" }
     - { src: "postgres_exporter binary",       dest: "/usr/local/bin/postgres_exporter" }
-    - { src: "prometheus tar file",            dest: "/root/prometheus-{{ prometheus_major_version }}.{{ prometheus_minor_version }}.{{ prometheus_patch_version }}.linux-amd64.tar.gz" }
-    - { src: "postgres_exporter tar file",     dest: "/root/postgres_exporter-{{ postgres_exporter_major_version }}.{{ postgres_exporter_minor_version }}.{{ postgres_exporter_patch_version }}.linux-amd64" }
-    - { src: "prometheus directory",           dest: "/root/prometheus-{{ prometheus_major_version }}.{{ prometheus_minor_version }}.{{ prometheus_patch_version }}.linux-amd64.tar.gz" }
-    - { src: "postgres_exporter directory",    dest: "/root/postgres_exporter-{{ postgres_exporter_major_version }}.{{ postgres_exporter_minor_version }}.{{ postgres_exporter_patch_version }}.linux-amd64" }
+    - { src: "prometheus tar file",            dest: "/root/prometheus-{{ _prometheus_major_version }}.{{ _prometheus_minor_version }}.{{ _prometheus_patch_version }}.linux-amd64.tar.gz" }
+    - { src: "postgres_exporter tar file",     dest: "/root/postgres_exporter-{{ _postgres_exporter_major_version }}.{{ _postgres_exporter_minor_version }}.{{ _postgres_exporter_patch_version }}.linux-amd64" }
+    - { src: "prometheus directory",           dest: "/root/prometheus-{{ _prometheus_major_version }}.{{ _prometheus_minor_version }}.{{ _prometheus_patch_version }}.linux-amd64.tar.gz" }
+    - { src: "postgres_exporter directory",    dest: "/root/postgres_exporter-{{ _postgres_exporter_major_version }}.{{ _postgres_exporter_minor_version }}.{{ _postgres_exporter_patch_version }}.linux-amd64" }
 
-#
-- name: Uninstall pip modules for grafana
+
+- name: Uninstall Pip Modules
   shell: |
     pip3 uninstall -y wheel
     pip3 uninstall -y Pillow
@@ -39,10 +37,10 @@
   async: 120
   poll: 5
   ignore_errors: true
-  register: pip_module_installed
+  register: uninstall_pip_modules
 
-#
-- name: Uninstall Dependent and Grafana RPM packages
+
+- name: Uninstall Dependent and Grafana RPM Packages
   yum:
     name: "{{ item }}"
     state: absent

@@ -1,12 +1,12 @@
 ---
-- name: Stop and Disable Services for Grafana
+- name: Stop and Disable Grafana Services
   systemd:
     daemon_reexec: true
     daemon_reload: true
     name: "{{ item }}"
     enabled: false
     state: stopped
-  register: systemd_stoppped
+  register: stop_grafana_services
   ignore_errors: true
   with_items:
     - grafana-server
@@ -16,7 +16,7 @@
 - name: Delete the Grafana Config Files
   file: path={{ item.dest }} state=absent
   ignore_errors: true
-  register: grafana_init_file_deleted
+  register: delete_grafana_init_file
   with_items:
     - { src: "grafana.ini.j2",                   dest: "/etc/grafana/grafana.ini" }
 
@@ -29,7 +29,7 @@
   async: 120
   poll: 5
   ignore_errors: true
-  register: pip_module_uninstalled
+  register: uninstall_pip_module
 
 
 - name: Uninstall Dependent and Grafana RPM Packages
@@ -52,7 +52,7 @@
 - name: Delete the influxdb Yum Repo File
   file: path={{ item.dest }} state=absent
   ignore_errors: true
-  register: influxdb_repo_file_deleted
+  register: delete_influxdb_repo_file
   with_items:
     - { src: "influxdata.repo.j2",   dest: "/etc/yum.repos.d/influxdata.repo" }
 

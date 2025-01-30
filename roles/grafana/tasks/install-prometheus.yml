@@ -30,75 +30,75 @@
 
 
 - name: Check the Prometheus and Postgres Exporter Tar Files Already Exists
-  stat: path=/root/{{ item }}
+  stat: path={{ pgsql.base_path }}/{{ item }}
   register: tar_files_existed
   with_items:
-    - prometheus-{{ prometheus.major_version }}.{{ prometheus.minor_version }}.{{ prometheus.patch_version }}.linux-amd64.tar.gz
-    - postgres_exporter-{{ postgres_exporter.major_version }}.{{ postgres_exporter.minor_version }}.{{ postgres_exporter.patch_version }}.linux-amd64.tar.gz
+    - prometheus-{{ _prometheus.major_version }}.{{ _prometheus.minor_version }}.{{ _prometheus.patch_version }}.linux-amd64.tar.gz
+    - postgres_exporter-{{ _postgres_exporter.major_version }}.{{ _postgres_exporter.minor_version }}.{{ _postgres_exporter.patch_version }}.linux-amd64.tar.gz
 - debug: msg={{ tar_files_existed }}
 
 
 - name: Check the Prometheus and Postgres Exporter Binary Files
   stat: path=/usr/local/bin/{{ item }}
-  register: bin_files_existed
+  register: check_bin_files
   with_items:
     - prometheus
     - postgres_exporter
-- debug: msg={{ bin_files_existed }}
+- debug: msg={{ check_bin_files }}
 
 
 - name: Copy the Prometheus and Postgres Exporter Tar Files
-  copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
-  register: tar_files_copied
+  copy: src={{ item }} dest={{ pgsql.base_path }}/{{ item }} mode=0644 owner=root group=root
+  register: copy_tar_files
   with_items:
-    - prometheus-{{ prometheus.major_version }}.{{ prometheus.minor_version }}.{{ prometheus.patch_version }}.linux-amd64.tar.gz
-    - postgres_exporter-{{ postgres.exporter_major_version }}.{{ postgres.exporter_minor_version }}.{{ postgres_exporter.patch_version }}.linux-amd64.tar.gz
-  when: not ( tar_files_existed.results | map( attribute='stat.exists') ) is all
+    - prometheus-{{ _prometheus.major_version }}.{{ _prometheus.minor_version }}.{{ _prometheus.patch_version }}.linux-amd64.tar.gz
+    - postgres_exporter-{{ _postgres.exporter_major_version }}.{{ _postgres.exporter_minor_version }}.{{ _postgres_exporter.patch_version }}.linux-amd64.tar.gz
+  when: not ( check_tar_files.results | map( attribute='stat.exists') ) is all
   # when: tar_files_existed.stat.exists != True
 
 
 - name: Untar the Prometheus and Postgres Exporter Tar Files
-  shell: tar -C /root -xf /root/{{ item }}
+  shell: tar -C /root -xf {{ pgsql.base_path }}/{{ item }}
   args:
     executable: /bin/bash
   with_items:
-    - prometheus-{{ prometheus.major_version }}.{{ prometheus.minor_version }}.{{ prometheus.patch_version }}.linux-amd64.tar.gz
-    - postgres_exporter-{{ postgres_exporter.major_version }}.{{ postgres_exporter.minor_version }}.{{ postgres_exporter.patch_version }}.linux-amd64.tar.gz
-  when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
+    - prometheus-{{ _prometheus.major_version }}.{{ _prometheus.minor_version }}.{{ _prometheus.patch_version }}.linux-amd64.tar.gz
+    - postgres_exporter-{{ _postgres_exporter.major_version }}.{{ _postgres_exporter.minor_version }}.{{ _postgres_exporter.patch_version }}.linux-amd64.tar.gz
+  when: not ( check_bin_files.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
 
 
 - name: Copy Binary of the Prometheus and Postgres Exporter into /usr/local/bin Directory
-  shell: cp -f /root/{{ item.src }} /usr/local/bin/{{ item.dest }}
+  shell: cp -f {{ pgsql.base_path }}/{{ item.src }} /usr/local/bin/{{ item.dest }}
   args:
     executable: /bin/bash
   with_items:
-    - { src: "prometheus-{{ prometheus.major_version }}.{{ prometheus.minor_version }}.{{ prometheus.patch_version }}.linux-amd64/prometheus",                                     dest: "prometheus" }
-    - { src: "postgres_exporter-{{ postgres_exporter.major_version }}.{{ postgres_exporter.minor_version }}.{{ postgres_exporter.patch_version }}.linux-amd64/postgres_exporter",  dest: "postgres_exporter" }
-  when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
+    - { src: "prometheus-{{ _prometheus.major_version }}.{{ _prometheus.minor_version }}.{{ _prometheus.patch_version }}.linux-amd64/prometheus",                                     dest: "prometheus" }
+    - { src: "postgres_exporter-{{ _postgres_exporter.major_version }}.{{ _postgres_exporter.minor_version }}.{{ _postgres_exporter.patch_version }}.linux-amd64/postgres_exporter",  dest: "postgres_exporter" }
+  when: not ( check_bin_files.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
 
 
 - name: Copy the Grafana and Prometheus and Postgres Exporter Systemd File
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
-  register: systemd_file_copied
+  register: copy_systemd_file
   with_items:
-    - { src: "prometheus.yml.j2",                dest: "/usr/local/etc/prometheus.yml" }
+    - { src: "prometheus.yml.j2",              dest: "/usr/local/etc/prometheus.yml" }
     - { src: "postgres_exporter.systemd.j2",   dest: "/etc/systemd/system/postgres_exporter.service" }
-    - { src: "prometheus.systemd.j2",            dest: "/etc/systemd/system/prometheus.service" }
-  when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
+    - { src: "prometheus.systemd.j2",          dest: "/etc/systemd/system/prometheus.service" }
+  when: not ( check_bin_files.results | map( attribute='stat.exists') ) is all
   # when: bin_files_existed.stat.exists != True
   # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
 
 
-- name: Reload and Start Services for Grafana
+- name: Reload and Start Prometheus & Exporter Services
   systemd:
     daemon_reexec: true
     daemon_reload: true
     name: "{{ item }}"
     enabled: true
     state: started
-  register: systemd_restarted
+  register: start_prometheus_services
   with_items:
     - postgres_exporter
     - prometheus

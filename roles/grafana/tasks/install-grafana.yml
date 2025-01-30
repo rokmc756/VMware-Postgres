@@ -1,14 +1,12 @@
 ---
-# Install grafana for RHEL or CentOS
-#
-- name: Copy influxdb yum repo file
+- name: Copy InfluxDB Package Repo file
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
-  register: config_file_copied
+  register: copy_influxdb_repo_config
   with_items:
     - { src: "influxdata.repo.j2",   dest: "/etc/yum.repos.d/influxdata.repo" }
 
-#
-- name: Install Dependent and Grafana RPM packages
+
+- name: Install Dependent and Grafana RPM Packages
   yum:
     name: "{{ item }}"
     state: present
@@ -25,9 +23,8 @@
     - influxdb2-cli
     - grafana
     - grafana-pcp
-  when: install_pkgs
 
-#
+
 - name: Install pip modules for grafana
   shell: |
     pip3 install setuptools_rust
@@ -37,9 +34,9 @@
     pip3 install wheel
   async: 120
   poll: 5
-  register: pip_module_installed
+  register: install_pip_module
 
-#
+
 - name: Copy the grafana ini file
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
   register: systemd_file_copied
@@ -50,41 +47,42 @@
   # when: bin_files_existed.stat.exists != True
   # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
 
-#
-- name: Reload and start services for grafana
+
+- name: Reload and Start Grafana Services
   systemd:
     daemon_reexec: true
     daemon_reload: true
     name: "{{ item }}"
     enabled: true
     state: started
-  register: systemd_restarted
+  register: restart_systemd
   with_items:
     - influxdb
     - grafana-server
 
-#
-- name: Setup pgwatch2 metrics database as default datasource
+
+- name: Setup PGWatch2 Metrics Database As Default Datasource
   become_user: postgres
   shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
   args:
     executable: /bin/bash
-  register: metrics_database_setup
+  register: setup_metrics_database
   with_items:
     - { dir: "/etc/pgwatch2/bootstrap", file: "grafana_datasource.sql", user: "pgwatch2_grafana", db: "pgwatch2_grafana" }
 
-#
-- name: Add pgwatch2 predefined dashboards to Grafana
+
+- name: Add PGWatch2 Predefined Dashboards to Grafana
   shell: |
     /etc/pgwatch2/grafana-dashboards/import_all.sh
   async: 120
   poll: 5
-  register: grafana_dashboard_added
+  register: add_grafana_dashboard
 
-#
-- name: Install Grafana plugin
+
+- name: Install Grafana Plugin
   shell: |
     grafana-cli plugins install savantly-heatmap-panel
   async: 120
   poll: 5
-  register: grafana_plugin_installed
+  register: install_grafana_plugin
+

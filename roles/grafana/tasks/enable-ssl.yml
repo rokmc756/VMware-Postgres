@@ -1,13 +1,18 @@
 ---
-- name: Create SSL Directory on Postgres Base
+- name: Create SSL Directory
   become_user: postgres
-  shell: mkdir -p {{ ssl.ssl_dir }}
+  file:
+    path: "{{ _ssl.ssl_dir }}"
+    state: directory
+    mode: 0755
+    owner: postgres
+    group: postgres
   register: create_ssl_dir
 
 
 - name: Generate a CA Certificate Private Key
   become_user: postgres
-  shell: openssl genrsa -out {{ ssl.ssl_dir }}/ca.key 4096
+  shell: openssl genrsa -out {{ _ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
 
 
@@ -15,15 +20,15 @@
   become_user: postgres
   shell: |
     openssl req -x509 -new -nodes -sha512 -days 3650 \
-    -subj "/C={{ ssl.ssl_country }}/ST={{ ssl.ssl_state }}/L={{ ssl.ssl_location }}/O={{ ssl.ssl_organization }}/OU={{ ssl.ssl_organization_unit }}/CN={{ ssl.ssl_common_name }}/emailAddress={{ ssl.ssl_email }}" \
-    -key {{ ssl.ssl_dir }}/ca.key \
-    -out {{ ssl.ssl_dir }}/ca.crt
+    -subj "/C={{ _ssl.ssl_country }}/ST={{ _ssl.ssl_state }}/L={{ _ssl.ssl_location }}/O={{ _ssl.ssl_organization }}/OU={{ _ssl.ssl_organization_unit }}/CN={{ _ssl.ssl_common_name }}/emailAddress={{ _ssl.ssl_email }}" \
+    -key {{ _ssl.ssl_dir }}/ca.key \
+    -out {{ _ssl.ssl_dir }}/ca.crt
   register: gen_ca_cert
 
 
 - name: Generate a Private Key
   become_user: postgres
-  shell: openssl genrsa -out {{ ssl.ssl_dir }}/server.key 4096
+  shell: openssl genrsa -out {{ _ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
 
 
@@ -31,24 +36,24 @@
   become_user: postgres
   shell: |
     openssl req -sha512 -new \
-    -subj "/C={{ ssl.ssl_country }}/ST={{ ssl.ssl_state }}/L={{ ssl.ssl_location }}/O={{ ssl.ssl_organization }}/OU={{ ssl.ssl_organization_unit }}/CN={{ ssl.ssl_common_name }}/emailAddress={{ ssl.ssl_email }}" \
-    -key {{ ssl.ssl_dir }}/server.key \
-    -out {{ ssl.ssl_dir }}/server.csr
+    -subj "/C={{ _ssl.ssl_country }}/ST={{ _ssl.ssl_state }}/L={{ _ssl.ssl_location }}/O={{ _ssl.ssl_organization }}/OU={{ _ssl.ssl_organization_unit }}/CN={{ _ssl.ssl_common_name }}/emailAddress={{ _ssl.ssl_email }}" \
+    -key {{ _ssl.ssl_dir }}/server.key \
+    -out {{ _ssl.ssl_dir }}/server.csr
   register: gen_cert_sign_req
 
 
 - name: Copy an x509 v3 Extension File
-  template: src=v3.ext.j2 dest={{ ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
+  template: src=v3.ext.j2 dest={{ _ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
 
 
 - name: Replace the CRS and CRT File Names
   become_user: postgres
   shell: |
-    openssl x509 -req -sha512 -days 3650 -extfile {{ ssl.ssl_dir }}/v3.ext \
-    -CA {{ ssl.ssl_dir }}/ca.crt -CAkey {{ ssl.ssl_dir }}/ca.key -CAcreateserial \
-    -in {{ ssl.ssl_dir }}/server.csr \
-    -out {{ ssl.ssl_dir }}/server.crt
+    openssl x509 -req -sha512 -days 3650 -extfile {{ _ssl.ssl_dir }}/v3.ext \
+    -CA {{ _ssl.ssl_dir }}/ca.crt -CAkey {{ _ssl.ssl_dir }}/ca.key -CAcreateserial \
+    -in {{ _ssl.ssl_dir }}/server.csr \
+    -out {{ _ssl.ssl_dir }}/server.crt
   register: replace_csr_crt
 
 
@@ -66,26 +71,26 @@
     - { file: "postgresql.conf", line: "ssl = on",           state: present }
     - { file: "postgresql.conf", line: "ssl_cert_file = '{{ pgsql.base_dir }}/certs/server.crt'",           state: present }
     - { file: "postgresql.conf", line: "ssl_key_file = '{{ pgsql.base_dir }}/certs/server.key'",           state: present }
-  register: ssl_postgres_config
+  register: config_postgres_ssl
 
 
 - name: Stop Postgres Instance Manually to Apply Systemd Unit
   become_user: postgres
   shell: /opt/vmware/postgres/{{ pgsql.major_version }}/bin/pg_ctl stop -D {{ pgsql.base_dir }}/data -s -m fast
-  register: postgres_instance_stoppped
+  register: stop_postgres_instance
 
 
 - name: Copy Systemd Configuration of PostgreSQL into /etc/systemd/system
   template: src=postgresql.systemd.j2 dest=/etc/systemd/system/postgresql.service owner=root group=root mode=644 force=yes
-  register: postgresql_systemd_config_copied
+  register: copy_postgresql_systemd_config
 
 
-- name: Reload and Start PostgreSQL through Systemd
+- name: Enable and Start PostgreSQL Service
   systemd:
     daemon_reexec: true
     daemon_reload: true
     name: postgresql
     enabled: true
     state: started
-  register: postgresql_systemd_restarted
+  register: start_postgresql_service
 

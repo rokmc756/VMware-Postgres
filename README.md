@@ -114,7 +114,7 @@ or
 $ make grafana r=install s=all
 ```
 - Open https://rk9-node01:3000 for Grafana
-- Open https://rk9-node01:8086 for InfluxDB
+- Open http://rk9-node01:8086 for InfluxDB
 
 #### 7) Destroy PGWatch2/Grafana and Single VMware-Postgres
 ```yaml

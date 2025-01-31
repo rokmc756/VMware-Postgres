@@ -103,6 +103,7 @@ $ make pgwatch2 r=install s=daemon
 or
 $ make pgwatch2 r=install s=all
 ```
+- Open http://rk9-node01:8080 for PGWatch2
 #### 6) Deploy Grafana and Prometheus
 ```yaml
 $ make grafana r=install s=go

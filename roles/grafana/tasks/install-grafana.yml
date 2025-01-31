@@ -14,38 +14,17 @@
   async: 120
   poll: 5
   with_items:
-    - epel-release
-    - python3
-    - python3-pip
-    - postgresql-contrib
-    - postgresql-devel
     - influxdb2
     - influxdb2-cli
     - grafana
     - grafana-pcp
 
 
-- name: Install pip modules for grafana
-  shell: |
-    pip3 install setuptools_rust
-    python3 -m pip install --upgrade pip
-    pip3 install --upgrade setuptools_rust
-    python3 -m pip install --upgrade Pillow
-    pip3 install wheel
-  async: 120
-  poll: 5
-  register: install_pip_module
-
-
-- name: Copy the grafana ini file
+- name: Copy the Grafana Ini File
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=644 force=yes
-  register: systemd_file_copied
+  register: copy_systemd_file
   with_items:
     - { src: "grafana.ini.j2",                   dest: "/etc/grafana/grafana.ini" }
-
-  # when: not ( bin_files_existed.results | map( attribute='stat.exists') ) is all
-  # when: bin_files_existed.stat.exists != True
-  # copy: src={{ item }} dest=/root/{{ item }} mode=0644 owner=root group=root
 
 
 - name: Reload and Start Grafana Services
@@ -55,7 +34,7 @@
     name: "{{ item }}"
     enabled: true
     state: started
-  register: restart_systemd
+  register: start_grafana
   with_items:
     - influxdb
     - grafana-server
@@ -63,10 +42,14 @@
 
 - name: Setup PGWatch2 Metrics Database As Default Datasource
   become_user: postgres
-  shell: cd {{ item.dir }} ; psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
-  args:
-    executable: /bin/bash
+  shell: |
+    psql -h localhost -U {{ item.user }} -d {{ item.db }} -f {{ item.file }}
   register: setup_metrics_database
+  args:
+    chdir: "{{ item.dir }}"
+    executable: /bin/bash
+  environment:
+    PATH: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin:{{ ansible_env.PATH }}"
   with_items:
     - { dir: "/etc/pgwatch2/bootstrap", file: "grafana_datasource.sql", user: "pgwatch2_grafana", db: "pgwatch2_grafana" }
 
@@ -77,6 +60,10 @@
   async: 120
   poll: 5
   register: add_grafana_dashboard
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin:{{ ansible_env.PATH }}"
 
 
 - name: Install Grafana Plugin
@@ -85,4 +72,8 @@
   async: 120
   poll: 5
   register: install_grafana_plugin
+  args:
+    executable: /bin/bash
+  environment:
+    PATH: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin:{{ ansible_env.PATH }}"
 

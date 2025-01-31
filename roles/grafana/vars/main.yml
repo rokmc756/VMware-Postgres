@@ -1,26 +1,26 @@
 ---
-# go1.13.4.linux-amd64.tar.gz
+# go1.23.5.linux-amd64.tar.gz                  -  https://go.dev/dl/
 _go:
   major_version: 1
-  minor_version: 13
-  patch_version: 4
+  minor_version: 23
+  patch_version: 5
 
 
-# prometheus-2.46.0.linux-amd64.tar.gz
+# prometheus-3.1.0.linux-amd64.tar.gz          -  https://prometheus.io/download/
 _prometheus:
-  major_version: 2
-  minor_version: 46
+  major_version: 3
+  minor_version: 1
   patch_version: 0
 
 
-# postgres_exporter-0.13.2.linux-amd64.tar.gz
+# postgres_exporter-0.16.0.linux-amd64.tar.gz  -  https://github.com/prometheus-community/postgres_exporter/releases
 _postgres_exporter:
   major_version: 0
-  minor_version: 13
-  patch_version: 2
+  minor_version: 16
+  patch_version: 0
 
 
-# pgwatch2_1.14.0_linux_x86_64.rpm
+# pgwatch2_1.14.0_linux_x86_64.rpm             -  https://github.com/cybertec-postgresql/pgwatch2/releases
 _pgwatch2:
   major_version: 1
   minor_version: 14
@@ -29,33 +29,8 @@ _pgwatch2:
   # arch: 64-bit
 
 
-#pgsql:
-#  major_version: 15
-#  minor_version: 5
-#  patch_version: 1
-#  build_version: 1
-#  os_version: el9
-#  arch_type: x86_64
-#  bin_type: rpm
-#  db_name: single_testdb
-#  db_user: jomoon
-#  db_password: changeme
-#  user: postgres
-#  group: postgres
-#  home_dir: "/home/postgres"
-#  base_dir: "/var/lib/pgsql"
-#
-##
-#common:
-#  sudo_user: jomoon
-#  sudo_group: jomoon
-#  sudo_user_home_dir: "/home/jomoon"
-#  pgsql_pkg_name: "vmware-postgres{{ pgsql.major_version }}"
-#  pgsql_bin_dir: "/opt/vmware/postgres/{{ pgsql.major_version }}/bin"
-
-
 _ssl:
-  ssl_dir: "{{ pgsql.base_dir }}/certs"
+  ssl_dir: "/etc/grafana"
   ssl_days: 3660
   ssl_country: "KR"
   ssl_state: "Seoul"

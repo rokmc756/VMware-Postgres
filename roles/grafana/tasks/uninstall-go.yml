@@ -4,27 +4,19 @@
   register: check_go_file
 
 
-- name: Check if the GO Binary Already Exists
-  stat: path=/usr/local/go/bin/go
+- name: Check if the GO Binary and Directory Already Exists
+  stat: path=/usr/local/go
   register: check_go_bin
 
 
-- name: Copy the GO File
-  copy: src=go{{ _go.major_version }}.{{ _go.minor_version }}.{{ _go.patch_version }}.linux-amd64.tar.gz dest={{ pgsql.base_path }}/go{{ _go.major_version }}.{{ _go.minor_version }}.{{ _go.patch_version }}.linux-amd64.tar.gz mode=0644 owner=root group=root
-  register: copy_go_file
-  when: check_go_file.stat.exists != True
+- name: Delete the GO File
+  file: path={{ pgsql.base_path }}/go{{ _go.major_version }}.{{ _go.minor_version }}.{{ _go.patch_version }}.linux-amd64.tar.gz state=absent
+  register: delete_go_file
+  when: check_go_file.stat.exists == True
 
 
-- name: Download GO File if Copy Fails
-  shell: wget https://dl.google.com/go/go{{ _go.major_version }}.{{ _go.minor_version }}.{{ _go.patch_version }}.linux-amd64.tar.gz -P {{ pgsql.base_path }}
-  args:
-    executable: /bin/bash
-  when: copy_go_file is not succeeded
-
-
-- name: Untar GO File
-  shell: tar -C /usr/local -xf {{ pgsql.base_path }}/go{{ _go.major_version }}.{{ _go.minor_version }}.{{ _go.patch_version }}.linux-amd64.tar.gz
-  args:
-    executable: /bin/bash
-  when: check_go_bin.stat.exists != True
+- name: Delete the GO Bin and Directory
+  file: path=/usr/local/go state=absent
+  register: delete_go_bin
+  when: check_go_bin.stat.exists == True
 

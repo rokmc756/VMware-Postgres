@@ -82,6 +82,7 @@ _ssl:
 ```
 #### 4) Deploy Single VMware Postgres
 ```yaml
+$ dnf versionlock openssl-*                   # For openssl-3.0.7-27 in Rocky 9.x
 $ make single r=disable s=security
 $ make single r=install s=pkgs
 $ make single r=init s=postgres
@@ -197,6 +198,7 @@ _etcd:
 ```
 #### 4) Deploy Patroni Cluster
 ```yaml
+$ dnf versionlock openssl-*                   # For openssl-3.0.7-27 in Rocky 9.x
 $ make hosts r=init
 
 or
@@ -285,7 +287,7 @@ _ssl:
 ```
 #### 4) Deploy PGAutoFailover Cluster
 ```yaml
-$ dnf versionlock openssl-*                   # For openssl-3.0.7-27
+$ dnf versionlock openssl-*                   # For openssl-3.0.7-27 in Rocky 9.x
 $ make pgautofailover r=disable s=security
 $ make pgautofailover r=install s=pkgs
 $ make pgautofailover r=deploy s=monitor
@@ -312,7 +314,7 @@ $ make pgautofailover r=uninstall s=all
 
 
 ## Planning
-- [O] Need to fix SEGFAULT when enabling SSL - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
+- [O] Need to fix SEGFAULT when enabling SSL for Patroni and PGAutoFailover - https://knowledge.broadcom.com/external/article/382919/master-panics-after-enabling-ssl-on-gree.html
 - [ ] Change CentOS and Rocky Linux Mirror into Local Mirrors in Korea
 - [ ] Add Monitoring Features With PGWatch2 and Grafana for Single Postgres, PGAutofailover and Patroni Cluster
 - [ ] Add Additional Extensions Inlcuded in VMware-Postgres Zip File

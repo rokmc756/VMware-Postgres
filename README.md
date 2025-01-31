@@ -102,13 +102,29 @@ $ make pgwatch2 r=install s=daemon
 or
 $ make pgwatch2 r=install s=all
 ```
-#### 6) Destroy Single VMware-Postgres
+#### 6) Deploy Grafana and Prometheus
+```yaml
+$ make grafana r=install s=go
+$ make grafana r=install s=pip
+$ make grafana r=install s=prometheus
+$ make grafana r=install s=grafana
+$ make grafana r=enable s=ssl
+
+or
+$ make grafana r=install s=all
+```
+- Open https://rk9-node01:3000 for Grafana
+- Open https://rk9-node01:8086 for InfluxDB
+
+#### 7) Destroy PGWatch2/Grafana and Single VMware-Postgres
 ```yaml
 $ make single r=stop s=service
 $ make single r=uninstall s=pkgs
 $ make single r=enable s=security
 
 or
+$ make grafana r=uninstall s=all
+$ make pgwatch2 r=uninstall s=all
 $ make single r=uninstall s=all
 ```
 ## For Patroni Cluster

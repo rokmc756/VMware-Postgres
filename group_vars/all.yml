@@ -25,6 +25,7 @@ pgsql:
   download: false
   host_num: "{{ groups['all'] | length }}"
   base_path: /root
+  enable_ssl: true
   # with_patroni_pkg: True
   net:
     type: "virtual"                # Or Physical

@@ -28,6 +28,7 @@ $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Libr
 * Fedora/CentOS/RHEL
 ```yaml
 $ sudo yum install ansible
+$ sudo yum install -y python3-netaddr
 ```
 ## Prepareing OS
 * Configure Yum / Local & EPEL Repostiory

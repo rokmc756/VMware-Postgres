@@ -64,14 +64,22 @@
   when: inventory_hostname in groups['workers'][0]
 
 
+#- name: Synchronize SSL Directory Using Rsync Protocol on Delegate Host (push) for {{ pgsql.base_dir }}/certs Directory in Primary Worker Node
+#  synchronize:
+#    src: "{{ _ssl.ssl_dir }}"
+#    dest: "{{ pgsql.base_dir }}"
+#    mode: push
+#    recursive: yes
+#  delegate_to: "{{groups['workers'][0]}}"
+#  register: ssl_dir_synced
+#  when: inventory_hostname not in groups['workers'][0]
+
+
 - name: Synchronize SSL Directory Using Rsync Protocol on Delegate Host (push) for {{ pgsql.base_dir }}/certs Directory in Primary Worker Node
-  synchronize:
-    src: "{{ _ssl.ssl_dir }}"
-    dest: "{{ pgsql.base_dir }}"
-    mode: push
-    recursive: yes
+  become_user: root
+  shell: |
+    rsync -a --rsh='/usr/bin/sshpass -p changeme ssh -o StrictHostKeyChecking=no' {{ _ssl.ssl_dir }} {{ inventory_hostname }}:{{ pgsql.base_dir }}
   delegate_to: "{{groups['workers'][0]}}"
-  register: ssl_dir_synced
   when: inventory_hostname not in groups['workers'][0]
 
 

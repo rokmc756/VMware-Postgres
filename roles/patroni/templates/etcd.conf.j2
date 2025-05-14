@@ -38,7 +38,7 @@ ETCD_ADVERTISE_CLIENT_URLS="http://localhost:2379"
 #ETCD_PROXY_READ_TIMEOUT="0"
 #
 
-{% if enable_ssl == true %}
+{% if _etcd.enable_ssl == true %}
 [Security]
 ETCD_TRUSTED_CA_FILE="{{ _ssl.ssl_dir }}/ca.crt"
 ETCD_CERT_FILE="{{ _ssl.ssl_dir }}/server.crt"

@@ -6,7 +6,7 @@
     mode: 0644
     owner: "{{ common.sudo_user }}"
     group: "{{ common.sudo_group }}"
-  register: vmware_postgres_copied
+  register: copy_vmware_postgres
   with_items:
     - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
@@ -18,7 +18,7 @@
     mode: 0644
     owner: "{{ common.sudo_user }}"
     group: "{{ common.sudo_group }}"
-  register: patroni_rpm_package_copied
+  register: copy_patroni_rpm_package
   with_items:
     - "{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.{{ _patroni.arch_type }}.{{ _patroni.bin_type }}"
   when: _patroni.with_pkgs
@@ -31,7 +31,7 @@
     disable_gpg_check: yes
   async: 60
   poll: 5
-  register: vmware_postgres_rpm_package_installed
+  register: install_vmware_postgres_rpm_package
   with_items:
     - "{{ pgsql_pkg_name }}.{{ pgsql.arch_type }}.{{ pgsql.bin_type }}"
 
@@ -43,8 +43,9 @@
     disable_gpg_check: yes
   async: 60
   poll: 5
-  register: paroni_rpm_package_installed
+  register: install_paroni_rpm_package
   with_items:
     - "{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.{{ _patroni.arch_type }}.{{ _patroni.bin_type }}"
   when: _patroni.with_pkgs
+
 

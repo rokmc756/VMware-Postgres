@@ -1,15 +1,17 @@
 ---
 - name: List IPTables Rules
   become_user: root
-  shell: ( iptables -nL )
-  register: iptables_rules_listed
+  shell: |
+    iptables -nL
+  register: list_iptables_rules
   ignore_errors: true
 
 
 - name: Flush IPTables Rules
   become_user: root
-  shell: ( iptables -F )
-  register: iptables_rules_flushed
+  shell: |
+    iptables -F
+  register: flush_iptables_rules
   ignore_errors: true
 
 
@@ -18,11 +20,11 @@
     name: firewalld
     state: stopped
     enabled: false
-  register: firewalld_service_stopped
+  register: stop_firewalld_service
   ignore_errors: true
 
 
-- debug: msg={{ iptables_rules_listed.stdout }}
+- debug: msg={{ list_iptables_rules.stdout }}
   tags:
     - print_debug
   ignore_errors: true

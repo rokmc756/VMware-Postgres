@@ -1,7 +1,9 @@
+---
 - name: Disable SSL on Monitor
   become_user: postgres
   shell: |
-    export PGDATA=/var/lib/pgsql/monitor && {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
+    export PGDATA=/var/lib/pgsql/monitor
+    {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
   register: disable_ssl_monitor
 
 

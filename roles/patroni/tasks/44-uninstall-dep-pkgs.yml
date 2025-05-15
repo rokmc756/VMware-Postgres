@@ -4,7 +4,7 @@
     name: "{{ item }}"
     state: absent
     skip_broken: yes
-  register: prereq_rpm_packages_of_patroni_deleted
+  register: delete_prereq_rpm_packages_of_patroni
   ignore_errors: true
   with_items: "{{ rh_uninstall_pkgs }}"
 
@@ -14,7 +14,7 @@
     name: "{{ item }}"
     state: absent
     skip_broken: yes
-  register: python39_installed
+  register: install_python39
   ignore_errors: true
   with_items: "{{ rh8_python_pkgs }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 8
@@ -26,7 +26,7 @@
     state: absent
     skip_broken: yes
   with_items: "{{ rh9_python_pkgs }}"
-  register: python311_installed
+  register: install_python311
   ignore_errors: true
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
 

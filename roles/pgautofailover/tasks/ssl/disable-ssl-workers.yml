@@ -1,7 +1,9 @@
+---
 - name: Disable SSL on Workers
   become_user: postgres
   shell: |
-    export PGDATA=/var/lib/pgsql/ha && {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
+    export PGDATA=/var/lib/pgsql/ha
+    {{ common.pgsql_bin_dir }}/pg_autoctl disable ssl
   register: enable_ssl_workers
 
 

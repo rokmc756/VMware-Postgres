@@ -2,7 +2,8 @@
 - name: Verify the State of Worker Instances
   become_user: postgres
   shell: |
-    source /var/lib/pgsql/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_autoctl show state
+    source /var/lib/pgsql/.bash_profile
+    {{ common.pgsql_bin_dir }}/pg_autoctl show state
   register: verify_workers_instance_state
   args:
     chdir: "/var/lib/pgsql"

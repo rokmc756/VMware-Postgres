@@ -4,15 +4,17 @@
     name: firewalld
     state: stopped
     enabled: false
-  register: firewalld_service_disabled
+  register: disable_firewalld_service
 
 
 - name: Flush IPTables Rules
-  shell: ( iptables -F )
-  register: iptables_rules_flushed
+  shell: |
+    iptables -F
+  register: flush_iptables_rules
 
 
 - name: List IPTables Rules
-  shell: ( iptables -nL )
-  register: iptables_rules_listed
+  shell: |
+    iptables -nL
+  register: list_iptables_rules
 

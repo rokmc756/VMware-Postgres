@@ -8,14 +8,14 @@
     owner: postgres
     group: postgres
   register: create_ssl_dir
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Generate a CA Certificate Private Key on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: openssl genrsa -out {{ _ssl.ssl_dir }}/ca.key 4096
   register: gen_ca_cert_priv_key
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Generate the CA Certificate on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
@@ -26,14 +26,14 @@
     -key {{ _ssl.ssl_dir }}/ca.key \
     -out {{ _ssl.ssl_dir }}/ca.crt
   register: gen_ca_cert
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Generate a Private Key on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
   become_user: postgres
   shell: openssl genrsa -out {{ _ssl.ssl_dir }}/server.key 4096
   register: gen_priv_key
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Generate a Certificate Signing Request (CSR) on {{ pgsql.base_dir }}/certs Directory for Primary Worker Node
@@ -44,13 +44,13 @@
     -key {{ _ssl.ssl_dir }}/server.key \
     -out {{ _ssl.ssl_dir }}/server.csr
   register: gen_cert_sign_req
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Copy an x509 v3 Extension File on {{ pgsql.base_dir }}/certs Directory for Promary Worker Node
   template: src=v3.ext.j2 dest={{ _ssl.ssl_dir }}/v3.ext owner=postgres group=postgres mode=644 force=yes
   register: copy_x509_v3_ext
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 - name: Replace the CRS and CRT File Names on {{ pgsql.base_dir }}/certs Directory for Primary worker node
@@ -61,7 +61,7 @@
     -in {{ _ssl.ssl_dir }}/server.csr \
     -out {{ _ssl.ssl_dir }}/server.crt
   register: replace_csr_crt
-  when: inventory_hostname in groups['workers'][0]
+  when: inventory_hostname in groups['control']
 
 
 #- name: Synchronize SSL Directory Using Rsync Protocol on Delegate Host (push) for {{ pgsql.base_dir }}/certs Directory in Primary Worker Node
@@ -70,17 +70,17 @@
 #    dest: "{{ pgsql.base_dir }}"
 #    mode: push
 #    recursive: yes
-#  delegate_to: "{{groups['workers'][0]}}"
+#  delegate_to: "{{groups['control'][0]}}"
 #  register: ssl_dir_synced
-#  when: inventory_hostname not in groups['workers'][0]
+#  when: inventory_hostname not in groups['control']
 
 
 - name: Synchronize SSL Directory Using Rsync Protocol on Delegate Host (push) for {{ pgsql.base_dir }}/certs Directory in Primary Worker Node
   become_user: root
   shell: |
     rsync -a --rsh='/usr/bin/sshpass -p changeme ssh -o StrictHostKeyChecking=no' {{ _ssl.ssl_dir }} {{ inventory_hostname }}:{{ pgsql.base_dir }}
-  delegate_to: "{{groups['workers'][0]}}"
-  when: inventory_hostname not in groups['workers'][0]
+  delegate_to: "{{groups['control'][0]}}"
+  when: inventory_hostname not in groups['control']
 
 
 - name: Change Permissions for Cert Files in {{ pgsql.base_dir }}/certs Directory for All Worker Nodes
@@ -90,7 +90,7 @@
     owner: postgres
     group: postgres
     mode: "0600"
-  register: certs_permission_changed
+  register: change_certs_permission
   with_items:
     - "ca.crt"
     - "ca.key"

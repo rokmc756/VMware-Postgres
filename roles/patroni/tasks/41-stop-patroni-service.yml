@@ -15,8 +15,10 @@
     - patroni
 
 
-- name: Kill ETCD Process
-  shell: ( killall etcd )
-  register: etcd_processes_killed
-  ignore_errors: true
+#- name: Kill ETCD Process
+#  shell: |
+#    killall etcd
+#  register: kill_etcd_processes
+#  ignore_errors: true
+
 

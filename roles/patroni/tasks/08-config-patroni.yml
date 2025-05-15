@@ -30,7 +30,7 @@
     dest: /etc/etcd/etcd.conf
     regexp: "{{ item.regexp }}"
     replace: "{{ item.line }}"
-  register: etcd_config_modified
+  register: modify_etcd_config
   with_items:
     - { regexp: '#ETCD_HEARTBEAT_INTERVAL="1000"', line: 'ETCD_HEARTBEAT_INTERVAL="10000"', state: present }
     - { regexp: '#ETCD_ELECTION_TIMEOUT="10000"', line: 'ETCD_ELECTION_TIMEOUT="100000"', state: present }
@@ -52,7 +52,8 @@
 
 - name: Lists the Members and Identifies the Current Leader
   become_user: postgres
-  shell: ( export ETCDCTL_API=3 && etcdctl member list )
+  shell: |
+    export ETCDCTL_API=3 && etcdctl member list
   register: list_members_leader
 
 
@@ -125,8 +126,8 @@
 #    {{ cluster_name }}
 #    Yes I am aware
 #    EOF
-#  register: cluster_removed
-#- debug: msg={{ cluster_removed }}
+#  register: remove_cluster
+#- debug: msg={{ remove_cluster }}
 #  when: print_debug
 
 
@@ -138,8 +139,8 @@
 #    y
 #    y
 #    EOF
-#  register: cluster_reinited
-#- debug: msg={{ cluster_reinited }}
+#  register: reinit_cluster
+#- debug: msg={{ reinit_cluster }}
 #  when: print_debug
 
 
@@ -150,7 +151,8 @@
 
 - name: Run the patronictl Command-Line Utility to View the Cluster State with Patroni Started on All Worker Nodes
   become_user: postgres
-  shell: ( {{ _patroni.ctl_path }} -c {{ pgsql.base_dir }}/patroni.yml list )
+  shell: |
+    {{ _patroni.ctl_path }} -c {{ pgsql.base_dir }}/patroni.yml list
   register: list_patroni
 - debug: msg={{ list_patroni }}
   when: print_debug

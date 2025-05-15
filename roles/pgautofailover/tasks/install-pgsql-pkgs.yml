@@ -16,7 +16,6 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-
   # skip_broken: yes
   # name:  "{{ item  }}"
   # async: 120

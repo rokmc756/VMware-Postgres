@@ -3,7 +3,7 @@
   file:
     path: "{{ item }}"
     state: absent
-  register: patroni_config_files_deleted
+  register: delete_patroni_config_files
   ignore_errors: true
   with_items:
     - "/var/lib/pgsql/patroni.yml"
@@ -22,7 +22,7 @@
   file:
     path: "/var/lib/pgsql/{{ item }}"
     state: absent
-  register: data_directories_deleted
+  register: delete_data_directories
   ignore_errors: true
   with_items:
     - "backups"

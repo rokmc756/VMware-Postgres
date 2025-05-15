@@ -3,13 +3,13 @@
   lineinfile:
     path: /etc/locale.conf
     line: "LC_CTYPE=en_US.UTF-8"
-  register: lctype_line_added
+  register: add_lctype_line
 
 
 - name: Check if .bash_profile exits under {{ pgsql.base_dir }} Directory
   become_user: postgres
   stat: path=/var/lib/pgsql/.bash_profile
-  register: bash_profile_existed
+  register: exists_bash_profile
 
 
 - name: Sanity Check for .bash_profile in {{ pgsql.base_dir }}
@@ -18,9 +18,9 @@
   with_items:
     - "touch {{ pgsql.base_dir }}/.bash_profile"
     - "chmod 600 {{ pgsql.base_dir }}/.bash_profile"
-  register: bash_profile_checked
+  register: check_bash_profile
   when:
-    - bash_profile_existed.stat.exists == False
+    - exists_bash_profile.stat.exists == False
 
 
 - name: Insert Executable Binary Path into .bashrc for VMware Postgres {{ pgsql.major_version }}
@@ -28,8 +28,8 @@
   lineinfile:
     path: "{{ pgsql.base_dir }}/.bash_profile"
     line: "export PATH={{ common.pgsql_bin_dir }}:$PATH"
-  register: bin_path_inline_added
+  register: add_bin_path_inline
   when:
-    - bash_profile_existed.stat.exists == True
+    - exists_bash_profile.stat.exists == True
     - hostvars[inventory_hostname].ansible_distribution_major_version|int == 7
 

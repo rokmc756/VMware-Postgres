@@ -6,7 +6,7 @@
     mode: 0644
     owner: "{{ common.sudo_user }}"
     group: "{{ common.sudo_group }}"
-  register: etcd_rpm_package_copied
+  register: copy_etcd_rpm_packages
   with_items:
     - "{{ etcd_pkg_name }}-{{ _etcd.build_version }}.{{ _etcd.os_version }}.{{ _etcd.arch_type }}.{{ _etcd.bin_type }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
@@ -19,7 +19,7 @@
     skip_broken: yes
   async: 180
   poll: 5
-  register: etcd_prereq_rpm_packages_installed
+  register: install_etcd_prereq_rpm_packages
   with_items:
     - python-psycopg2
     - etcd
@@ -33,7 +33,7 @@
     disable_gpg_check: yes
   async: 60
   poll: 5
-  register: etcd_rpm_packages_installed
+  register: install_etcd_rpm_packages
   with_items:
     - "{{ etcd_pkg_name }}-{{ _etcd.build_version }}.{{ _etcd.os_version }}.{{ _etcd.arch_type }}.{{ _etcd.bin_type }}"
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int == 8
@@ -60,4 +60,5 @@
     - etcd
     - etcdctl
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int >= 9
+
 

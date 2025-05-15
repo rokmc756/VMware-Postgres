@@ -7,10 +7,6 @@
   register: stop_pgautofailover_service
   ignore_errors: true
 
-  # when: uninstall_pkgs == true
-  # async: 60
-  # poll: 5
-
 
 - name: Alternative Python Version
   shell: |

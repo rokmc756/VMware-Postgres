@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-lab_host="192.168.0.101"
-lab_ips="192.168.0.101"
+lab_host="192.168.2.101"
+lab_ips="192.168.2.101"
 lab_passwd="changeme"
 
 

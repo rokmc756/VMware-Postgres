@@ -12,7 +12,7 @@
   package:
     name: "{{ item }}"
     state: absent
-  register: patroni_rpm_packages_uninstalled
+  register: uninstall_patroni_rpm_packages
   ignore_errors: true
   with_items:
     - "{{ patroni_pkg_name }}"
@@ -25,7 +25,7 @@
   package:
     name: "{{ item }}"
     state: absent
-  register: vmware_postgres_rpm_packages_deleted
+  register: delete_vmware_postgres_rpm_packages
   ignore_errors: true
   with_items:
     - "{{ pgsql_pkg_name }}"
@@ -38,7 +38,7 @@
   file:
     path: /home/jomoon/{{ patroni_pkg_name }}-{{ _patroni.build_version }}.{{ _patroni.os_version }}.x86_64.rpm
     state: absent
-  register: patroni_rpm_packages_deleted
+  register: delete_patroni_rpm_packages
   ignore_errors: true
   when: _patroni.with_pkgs == true
 
@@ -47,6 +47,7 @@
   file:
     path: /home/jomoon/{{ pgsql_pkg_name }}.x86-64.rpm
     state: absent
-  register: vmware_postgres_rpm_packages_deleted
+  register: delete_vmware_postgres_rpm_packages
   ignore_errors: true
+
 

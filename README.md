@@ -16,7 +16,7 @@ It's originated by itself.
 * Baremetal
 * RHEL/CentOS/Rocky Linux 7.x, 8.x, 9.x
 ## Prerequisite
-* acOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
+* MacOS or Fedora/CentOS/RHEL should have installed ansible as ansible host.
 * Supported OS for ansible target host should be prepared with package repository configured such as yum, dnf and apt
 ## Prepare ansible host to run vmware-postgres ansible playbook
 * MacOS
@@ -141,6 +141,9 @@ ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"              # Replace with sudo user of vmware-postgres administrator
 remote_machine_password="changeme"            # Replace with password of sudo user
 
+[control]
+rk9-node01 ansible_ssh_host=192.168.2.191
+
 [workers]
 rk9-node01 ansible_ssh_host=192.168.2.191
 rk9-node02 ansible_ssh_host=192.168.2.192
@@ -238,20 +241,16 @@ ssh_key_filename="id_rsa"
 remote_machine_username="jomoon"
 remote_machine_password="changeme"
 
-
 # For VMware Postgres PGAutoFailover
 [monitor]
 rk9-node01 ansible_ssh_host=192.168.2.191
 
-
 [primary]
 rk9-node03 ansible_ssh_host=192.168.2.193
-
 
 [secondary]
 rk9-node04 ansible_ssh_host=192.168.2.194
 rk9-node05 ansible_ssh_host=192.168.2.195
-
 
 [workers]
 rk9-node03 ansible_ssh_host=192.168.2.193
@@ -300,6 +299,9 @@ $ make pgautofailover r=add s=user
 $ make pgautofailover r=create s=ssl c=key
 $ make pgautofailover r=enable s=ssl c=monitor
 $ make pgautofailover r=enable s=ssl c=workers
+
+or
+$ make pgautofailover r=install s=all
 ```
 
 #### 5) Destroy PGAutoFailover Cluster

@@ -92,7 +92,8 @@
 
 - name: Stop Postgres Instance manually to Apply Systemd Unit
   become_user: postgres
-  shell: /opt/vmware/postgres/{{ pgsql.major_version }}/bin/pg_ctl stop -D {{ pgsql.base_dir }}/data -s -m fast
+  shell: |
+    /opt/vmware/postgres/{{ pgsql.major_version }}/bin/pg_ctl stop -D {{ pgsql.base_dir }}/data -s -m fast
   register: stop_postgres_instance
 
 

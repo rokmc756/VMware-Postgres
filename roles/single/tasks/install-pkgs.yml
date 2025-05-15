@@ -1,7 +1,7 @@
 ---
 - name: Alternative Python Version
-  become: true
-  become_user: root
+  # become: true
+  # become_user: root
   shell: |
     update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
     alternatives --set python {{ yum_python_version }}
@@ -14,9 +14,6 @@
     state: present
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  # async: 120
-  # poll: 5
-  # skip_broken: yes
 
 
 - name: Install ipaddress Pip3 module
@@ -39,5 +36,4 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-
 

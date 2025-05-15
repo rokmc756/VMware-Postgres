@@ -12,7 +12,7 @@
 
 
 # https://stackoverflow.com/questions/36328907/ansible-get-all-the-ip-addresses-of-a-group
-- name: Define Facts For All GPHOST's Hostname
+- name: Define Facts For All Hostname
   set_fact:
     all_ext_hostnames: "{{ groups['all'] | map('extract', hostvars, ['ansible_hostname']) | join(' ') }}"
 - debug: msg={{ all_ext_hostnames }}

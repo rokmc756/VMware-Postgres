@@ -63,6 +63,12 @@
   when: ( security is defined and security == true ) or ( single_all is defined and single_all == true )
 
 
+- name: Remove config files of environment for Single VMware Postgres
+  import_tasks: remove-config-files.yml
+  tags: uninstall, remove
+  when: ( files is defined and files == true ) or ( single_all is defined and single_all == true )
+
+
 - name: Upgrade RPM Packages for Single VMware Postgres
   import_tasks: upgrade.yml
   tags: upgrade

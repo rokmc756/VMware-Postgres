@@ -75,31 +75,6 @@
     backup: yes
 
 
-#- name: Verify the Current State of Postgres Instance
-#  become_user: postgres
-#  shell: |
-#    ps -ef | grep postgres
-#  register: verify_postgres_instance_state
-
-
-#- name: Verify the Current State of Postgres
-#  become_user: postgres
-#  shell: |
-#    source {{ pgsql.base_dir }}/.bash_profile
-#    {{ common.pgsql_bin_dir }}/psql -c "\l"
-#  register: verify_postgres_state
-#  args:
-#    chdir: "{{ pgsql.base_dir }}"
-#    executable: /bin/bash
-#- debug: msg={{ verify_postgres_state }}
-#  tags: print_debug
-
-
-#- name: Copy Systemd Configuration of Postgres into /etc/systemd/system
-#  template: src=postgres.systemd.j2 dest=/etc/systemd/system/postgres.service owner=root group=root mode=644 force=yes
-#  register: copy_postgres_systemd_config
-
-
 #- name: Change the Permissions on the Database Directory in {{ pgsql.base_dir }} Directory
 #  become_user: postgres
 #  file:
@@ -134,23 +109,6 @@
 #  register: change_tmp_dir_permission
 
 
-# Enable and Start Services for Patroni
-#- name: Reload and start systemd service of VMware Postgres
-#  systemd:
-#    daemon_reload: yes
-#    name: postgres
-#    enabled: yes
-#    state: started
-#  register: reload_postgres_systemd_service
-
-
-- name: Verify the Current State of Postgres Instance
-  become_user: postgres
-  shell: |
-    ps -ef | grep postgres
-  register: verify_postgres_instance_state
-
-
 - name: Verify the Current State of Postgres
   become_user: postgres
   shell: |
@@ -160,9 +118,5 @@
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
-
-
-- debug: msg={{ postgres_state_verified }}
-  tags: print_debug
-
+- debug: msg={{ verify_postgres_state }}
 

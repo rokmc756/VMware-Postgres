@@ -17,6 +17,7 @@ pgsql:
   user: postgres
   group: postgres
   db_password: 'changeme'
+  sudo_user_dir: "/home/jomoon"
   home_dir: "/home/postgres"
   base_dir: "/var/lib/pgsql"
   domain: "jtest.pivotal.io"

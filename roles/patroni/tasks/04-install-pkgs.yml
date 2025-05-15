@@ -38,7 +38,7 @@
 
 - name: Install the VMware Postgres Patroni RPM Package
   yum:
-    name: "/home/jomoon/{{ item }}"
+    name: "{{ pgsql.sudo_user_dir }}/{{ item }}"
     state: present
     disable_gpg_check: yes
   async: 60

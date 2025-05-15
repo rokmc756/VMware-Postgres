@@ -21,4 +21,3 @@
 #  register: kill_etcd_processes
 #  ignore_errors: true
 
-

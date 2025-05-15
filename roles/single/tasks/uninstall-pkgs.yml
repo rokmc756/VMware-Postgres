@@ -18,7 +18,7 @@
   file:
     path: "{{ item }}"
     state: absent
-  register: postgres_config_files_deleted
+  register: delete_postgres_config_files
   with_items: "{{ delete_file_list }}"
 
 
@@ -34,7 +34,7 @@
 - name: Reload Systemd Daemon
   systemd:
     daemon_reload: yes
-  register: sysemd_daemon_reloaded
+  register: reload_sysemd_daemon
   async: 60
   poll: 5
 

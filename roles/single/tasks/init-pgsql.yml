@@ -1,8 +1,10 @@
 ---
 - name: Initialize VMware Postgres Database Instance
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/initdb -D {{ pgsql.base_dir }}/data )
-  register: postgres_instance_initialized
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile
+    {{ common.pgsql_bin_dir }}/initdb -D {{ pgsql.base_dir }}/data
+  register: init_postgres_instance
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -10,8 +12,10 @@
 
 - name: Create a Single Non-HA VMware Postgres Database Server
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/postgres -D {{ pgsql.base_dir }}/data > {{ pgsql.base_dir }}/logfile 2>&1 & )
-  register: postgres_instance_created
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile
+    {{ common.pgsql_bin_dir }}/postgres -D {{ pgsql.base_dir }}/data > {{ pgsql.base_dir }}/logfile 2>&1 &
+  register: create_postgres_instance
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -19,8 +23,10 @@
 
 - name: Verify that the psql of VMware Postgres is Installed Properly
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "select version()" )
-  register: postgres_install_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile
+    {{ common.pgsql_bin_dir }}/psql -c "select version()"
+  register: verify_postgres_install
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -28,8 +34,10 @@
 
 - name: Verify that the pg_ctl of VMware Postgres is Installed Properly
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/pg_ctl -V )
-  register: pg_ctl_install_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile
+    {{ common.pgsql_bin_dir }}/pg_ctl -V
+  register: verify_pg_ctl_install
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -69,24 +77,27 @@
 
 #- name: Verify the Current State of Postgres Instance
 #  become_user: postgres
-#  shell: ( ps -ef | grep postgres )
-#  register: postgres_instance_state_verified
+#  shell: |
+#    ps -ef | grep postgres
+#  register: verify_postgres_instance_state
 
 
 #- name: Verify the Current State of Postgres
 #  become_user: postgres
-#  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "\l" )
-#  register: postgres_state_verified
+#  shell: |
+#    source {{ pgsql.base_dir }}/.bash_profile
+#    {{ common.pgsql_bin_dir }}/psql -c "\l"
+#  register: verify_postgres_state
 #  args:
 #    chdir: "{{ pgsql.base_dir }}"
 #    executable: /bin/bash
-#- debug: msg={{ postgres_state_verified }}
+#- debug: msg={{ verify_postgres_state }}
 #  tags: print_debug
 
 
 #- name: Copy Systemd Configuration of Postgres into /etc/systemd/system
 #  template: src=postgres.systemd.j2 dest=/etc/systemd/system/postgres.service owner=root group=root mode=644 force=yes
-#  register: postgres_systemd_config_copied
+#  register: copy_postgres_systemd_config
 
 
 #- name: Change the Permissions on the Database Directory in {{ pgsql.base_dir }} Directory
@@ -95,7 +106,7 @@
 #    path: "{{ pgsql.base_dir }}/{{ item }}"
 #    state: directory
 #    mode: 0750
-#  register: data_directories_permission_changed
+#  register: change_data_directories_permission
 #  with_items:
 #    - "backups"
 #    - "data"
@@ -108,7 +119,7 @@
 #    path: "{{ pgsql.base_dir }}/{{ item }}"
 #    state: directory
 #    mode: 0700
-#  register: data_directories_permission_changed
+#  register: change_data_directories_permission
 #  with_items:
 #    - "backups"
 #    - "data"
@@ -120,7 +131,7 @@
 #    path: /tmp
 #    state: directory
 #    mode: 0777
-#  register: tmp_dir_permission_changed
+#  register: change_tmp_dir_permission
 
 
 # Enable and Start Services for Patroni
@@ -130,19 +141,22 @@
 #    name: postgres
 #    enabled: yes
 #    state: started
-#  register: postgres_systemd_service_reloaded
+#  register: reload_postgres_systemd_service
 
 
 - name: Verify the Current State of Postgres Instance
   become_user: postgres
-  shell: ( ps -ef | grep postgres )
-  register: postgres_instance_state_verified
+  shell: |
+    ps -ef | grep postgres
+  register: verify_postgres_instance_state
 
 
 - name: Verify the Current State of Postgres
   become_user: postgres
-  shell: ( source {{ pgsql.base_dir }}/.bash_profile ; {{ common.pgsql_bin_dir }}/psql -c "\l" )
-  register: postgres_state_verified
+  shell: |
+    source {{ pgsql.base_dir }}/.bash_profile
+    {{ common.pgsql_bin_dir }}/psql -c "\l"
+  register: verify_postgres_state
   args:
     chdir: "{{ pgsql.base_dir }}"
     executable: /bin/bash
@@ -150,4 +164,5 @@
 
 - debug: msg={{ postgres_state_verified }}
   tags: print_debug
+
 

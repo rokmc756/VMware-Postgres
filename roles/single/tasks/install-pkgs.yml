@@ -5,7 +5,7 @@
   shell: |
     update-alternatives --install /usr/bin/python python {{ yum_python_version }} 1
     alternatives --set python {{ yum_python_version }}
-  register: python_version_alternatives
+  register: alternative_python_version
 
 
 - name: Install Common Prerequisties RPM Packages for VMware Postgres
@@ -14,7 +14,6 @@
     state: present
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
-  # with_items: "{{ rh_install_pkgs }}"
   # async: 120
   # poll: 5
   # skip_broken: yes
@@ -23,7 +22,7 @@
 - name: Install ipaddress Pip3 module
   shell: |
     pip3 install ipaddress
-  register: pip3_ipaddress_installed
+  register: install_pip3_ipaddress
   when: hostvars[inventory_hostname].ansible_distribution_major_version|int <= 7
 
 
@@ -40,4 +39,5 @@
   poll: 5
   vars:
     ansible_python_interpreter: "{{ yum_python_version }}"
+
 

@@ -84,13 +84,12 @@ read_timeout = 0
 # name = grafana
 # user = root
 
-#
 type = postgres
 host = localhost:5432
-name = pgwatch2_grafana
-user = pgwatch2_grafana
+name = {{ pgsql.db_name }}
+user = {{ pgsql.db_user }}
 # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
-password = changeme
+password = {{ pgsql.db_password }}
 #
 # Use either URL or the previous fields to configure the database
 # Example: mysql://user:secret@host:port/database

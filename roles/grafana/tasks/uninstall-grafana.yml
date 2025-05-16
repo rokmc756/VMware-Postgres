@@ -40,3 +40,11 @@
     - { src: "grafana.key",          dest: "/etc/grafana/grafana.key" }
     - { src: "grafana.csr",          dest: "/etc/grafana/grafana.csr" }
 
+
+- name: Delete the Config Directories
+  file: path={{ item.dest }} state=absent
+  register: delete_config_dirs
+  ignore_errors: true
+  with_items:
+    - { src: "grafana.ini.j2",       dest: "/var/lib/grafana/*" }
+

@@ -34,6 +34,8 @@ shutdown:
 		ln -sf ansible-hosts-rk9-patroni ansible-hosts;\
 	elif [ "${*}" = "pgautofailover" ]; then\
 		ln -sf ansible-hosts-rk9-pgautofailover ansible-hosts;\
+	elif [ "${*}" = "repmgr" ]; then\
+		ln -sf ansible-hosts-rk9-repmgr ansible-hosts;\
 	elif [ "${*}" = "single" ] || [ "${*}" = "pgwatch2" ] || [ "${*}" = "grafana" ]; then\
 		ln -sf ansible-hosts-rk9-single ansible-hosts;\
 	elif [ "${*}" = "hosts" ]; then\

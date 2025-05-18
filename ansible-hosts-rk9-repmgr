@@ -5,16 +5,16 @@ remote_machine_password="changeme"
 
 
 [master]
-rk9-node01 ansible_ssh_host=192.168.2.191
+rk9-node01  ansible_ssh_host=192.168.2.191  repmgr_node_id=1
 
 
 [witness]
-rk9-node02 ansible_ssh_host=192.168.2.192
+rk9-node02  ansible_ssh_host=192.168.2.192  repmgr_node_id=2
 
 
 [replica]
-rk9-node03 ansible_ssh_host=192.168.2.193
-rk9-node04 ansible_ssh_host=192.168.2.194
-rk9-node05 ansible_ssh_host=192.168.2.195
+rk9-node03  ansible_ssh_host=192.168.2.193  repmgr_node_id=3
+rk9-node04  ansible_ssh_host=192.168.2.194  repmgr_node_id=4
+rk9-node05  ansible_ssh_host=192.168.2.195  repmgr_node_id=5
 
 

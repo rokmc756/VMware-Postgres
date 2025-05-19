@@ -4,7 +4,7 @@ remote_machine_username="jomoon"
 remote_machine_password="changeme"
 
 
-[master]
+[primary]
 rk9-node01  ansible_ssh_host=192.168.2.191  repmgr_node_id=1
 
 
@@ -12,7 +12,7 @@ rk9-node01  ansible_ssh_host=192.168.2.191  repmgr_node_id=1
 rk9-node02  ansible_ssh_host=192.168.2.192  repmgr_node_id=2
 
 
-[replica]
+[standby]
 rk9-node03  ansible_ssh_host=192.168.2.193  repmgr_node_id=3
 rk9-node04  ansible_ssh_host=192.168.2.194  repmgr_node_id=4
 rk9-node05  ansible_ssh_host=192.168.2.195  repmgr_node_id=5
